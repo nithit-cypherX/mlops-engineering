@@ -1,0 +1,16 @@
+# TODO(Lab 1, Task 2): REGENERATE THIS FILE WITH HASHES.
+#   pip install pip-tools
+#   pip-compile --generate-hashes requirements.in -o requirements.txt
+# What you have below is a plain pin list. It fixes versions but not artifacts, so a
+# republished wheel still changes your build. Hashes close that gap, and the Dockerfile
+# has a matching TODO to add --require-hashes.
+scikit-learn==1.8.0
+pandas==3.0.2
+numpy==2.4.4
+mlflow==3.16.0
+pytest==9.1.1
+PyYAML==6.0.3
+joblib==1.4.2
+ruff==0.16.6
+fastapi==0.141.1
+httpx2==2.12.0

@@ -1,0 +1,20 @@
+# Local environments and configuration, at every depth
+.venv/
+cloud.env
+.env
+.env.*
+!.env.example
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+# Data and tracking artifacts
+**/data/raw/
+**/data/_local_blob/
+**/.dvc/cache/
+mlruns/
+mlartifacts/
+mlflow.db
+mlflow.db-*
+*.joblib
+# Keep selected reports as submission evidence; review before committing.

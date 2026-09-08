@@ -1,0 +1,22 @@
+Workspace migration verification — 2026-09-07
+
+Git root: /home/nirvana/ml-od
+Lab 1 working directory: /home/nirvana/ml-od/lab/lab1
+Python virtual environment: recreated in lab/lab1/.venv, Python 3.11.16.
+
+PASS: requirements.txt installed successfully in the new environment.
+PASS: python -m pip check — No broken requirements found.
+PASS: make cloud-check — 11/11 checks passed.
+PASS: make portability-audit.
+PASS: python -m pytest --collect-only -q tests — 10 tests collected.
+PASS: python -m src.train --help — training module imports and CLI loads.
+PASS: Git ignores cloud.env, .venv, raw data, local blob data and DVC cache.
+
+Test collection is not a test run. No dataset or training results were produced.
+No Docker build, image push, DVC push or Lab 1 grading validation was performed.
+No Git commit or GitHub remote was created.
+The original Windows checkout and its local environment remain intact.
+
+Dependency hashes and full transitive pinning remain Lab 1 tasks. Dependencies
+were resolved again for the new environment; this is not a byte-identical copy
+of the previous environment.

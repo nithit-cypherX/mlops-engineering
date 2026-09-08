@@ -1,0 +1,25 @@
+Verified 2026-09-07 from Ubuntu WSL2
+
+ITCS355 cloud check
+
+  [PASS] CLOUD_PROVIDER         azure
+  [PASS] PROJECT_ID             itcs355-u6688124
+  [PASS] REGION                 malaysiawest
+  [PASS] BLOB_URI               https://itcs355u6688124.blob.core.windows.n...
+  [PASS] CONTAINER_REGISTRY     itcs355u6688124.azurecr.io/itcs355
+  [PASS] MLFLOW_TRACKING_URI    sqlite:///mlflow.db
+  [PASS] MODEL_REGISTRY_NAME    itcs355-u6688124
+  [PASS] IDENTITY_REF           REDACTED-AUTHENTICATED-ACCOUNT
+
+  [PASS] az on PATH
+  [PASS] credentials            identity resolved
+  [PASS] docker on PATH
+
+11/11 checks passed
+
+Region exception: this Azure for Students subscription blocks southeastasia.
+Its allowed-region policy permits malaysiawest, which supports both Storage
+and Container Registry. Both resources were created in malaysiawest.
+Resource group: itcs355-u6688124 (metadata location: southeastasia).
+Blob container itcs355 is private. Azure CLI access and ACR Docker login passed.
+This check does not validate training, the lab adapter, or image push.

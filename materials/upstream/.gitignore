@@ -1,0 +1,25 @@
+# NEVER commit this. Real credentials and account identifiers live here.
+cloud.env
+
+# DVC manages these; Git must not.
+data/raw/
+data/_local_blob/
+.dvc/cache/
+
+# Local tracking store
+mlruns/
+mlartifacts/
+mlflow.db
+
+reports/*.json
+reports/*.joblib
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+
+# Excel lock files — created while the specification workbook is open.
+~$*
+
+# ruff cache
+.ruff_cache/
