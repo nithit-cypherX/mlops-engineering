@@ -6,6 +6,8 @@ IMAGE ?= itcs355-lab1
 TAG   ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo dev)
 PLATFORM ?= linux/amd64
 SEED ?= 20260101
+# Python reads this at process startup; keep it aligned with --seed.
+export PYTHONHASHSEED := $(SEED)
 
 .PHONY: help setup cloud-check data test portability-audit train image image-push reproduce verify clean teardown
 
@@ -44,6 +46,7 @@ reproduce: data image ## THE ONE COMMAND. Grader runs this.
 	  -v "$$PWD/data:/app/data:ro" \
 	  -v "$$PWD/reports:/app/reports" \
 	  -e MLFLOW_TRACKING_URI=sqlite:////app/reports/mlflow.db \
+	  -e PYTHONHASHSEED=$(SEED) \
 	  $(IMAGE):$(TAG) --seed $(SEED) --metrics-out /app/reports/metrics.json
 
 verify: ## Check the produced metric against the README claim

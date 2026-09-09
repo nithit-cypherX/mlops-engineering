@@ -1,6 +1,6 @@
 """Training entry point.
 
-Run locally:      python -m src.train --n-estimators 200 --max-depth 8
+Run locally:      PYTHONHASHSEED=20260101 python -m src.train --seed 20260101
 Run in Docker:    make reproduce
 
 Every run logs: all hyperparameters, the seed, validation AND test metrics separately,
@@ -48,6 +48,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    hash_seed = seeds.require_hash_seed(args.seed)
     cfg = config.load(strict=False)
     seed = seeds.set_all(args.seed)
 
@@ -64,6 +65,7 @@ def main() -> None:
             "max_depth": args.max_depth,
             "min_samples_leaf": args.min_samples_leaf,
             "seed": seed,
+            "python_hash_seed": hash_seed,
             "n_features": len(data.FEATURES),
         })
         # Provenance. This is what makes the metric traceable.
