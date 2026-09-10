@@ -16,7 +16,9 @@ Hints for Lab 1:
 """
 from __future__ import annotations
 
-from typing import Any
+import json
+import re
+import subprocess
 
 from cloudlayer.base import CloudAdapter
 
@@ -29,7 +31,31 @@ class AzureAdapter(CloudAdapter):
         raise NotImplementedError("TODO Lab 1: download_blob, creating parent directories")
 
     def push_image(self, local_tag: str) -> str:
-        raise NotImplementedError("TODO Lab 1: az acr login, push, return registry/repo@sha256:...")
+        destination = self.cfg.container_registry.rstrip("/")
+        host, separator, repository = destination.partition("/")
+        if not re.fullmatch(r"[a-z0-9]+\.azurecr\.io", host) or not separator:
+            raise ValueError("CONTAINER_REGISTRY must be an ACR hostname/repository")
+        if not re.fullmatch(r"[a-z0-9]+(?:[._/-][a-z0-9]+)*", repository):
+            raise ValueError("Invalid container repository name")
+        tag = local_tag.rsplit(":", 1)[-1]
+        if local_tag.startswith("-") or ":" not in local_tag or not re.fullmatch(
+            r"[\w][\w.-]{0,127}", tag, flags=re.ASCII,
+        ):
+            raise ValueError("local_tag must include an explicit valid image tag")
+        remote_tag = f"{destination}:{tag}"
+        registry = host.split(".", 1)[0]
+        # Argument lists avoid shell interpolation; failures stop before the next step.
+        subprocess.run(["az", "acr", "login", "--name", registry], check=True)
+        subprocess.run(["docker", "tag", local_tag, remote_tag], check=True)
+        subprocess.run(["docker", "push", remote_tag], check=True)
+        result = subprocess.run(
+            ["docker", "image", "inspect", remote_tag, "--format", "{{json .RepoDigests}}"],
+            check=True, capture_output=True, text=True,
+        )
+        for reference in json.loads(result.stdout) or []:
+            if re.fullmatch(re.escape(destination) + r"@sha256:[0-9a-f]{64}", reference):
+                return reference
+        raise RuntimeError("Push completed but Docker did not return the repository digest")
 
     # submit_training / register_model  -> Lab 2 (Azure ML command job + model registry)
     # deploy / invoke                   -> Lab 3 (managed online endpoint + deployment)

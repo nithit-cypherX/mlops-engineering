@@ -12,6 +12,8 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 ENV_FILE = REPO_ROOT / "cloud.env"
+# Set by the image build; never copy the Git directory into the image.
+IMAGE_GIT_COMMIT = os.environ.get("GIT_COMMIT", "")
 
 # The eight capability slots every lab depends on. scripts/cloud_check.py resolves each.
 CAPABILITY_SLOTS = (
@@ -57,6 +59,10 @@ class Config:
     @property
     def raw_path(self) -> Path:
         return self.data_dir / "raw" / "sensors.csv"
+
+    @property
+    def dvc_metadata_path(self) -> Path:
+        return self.data_dir / "raw.dvc"
 
     def tags(self, lab: int) -> dict[str, str]:
         """Every cloud resource carries these. `make teardown` finds resources by tag."""

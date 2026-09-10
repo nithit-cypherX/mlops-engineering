@@ -76,7 +76,10 @@ def test_training_passes_seed_and_records_it_in_mlflow(tmp_path, monkeypatch):
     monkeypatch.setattr(seeds, "_INITIAL_HASH_SEED", str(seed))
     monkeypatch.chdir(tmp_path)
     tracking_uri = f"sqlite:///{tmp_path / 'mlflow.db'}"
-    cfg = Namespace(raw_path=tmp_path / "unused.csv", mlflow_tracking_uri=tracking_uri)
+    metadata_path = tmp_path / "raw.dvc"
+    metadata_path.write_text("outs:\n- path: raw\n  hash: md5\n  md5: " + "a" * 32 + ".dir\n")
+    cfg = Namespace(raw_path=tmp_path / "unused.csv", mlflow_tracking_uri=tracking_uri,
+                    dvc_metadata_path=metadata_path)
     args = Namespace(
         seed=seed, n_estimators=2, max_depth=2, min_samples_leaf=1,
         experiment="task23-seed-check", run_name="test-double-not-training", metrics_out=None,
@@ -85,6 +88,10 @@ def test_training_passes_seed_and_records_it_in_mlflow(tmp_path, monkeypatch):
     frame[data.TARGET] = [0, 1]
     split_mock = Mock(return_value=(frame, frame, frame))
     model = Mock()
+    expected_params = train.RandomForestClassifier(
+        n_estimators=2, max_depth=2, min_samples_leaf=1, random_state=seed, n_jobs=-1,
+    ).get_params(deep=False)
+    model.get_params.return_value = expected_params
     model.predict_proba.return_value = np.array([[0.9, 0.1], [0.1, 0.9]])
     model_factory = Mock(return_value=model)
     monkeypatch.setattr(train, "parse_args", lambda: args)
@@ -104,6 +111,15 @@ def test_training_passes_seed_and_records_it_in_mlflow(tmp_path, monkeypatch):
         assert len(runs) == 1
         assert runs[0].data.params["seed"] == str(seed)
         assert runs[0].data.params["python_hash_seed"] == str(seed)
+        for key, value in expected_params.items():
+            assert runs[0].data.params[key] == str(value)
+        assert runs[0].data.tags["dvc_hash"] == "a" * 32 + ".dir"
+        assert runs[0].data.tags["git_commit"] == "test-double-code"
+        assert runs[0].data.tags["data_fingerprint"] == "test-double-data"
+        assert set(runs[0].data.metrics) == {
+            "val_roc_auc", "val_pr_auc", "test_roc_auc", "test_pr_auc",
+        }
+        train.mlflow.sklearn.log_model.assert_called_once_with(model, name="model")
         assert split_mock.call_args.kwargs["seed"] == seed
         assert model_factory.call_args.kwargs["random_state"] == seed
     finally:

@@ -35,14 +35,22 @@ train: ## Train locally, outside the container
 	python -m src.train --seed $(SEED) --metrics-out reports/metrics.json
 
 image: ## Build the training image for linux/amd64
-	docker buildx build --platform $(PLATFORM) -t $(IMAGE):$(TAG) --load .
+	@revision="$$(git rev-parse HEAD)" || exit 1; \
+	status="$$(git status --porcelain --untracked-files=normal)" || exit 1; \
+	if [ -n "$$status" ]; then revision="$$revision-dirty"; fi; \
+	docker buildx build --platform $(PLATFORM) --build-arg GIT_COMMIT="$$revision" -t $(IMAGE):$(TAG) --load .
 
 image-push: image ## Push to CONTAINER_REGISTRY via your adapter
 	python -c "from src import config; from cloudlayer.factory import get_adapter; \
 	print(get_adapter(config.load()).push_image(\"$(IMAGE):$(TAG)\"))"
 
 reproduce: data image ## THE ONE COMMAND. Grader runs this.
+	@mkdir -p reports
+	@test "$$(id -u)" -ne 0 || { echo "Run reproduce as a non-root user."; exit 1; }
+	# Match bind-mount ownership; keep MLflow's relative artifacts under reports.
 	docker run --rm \
+	  --user "$$(id -u):$$(id -g)" \
+	  --workdir /app/reports \
 	  -v "$$PWD/data:/app/data:ro" \
 	  -v "$$PWD/reports:/app/reports" \
 	  -e MLFLOW_TRACKING_URI=sqlite:////app/reports/mlflow.db \

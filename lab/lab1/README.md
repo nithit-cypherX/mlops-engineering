@@ -30,6 +30,61 @@ The starter already used seeds for Python, NumPy, data splitting and Random Fore
 
 If I had to skip one thing under time pressure, I would skip base-image digest pinning first. I would keep hashed dependencies and seeds so the Python packages and random choices stay the same. The risk is that the image tag could point to a newer image with different Python or system libraries. This could change the result even with the same packages and seeds. I would add the digest back before submitting. In this lab, I kept all three.
 
+## Task 3 — Containerise the training job
+
+I kept the starter's multi-stage Dockerfile and non-root user. I updated the Makefile so the container uses my Ubuntu UID/GID and runs from `/app/reports`. This lets it save the MLflow database and artifacts outside the container.
+
+I trained one Random Forest model with the starter settings. The validation ROC-AUC was 0.8364 and the test ROC-AUC was 0.8482. I loaded the saved model in a new container and checked that its predictions gave the same metrics without training again.
+
+I implemented `push_image` in the Azure adapter using `az acr login`, `docker tag` and `docker push`. Then I pushed the image to ACR with:
+
+```bash
+make image-push TAG=task33-20260909
+```
+
+### Checks
+
+- All 10 data tests and four image-push tests passed.
+- The image uses `linux/amd64` and runs as a non-root user.
+- The image digest on ACR matched the one from the push. I also ran the image by digest with `--help`, and it worked.
+- I checked all 10 image layers and the image metadata for credentials. I found no personal credentials. The flagged matches came from library examples or compiled code.
+
+### Problem and fix
+
+The container could read the data, but it could not save the output because of folder permissions.
+
+I fixed this by running the container with my Ubuntu user and group IDs (`UID/GID`). I also set its working folder to `/app/reports`, so the MLflow database and saved model stay available after the container stops.
+
+### Image reference
+
+```text
+itcs355u6688124.azurecr.io/itcs355@sha256:4a0b592dfe6cea2618d886e603444fd429271fd8d965ad44ef545e8415b4fc6c
+```
+
+ACR access requires authentication. This image contains the training code and dependencies, not the trained model from the test run.
+
+## Task 4 — Version the data
+
+I added `dvc[azure]` and updated the hashed lock file without changing the existing package versions.
+
+I used `dvc init --subdir` to keep DVC inside Lab 1. I tracked `data/raw` and pushed it to Azure Blob Storage. Git ignores the CSV, and the DVC config contains no credentials.
+
+### Checks
+
+- `dvc push` passed, and `dvc status -c` confirmed that the cache and remote were in sync.
+- I tested `dvc pull` in a separate folder with no data or existing cache, using my Azure account. The downloaded CSV matched the original byte-for-byte.
+- I kept the starter's split code and leakage test. The pipeline splits by `machine_id`, so readings from one machine stay together.
+- All 10 data tests passed. Extra checks with three seeds confirmed that each seed gave the same split when repeated, with no missing or duplicated rows.
+- I also simulated machine leakage between each pair of splits. The existing test caught all three cases. These extra checks were separate from the saved test suite.
+
+### Data version
+
+```text
+1c886b512c8a5c9bf723da1cd119fc80.dir
+```
+
+No changes to the split code were needed.
+
 ## Checklist before you submit
 
 - [ ] `make reproduce` works from a fresh clone, on a machine that is not yours
