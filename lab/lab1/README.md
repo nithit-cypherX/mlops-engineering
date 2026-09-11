@@ -85,6 +85,100 @@ I used `dvc init --subdir` to keep DVC inside Lab 1. I tracked `data/raw` and pu
 
 No changes to the split code were needed.
 
+## Task 5 — Track five runs
+
+I trained five Random Forest models using the same dataset and seed (`20260101`). I used the starter settings as the baseline and changed one hyperparameter at a time.
+
+I added DVC hash logging and passed the Git SHA into the Docker image at build time. I also used `model.get_params()` to log all model settings, including defaults.
+
+### Results
+
+| Run | Trees | Max depth | Min samples leaf | Validation ROC-AUC | Test ROC-AUC |
+|---|---:|---:|---:|---:|---:|
+| Baseline | 200 | 8 | 5 | 0.8364 | 0.8482 |
+| Fewer trees | 100 | 8 | 5 | 0.8397 | 0.8466 |
+| More trees | 300 | 8 | 5 | 0.8377 | 0.8491 |
+| Shallower trees | 200 | 4 | 5 | 0.8405 | 0.8543 |
+| Larger leaves | 200 | 8 | 10 | 0.8417 | 0.8491 |
+
+I used validation ROC-AUC to compare the runs. Increasing `min_samples_leaf` to 10 gave the highest score among these five runs. The improvement over the baseline was small, so I would not claim that this setting is always better. I did not use test scores to choose the settings.
+
+### Checks
+
+- All five runs finished successfully in MLflow.
+- Each run recorded all model settings, the seed, validation/test metrics, DVC hash, Git SHA and a model artifact.
+- I loaded all five saved models in a new container without training again. Their ROC-AUC and Average Precision matched the logged metrics within `1e-12`.
+- MLflow showed warnings about the container username and automatic Git detection. I checked that our `git_commit` tag still contained the correct SHA in every run.
+
+### Run references
+
+Experiment: `task53-five-runs`
+
+Git commit:
+
+```text
+d20ed98d88d1faaa5a0669d23647f281b3daaee0
+```
+
+DVC data version:
+
+```text
+1c886b512c8a5c9bf723da1cd119fc80.dir
+```
+
+Local results: `reports/task53-AU71uE/`
+
+## Task 6 — Reproduce the result
+
+### Problem and data
+
+The goal is to predict whether a machine will fail within seven days using sensor readings.
+
+The dataset is synthetic, created with the instructor’s `scripts/make_dataset.py`. It contains 6,000 readings from 240 machines. I stored this version in DVC on Azure Blob Storage. The command below downloads that data instead of generating it again.
+
+### Run it yourself
+
+You need Git, Make, Bash and Docker with Linux containers. On Windows, use Ubuntu in WSL with Docker Desktop integration enabled. You do not need Python, DVC or an Azure account on your machine.
+
+Clone the repo and open the lab folder:
+
+```bash
+git clone https://github.com/nithit-cypherX/mlops-engineering.git
+cd mlops-engineering/lab/lab1
+```
+
+Then run:
+
+```bash
+make reproduce
+```
+
+This builds the image, downloads the data, trains the model and checks the score. It uses the settings selected in Task 5: 200 trees, max depth 8, min samples leaf 10 and seed `20260101`.
+
+```text
+expected test_roc_auc: 0.8491 +/- 0.001
+```
+
+The command should finish with `PASS reproduced within tolerance`. Metrics are saved in `reports/metrics.json`. The MLflow database and model artifacts also stay in `reports/`.
+
+To check the score again without retraining:
+
+```bash
+make verify
+```
+
+### Checks
+
+I tested the flow in a separate folder with no dataset or previous training results. The downloaded data matched the original byte-for-byte. Training gave a test ROC-AUC of `0.8491045378`, and verification passed.
+
+The test took about 20 seconds with Docker build cache available. The first run will take longer because Docker needs to download the base image and install dependencies.
+
+### Problem and fix
+
+The Azure data was private, so someone else could not download it without logging in. I enabled public read and listing on the data container because DVC needs both. Anonymous users can download the data, but cannot upload, change or delete files.
+
+DVC also failed because the Ubuntu UID used by the container had no username inside the image. I supplied a username for the download step while keeping the container non-root.
+
 ## Checklist before you submit
 
 - [ ] `make reproduce` works from a fresh clone, on a machine that is not yours

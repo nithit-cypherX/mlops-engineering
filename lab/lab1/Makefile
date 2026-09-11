@@ -9,7 +9,7 @@ SEED ?= 20260101
 # Python reads this at process startup; keep it aligned with --seed.
 export PYTHONHASHSEED := $(SEED)
 
-.PHONY: help setup cloud-check data test portability-audit train image image-push reproduce verify clean teardown
+.PHONY: help setup cloud-check data data-pull test portability-audit train image image-push reproduce verify clean teardown
 
 help:
 	@grep -E "^[a-zA-Z_-]+:.*?## .*$$" $(MAKEFILE_LIST) | awk -F":.*?## " "{printf \"  %-20s %s\\n\", \$$1, \$$2}"
@@ -44,21 +44,38 @@ image-push: image ## Push to CONTAINER_REGISTRY via your adapter
 	python -c "from src import config; from cloudlayer.factory import get_adapter; \
 	print(get_adapter(config.load()).push_image(\"$(IMAGE):$(TAG)\"))"
 
-reproduce: data image ## THE ONE COMMAND. Grader runs this.
+data-pull: image ## Download the tracked data anonymously, using DVC in Docker
+	@test "$$(id -u)" -ne 0 || { echo "Run reproduce as a non-root user."; exit 1; }
+	docker run --rm --platform $(PLATFORM) \
+	  --user "$$(id -u):$$(id -g)" \
+	  --mount "type=bind,src=$$PWD/.dvc/config,dst=/inputs/dvc-config,readonly" \
+	  --mount "type=bind,src=$$PWD/data/raw.dvc,dst=/inputs/raw.dvc,readonly" \
+	  --mount "type=bind,src=$$PWD/data,dst=/app/data" \
+	  --entrypoint sh $(IMAGE):$(TAG) \
+	  /app/scripts/pull_data.sh /inputs/dvc-config /inputs/raw.dvc /app/data
+
+reproduce: data-pull ## THE ONE COMMAND. Grader runs this.
 	@mkdir -p reports
 	@test "$$(id -u)" -ne 0 || { echo "Run reproduce as a non-root user."; exit 1; }
 	# Match bind-mount ownership; keep MLflow's relative artifacts under reports.
-	docker run --rm \
+	docker run --rm --platform $(PLATFORM) --network none \
 	  --user "$$(id -u):$$(id -g)" \
 	  --workdir /app/reports \
 	  -v "$$PWD/data:/app/data:ro" \
 	  -v "$$PWD/reports:/app/reports" \
 	  -e MLFLOW_TRACKING_URI=sqlite:////app/reports/mlflow.db \
 	  -e PYTHONHASHSEED=$(SEED) \
-	  $(IMAGE):$(TAG) --seed $(SEED) --metrics-out /app/reports/metrics.json
+	  $(IMAGE):$(TAG) --seed $(SEED) \
+	  --n-estimators 200 --max-depth 8 --min-samples-leaf 10 \
+	  --metrics-out /app/reports/metrics.json
+	$(MAKE) verify
 
 verify: ## Check the produced metric against the README claim
-	python scripts/verify_metric.py
+	docker run --rm --platform $(PLATFORM) --network none \
+	  --user "$$(id -u):$$(id -g)" \
+	  --mount "type=bind,src=$$PWD/reports,dst=/app/reports,readonly" \
+	  --mount "type=bind,src=$$PWD/README.md,dst=/app/README.md,readonly" \
+	  --entrypoint python $(IMAGE):$(TAG) /app/scripts/verify_metric.py
 
 teardown: ## Delete every resource tagged course=itcs355 for this lab
 	python -c "from src import config; from cloudlayer.factory import get_adapter; \

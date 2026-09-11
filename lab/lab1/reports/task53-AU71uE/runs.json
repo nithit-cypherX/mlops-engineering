@@ -1,0 +1,288 @@
+{
+  "schema_version": 1,
+  "source": "Read-only export of the existing local MLflow database and model metadata.",
+  "artifact_note": "Model paths are relative to this report folder on the original machine. The database and model files are not included in Git; these are references, not download links.",
+  "metric_note": "val_pr_auc and test_pr_auc are Average Precision, calculated with average_precision_score.",
+  "runs": [
+    {
+      "run_id": "16b0b9f1c3c247a9b517abfa22bb1bd3",
+      "run_name": "baseline",
+      "experiment": "task53-five-runs",
+      "status": "FINISHED",
+      "parameters": {
+        "bootstrap": "True",
+        "ccp_alpha": "0.0",
+        "class_weight": "None",
+        "criterion": "gini",
+        "max_depth": "8",
+        "max_features": "sqrt",
+        "max_leaf_nodes": "None",
+        "max_samples": "None",
+        "min_impurity_decrease": "0.0",
+        "min_samples_leaf": "5",
+        "min_samples_split": "2",
+        "min_weight_fraction_leaf": "0.0",
+        "monotonic_cst": "None",
+        "n_estimators": "200",
+        "n_jobs": "-1",
+        "oob_score": "False",
+        "random_state": "20260101",
+        "verbose": "0",
+        "warm_start": "False",
+        "seed": "20260101",
+        "python_hash_seed": "20260101",
+        "n_features": "6"
+      },
+      "metrics": {
+        "val_roc_auc": 0.8363728276105056,
+        "val_pr_auc": 0.3963091530665979,
+        "test_roc_auc": 0.8482378548603715,
+        "test_pr_auc": 0.4776221420444084
+      },
+      "provenance": {
+        "git_commit": "d20ed98d88d1faaa5a0669d23647f281b3daaee0",
+        "dvc_hash": "1c886b512c8a5c9bf723da1cd119fc80.dir",
+        "data_fingerprint": "422cccb9136e8140",
+        "split_strategy": "group_by_machine_id"
+      },
+      "split_rows": {
+        "train": 3600,
+        "val": 1200,
+        "test": 1200
+      },
+      "metrics_file": "baseline-metrics.json",
+      "model_artifact": {
+        "model_id": "m-af01e7e4e878448a913166e169b59e09",
+        "local_relative_path": "mlruns/1/models/m-af01e7e4e878448a913166e169b59e09/artifacts/model.skops",
+        "size_bytes": 6034615,
+        "sha256": "bc862aad183091488fb13c4096da33a8ac0b0f5b491384690f5fe2c0140967a8",
+        "format": "skops",
+        "included_in_git": false
+      }
+    },
+    {
+      "run_id": "c93959aa6a0346339ac82a621922e8c9",
+      "run_name": "fewer-trees",
+      "experiment": "task53-five-runs",
+      "status": "FINISHED",
+      "parameters": {
+        "bootstrap": "True",
+        "ccp_alpha": "0.0",
+        "class_weight": "None",
+        "criterion": "gini",
+        "max_depth": "8",
+        "max_features": "sqrt",
+        "max_leaf_nodes": "None",
+        "max_samples": "None",
+        "min_impurity_decrease": "0.0",
+        "min_samples_leaf": "5",
+        "min_samples_split": "2",
+        "min_weight_fraction_leaf": "0.0",
+        "monotonic_cst": "None",
+        "n_estimators": "100",
+        "n_jobs": "-1",
+        "oob_score": "False",
+        "random_state": "20260101",
+        "verbose": "0",
+        "warm_start": "False",
+        "seed": "20260101",
+        "python_hash_seed": "20260101",
+        "n_features": "6"
+      },
+      "metrics": {
+        "val_roc_auc": 0.8396969952282112,
+        "val_pr_auc": 0.40629248644155647,
+        "test_roc_auc": 0.84655741609384,
+        "test_pr_auc": 0.4674569671696359
+      },
+      "provenance": {
+        "git_commit": "d20ed98d88d1faaa5a0669d23647f281b3daaee0",
+        "dvc_hash": "1c886b512c8a5c9bf723da1cd119fc80.dir",
+        "data_fingerprint": "422cccb9136e8140",
+        "split_strategy": "group_by_machine_id"
+      },
+      "split_rows": {
+        "train": 3600,
+        "val": 1200,
+        "test": 1200
+      },
+      "metrics_file": "fewer-trees-metrics.json",
+      "model_artifact": {
+        "model_id": "m-1e838a8a68364896a3bdd3c53980604c",
+        "local_relative_path": "mlruns/1/models/m-1e838a8a68364896a3bdd3c53980604c/artifacts/model.skops",
+        "size_bytes": 3034547,
+        "sha256": "2b36aeb1335c619e1e5b32ec7e8fb053b0697d66c075a418d978e1d1fbd41043",
+        "format": "skops",
+        "included_in_git": false
+      }
+    },
+    {
+      "run_id": "d64b918320ff4880ae2b02df5393d4d2",
+      "run_name": "more-trees",
+      "experiment": "task53-five-runs",
+      "status": "FINISHED",
+      "parameters": {
+        "bootstrap": "True",
+        "ccp_alpha": "0.0",
+        "class_weight": "None",
+        "criterion": "gini",
+        "max_depth": "8",
+        "max_features": "sqrt",
+        "max_leaf_nodes": "None",
+        "max_samples": "None",
+        "min_impurity_decrease": "0.0",
+        "min_samples_leaf": "5",
+        "min_samples_split": "2",
+        "min_weight_fraction_leaf": "0.0",
+        "monotonic_cst": "None",
+        "n_estimators": "300",
+        "n_jobs": "-1",
+        "oob_score": "False",
+        "random_state": "20260101",
+        "verbose": "0",
+        "warm_start": "False",
+        "seed": "20260101",
+        "python_hash_seed": "20260101",
+        "n_features": "6"
+      },
+      "metrics": {
+        "val_roc_auc": 0.8376978990341531,
+        "val_pr_auc": 0.39544533573917123,
+        "test_roc_auc": 0.8490516106410145,
+        "test_pr_auc": 0.4779626778060821
+      },
+      "provenance": {
+        "git_commit": "d20ed98d88d1faaa5a0669d23647f281b3daaee0",
+        "dvc_hash": "1c886b512c8a5c9bf723da1cd119fc80.dir",
+        "data_fingerprint": "422cccb9136e8140",
+        "split_strategy": "group_by_machine_id"
+      },
+      "split_rows": {
+        "train": 3600,
+        "val": 1200,
+        "test": 1200
+      },
+      "metrics_file": "more-trees-metrics.json",
+      "model_artifact": {
+        "model_id": "m-32ef80149d1e4caa8592c5ef258bc783",
+        "local_relative_path": "mlruns/1/models/m-32ef80149d1e4caa8592c5ef258bc783/artifacts/model.skops",
+        "size_bytes": 9039329,
+        "sha256": "e0a49776d0cc347cc0e0f249720a101c9acef6a86c3593c4c5541edeb73faf6d",
+        "format": "skops",
+        "included_in_git": false
+      }
+    },
+    {
+      "run_id": "6a33cb114c0b407a9848b372990bc2d0",
+      "run_name": "shallower-trees",
+      "experiment": "task53-five-runs",
+      "status": "FINISHED",
+      "parameters": {
+        "bootstrap": "True",
+        "ccp_alpha": "0.0",
+        "class_weight": "None",
+        "criterion": "gini",
+        "max_depth": "4",
+        "max_features": "sqrt",
+        "max_leaf_nodes": "None",
+        "max_samples": "None",
+        "min_impurity_decrease": "0.0",
+        "min_samples_leaf": "5",
+        "min_samples_split": "2",
+        "min_weight_fraction_leaf": "0.0",
+        "monotonic_cst": "None",
+        "n_estimators": "200",
+        "n_jobs": "-1",
+        "oob_score": "False",
+        "random_state": "20260101",
+        "verbose": "0",
+        "warm_start": "False",
+        "seed": "20260101",
+        "python_hash_seed": "20260101",
+        "n_features": "6"
+      },
+      "metrics": {
+        "val_roc_auc": 0.8404552730949226,
+        "val_pr_auc": 0.38666780836608866,
+        "test_roc_auc": 0.8543112516622451,
+        "test_pr_auc": 0.49958779733003233
+      },
+      "provenance": {
+        "git_commit": "d20ed98d88d1faaa5a0669d23647f281b3daaee0",
+        "dvc_hash": "1c886b512c8a5c9bf723da1cd119fc80.dir",
+        "data_fingerprint": "422cccb9136e8140",
+        "split_strategy": "group_by_machine_id"
+      },
+      "split_rows": {
+        "train": 3600,
+        "val": 1200,
+        "test": 1200
+      },
+      "metrics_file": "shallower-trees-metrics.json",
+      "model_artifact": {
+        "model_id": "m-89a5580addbb4a64b5c089617d805f9d",
+        "local_relative_path": "mlruns/1/models/m-89a5580addbb4a64b5c089617d805f9d/artifacts/model.skops",
+        "size_bytes": 3855055,
+        "sha256": "776ecb863aac662db45d734b7e6d6037d8de3d3930894de998de743634ebf542",
+        "format": "skops",
+        "included_in_git": false
+      }
+    },
+    {
+      "run_id": "7ffb07bd0c82447eac48cedc0f0adbe6",
+      "run_name": "larger-leaves",
+      "experiment": "task53-five-runs",
+      "status": "FINISHED",
+      "parameters": {
+        "bootstrap": "True",
+        "ccp_alpha": "0.0",
+        "class_weight": "None",
+        "criterion": "gini",
+        "max_depth": "8",
+        "max_features": "sqrt",
+        "max_leaf_nodes": "None",
+        "max_samples": "None",
+        "min_impurity_decrease": "0.0",
+        "min_samples_leaf": "10",
+        "min_samples_split": "2",
+        "min_weight_fraction_leaf": "0.0",
+        "monotonic_cst": "None",
+        "n_estimators": "200",
+        "n_jobs": "-1",
+        "oob_score": "False",
+        "random_state": "20260101",
+        "verbose": "0",
+        "warm_start": "False",
+        "seed": "20260101",
+        "python_hash_seed": "20260101",
+        "n_features": "6"
+      },
+      "metrics": {
+        "val_roc_auc": 0.841734388284224,
+        "val_pr_auc": 0.3999454325377558,
+        "test_roc_auc": 0.8491045378462598,
+        "test_pr_auc": 0.47646489056168173
+      },
+      "provenance": {
+        "git_commit": "d20ed98d88d1faaa5a0669d23647f281b3daaee0",
+        "dvc_hash": "1c886b512c8a5c9bf723da1cd119fc80.dir",
+        "data_fingerprint": "422cccb9136e8140",
+        "split_strategy": "group_by_machine_id"
+      },
+      "split_rows": {
+        "train": 3600,
+        "val": 1200,
+        "test": 1200
+      },
+      "metrics_file": "larger-leaves-metrics.json",
+      "model_artifact": {
+        "model_id": "m-835e4d178f294534b9de8aeff0da0dea",
+        "local_relative_path": "mlruns/1/models/m-835e4d178f294534b9de8aeff0da0dea/artifacts/model.skops",
+        "size_bytes": 5472091,
+        "sha256": "b0dd184edb8dbe6bb4c32e36acb669dc402effe74cd89fe7467ea14945b27187",
+        "format": "skops",
+        "included_in_git": false
+      }
+    }
+  ]
+}
