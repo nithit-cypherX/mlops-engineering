@@ -181,15 +181,17 @@ DVC also failed because the Ubuntu UID used by the container had no username ins
 
 ## Checklist before you submit
 
-- [ ] `make reproduce` works from a fresh clone, on a machine that is not yours
-- [ ] `make verify` passes against your claim line
-- [ ] `make test` — all tests pass
-- [ ] `make portability-audit` — clean
-- [ ] Image builds for `linux/amd64` and is pushed, digest-pinned
-- [ ] `dvc push` completed; a grader can `dvc pull`
-- [ ] Five or more tracked runs with params, metrics, data fingerprint, and commit SHA
-- [ ] Every **REPLACE** block above is gone (the course-materials block at the top stays)
-- [ ] `git log -p | grep -i -E "secret|password|AKIA|BEGIN PRIVATE"` returns nothing
+Checked items below include two limitations I accepted, not a waiver from the instructor.
+
+- [x] `make reproduce` passed from a fresh clone of a local snapshot. **Accepted limitation:** this was on my own machine with Docker build cache, not someone else's machine.
+- [x] `make verify` passed against the README claim: `0.8491 +/- 0.001`.
+- [x] `make test` — all 34 tests passed. The four Azure push tests also passed separately.
+- [x] `make portability-audit` — clean.
+- [x] The Task 3 image builds for `linux/amd64`, was pushed to ACR, and has a digest reference above. It is the Task 3 version; `make reproduce` builds the latest code locally.
+- [x] `dvc push` completed, and anonymous data download passed through `make reproduce`. The download script sets up anonymous access for DVC.
+- [x] Five tracked runs have params, metrics, data fingerprint, commit SHA and model artifact references.
+- [x] No unfinished **REPLACE** blocks remain above this checklist; the course-material links are kept.
+- [x] Ran `git log -p | grep -i -E "secret|password|AKIA|BEGIN PRIVATE"`. **Accepted limitation:** it returns keyword matches, including `SECRET_STORE_PATH` and the checklist command itself, so it does not return nothing. Additional checks found no private-key headers, AWS access-key IDs, GitHub tokens or Azure account-key patterns, and no committed `cloud.env`. These checks do not guarantee that every possible secret has been detected.
 
 That last check is not optional. A credential in Git history is an automatic deduction in this
 course, and rotating it is your responsibility, not the grader's.
