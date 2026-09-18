@@ -223,8 +223,8 @@ def main() -> None:
     tags = {
         "lab": "2", "study_id": state["study_id"], "git_commit": revision,
         "dvc_hash": version, "data_fingerprint": fingerprint,
-        "split_strategy": "group_by_machine_id", "n_train_rows": len(train_df),
-        "n_val_rows": len(val_df), "n_test_rows": len(test_df),
+        "split_strategy": "group_by_machine_id", "n_train_rows": str(len(train_df)),
+        "n_val_rows": str(len(val_df)), "n_test_rows": str(len(test_df)),
         "cost_basis": "dedicated_trial_through_model_log_estimate",
     }
     if checkpoint_uri:

@@ -10,6 +10,7 @@ import mlflow
 import numpy as np
 import pandas as pd
 import pytest
+from mlflow.entities import RunTag
 from sklearn.ensemble import RandomForestClassifier
 
 from src import tune
@@ -203,6 +204,39 @@ def test_twelve_trials_have_separate_complete_runs_and_one_split(study, monkeypa
     state = json.loads(study.args.checkpoint.read_text())
     assert len(state["completed"]) == 12
     assert state["spent_thb"] == pytest.approx(60 / 3600 * 2.900677)
+
+
+def test_nested_run_tags_are_rest_serializable(study, monkeypatch):
+    study.args.trials = 1
+    experiment = mlflow.set_experiment(study.args.experiment)
+    parent = study.client.create_run(experiment.experiment_id)
+    monkeypatch.setenv("MLFLOW_RUN_ID", parent.info.run_id)
+    original_create_run = mlflow.MlflowClient.create_run
+    serialized_tags = []
+
+    def create_run_with_rest_tags(client, *args, **kwargs):
+        # Exercise the same serializer as RestStore before SQLite can coerce values.
+        serialized_tags.append({
+            key: RunTag(key, value).to_proto().value for key, value in kwargs["tags"].items()
+        })
+        return original_create_run(client, *args, **kwargs)
+
+    monkeypatch.setattr(mlflow.MlflowClient, "create_run", create_run_with_rest_tags)
+    monkeypatch.setattr(socket.socket, "connect", Mock(side_effect=AssertionError("No network")))
+    tune.main()
+
+    assert len(serialized_tags) == 1
+    tags = serialized_tags[0]
+    assert tags["mlflow.parentRunId"] == parent.info.run_id
+    assert tags["run_role"] == "trial"
+    expected_rows = dict(zip(
+        ("n_train_rows", "n_val_rows", "n_test_rows"),
+        (str(len(frame)) for frame in study.frames),
+    ))
+    for key, value in expected_rows.items():
+        assert tags[key] == value
+    children = runs(study, "trial")
+    assert len(children) == 1 and children[0].info.status == "FINISHED"
 
 
 def test_budget_guard_skips_before_first_trial(study, capsys):
