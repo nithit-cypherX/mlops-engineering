@@ -1,0 +1,5 @@
+[core]
+    remote = storage
+['remote "storage"']
+    url = azure://itcs355/itcs355/dvc
+    account_name = itcs355u6688124

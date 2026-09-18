@@ -1,0 +1,21 @@
+# Source of truth. Compile to requirements.txt WITH HASHES:
+#   uv pip compile requirements.in --generate-hashes --python .venv/bin/python --python-platform x86_64-unknown-linux-gnu -o requirements.txt
+# Commit both files. The lock file is what makes the build reproducible.
+scikit-learn==1.8.0
+pandas==2.3.3
+numpy==2.4.4
+mlflow==2.22.5
+pytest==9.1.1
+PyYAML==6.0.3
+joblib==1.4.2
+ruff==0.16.6
+fastapi==0.141.1
+httpx2==2.12.0
+dvc[azure]==3.67.1
+
+# Lab 2: managed jobs and authentication through the existing Azure CLI login.
+azure-ai-ml==1.35.0
+azure-identity==1.25.3
+
+# Send MLflow metrics and artifacts to the Azure ML workspace.
+azureml-mlflow==1.62.0.post6
