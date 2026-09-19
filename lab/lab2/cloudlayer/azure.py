@@ -28,6 +28,8 @@ from typing import Any
 from urllib.parse import urlsplit
 from uuid import uuid4
 
+from mlflow import MlflowClient
+from mlflow.exceptions import MlflowException
 from azure.ai.ml import Input, MLClient, Output, command
 from azure.ai.ml.entities import (
     AmlCompute, AzureBlobDatastore, Environment, ManagedIdentityConfiguration,
@@ -284,7 +286,88 @@ class AzureAdapter(CloudAdapter):
                 )
             time.sleep(10)
 
-    # register_model                    -> Lab 2 (model registry)
+    def register_model(self, model_uri: str, name: str) -> str:
+        """Register a finished Lab 2 study's saved model; do not train or change stage.
+
+        Each call creates a new version. Lineage comes from the source run/job,
+        not the current checkout or local seed-check averages.
+        """
+        match = re.fullmatch(r"runs:/([A-Za-z0-9_-]+)/model", model_uri)
+        if not match:
+            raise ValueError("model_uri must be runs:/<run-id>/model")
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,254}", name):
+            raise ValueError("name must be a non-empty model name without spaces or slashes")
+        run_id = match[1]
+        client = MlflowClient(
+            tracking_uri=self.cfg.mlflow_tracking_uri, registry_uri=self.cfg.mlflow_tracking_uri,
+        )
+        run = client.get_run(run_id)
+        if run.info.run_id != run_id or run.info.status != "FINISHED":
+            raise ValueError("The source model must belong to a FINISHED run")
+        tags = run.data.tags
+        seed = run.data.params.get("seed", "")
+        job_id = tags.get("mlflow.parentRunId", "")
+        image = tags.get("image_uri", "")
+        image_match = re.fullmatch(r"[^@\s]+@(sha256:[0-9a-f]{64})", image)
+        if (not re.fullmatch(r"[0-9a-f]{40}", tags.get("git_commit", ""))
+                or not re.fullmatch(r"[0-9a-f]{32}(?:\.dir)?", tags.get("dvc_hash", ""))
+                or not re.fullmatch(r"lab2-[0-9a-f]{32}", job_id)
+                or not re.fullmatch(r"[0-9]+", seed) or not 0 <= int(seed) < 2**32
+                or image_match is None):
+            raise ValueError("Source run is missing valid Git, DVC, job, image or seed lineage")
+        scores = {key: run.data.metrics.get(key) for key in ("val_roc_auc", "test_roc_auc")}
+        if any(type(value) not in (int, float) or not math.isfinite(value) or not 0 <= value <= 1
+               for value in scores.values()):
+            raise ValueError("Source run must contain finite validation and test ROC-AUC in [0, 1]")
+        artifacts = {item.path for item in client.list_artifacts(run_id, "model") if not item.is_dir}
+        required = {f"model/{filename}" for filename in (
+            "MLmodel", "model.pkl", "conda.yaml", "python_env.yaml", "requirements.txt",
+        )}
+        if not required <= artifacts:
+            raise ValueError("Source run is missing required saved MLflow model files")
+        job = self._ml_client.jobs.get(job_id)
+        if job.name != job_id or any(
+            (job.tags or {}).get(key) != tags[key] for key in ("git_commit", "dvc_hash")
+        ):
+            raise ValueError("Source run lineage does not match the managed training job")
+        environment_name, environment_version = job.environment.split(":", 1)
+        environment = self._ml_client.environments.get(environment_name, environment_version)
+        if environment.image != image:
+            raise ValueError("Source image digest does not match the training job environment")
+        lineage = {
+            "git_commit": tags["git_commit"], "data_version": tags["dvc_hash"],
+            "mlflow_run_id": run_id, "training_job_id": job_id,
+            "image_digest": image_match[1], "seed": seed,
+            "metric_val": str(scores["val_roc_auc"]), "metric_test": str(scores["test_roc_auc"]),
+        }
+        # Explicit clients keep tracking and registration in the configured workspace.
+        # Resolving the run's artifact root is the same mapping used by mlflow.register_model.
+        try:
+            client.create_registered_model(name)
+        except MlflowException as error:
+            if error.error_code not in {"RESOURCE_ALREADY_EXISTS", "ALREADY_EXISTS"}:
+                raise
+        created = client.create_model_version(
+            name=name, source=run.info.artifact_uri.rstrip("/") + "/model",
+            run_id=run_id, tags=lineage,
+        )
+        version = str(created.version)
+        try:
+            saved = client.get_model_version(name, version)
+        except MlflowException as error:
+            raise RuntimeError(
+                f"Created {name} version {version}, but read-back failed. "
+                "Inspect that version before retrying registration."
+            ) from error
+        if (saved.name != name or str(saved.version) != version or saved.status != "READY"
+                or saved.run_id != run_id or saved.current_stage != "None"
+                or any(saved.tags.get(key) != value for key, value in lineage.items())):
+            raise RuntimeError(
+                f"Model {name} version {version} failed registration verification. "
+                "Inspect that version before retrying registration."
+            )
+        return version
+
     # deploy / invoke                   -> Lab 3 (managed online endpoint + deployment)
     # emit_metric                       -> Lab 4 (Azure Monitor custom metric)
     # generate                          -> Lab 5 (managed LLM endpoint; read the usage block for tokens)

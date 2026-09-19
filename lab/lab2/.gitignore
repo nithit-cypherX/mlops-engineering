@@ -1,6 +1,10 @@
 # Keep local outputs out of Git. Select submission evidence later.
 /reports/*
 !/reports/README.md
+!/reports/lab2-comparison.md
+!/reports/lab2-seed-check.json
+!/reports/lab2-model-benchmark.json
+!/reports/lab2-cost.md
 /mlflow.db*
 *.sqlite
 *.sqlite3

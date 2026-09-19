@@ -1,0 +1,130 @@
+{
+  "status": "seed_check_complete",
+  "checked_at_utc": "2026-09-19T07:03:42.543271+00:00",
+  "reference": {
+    "mlflow_run_id": "8087ae5c-d06f-411e-b6b0-7f7891ffe7ed",
+    "study_id": "34f2f83bfb9641e38347f8ddb04c1caf",
+    "training_code_commit": "610e7cfefbfe080d711a7f621e1d6992fa803ad3",
+    "required_image": "itcs355u6688124.azurecr.io/itcs355-lab2@sha256:df878435dd990605f1c63dc4538b9cb86dacd31384d0a730c6b2d1c0399b282d",
+    "raw_sha256": "422cccb9136e814061b83e4f041cff21ba7372c6f7fb0feb2c321555c6a6341f",
+    "dvc_hash": "1c886b512c8a5c9bf723da1cd119fc80.dir",
+    "validation_metrics": {
+      "val_roc_auc": 0.8444994217173845,
+      "val_pr_auc": 0.4044125077384774
+    }
+  },
+  "execution": {
+    "location": "local",
+    "python": "3.11.16",
+    "machine": "x86_64",
+    "scikit_learn": "1.8.0",
+    "checker_sha256": "966eee1818fc44e2180b3cc9ca86281fefe19d565597130d5e8ed6bf580d575a",
+    "source_sha256": {
+      "data.py": "4df8271b3193926b0c75d1b0213c8ade76d3beb16b62cc1bf177c542f2b50e49",
+      "seeds.py": "687081113af72316fd029b0aa70195558959787108a18ead577251ad06cd5491",
+      "train.py": "2d8f49a8c280d833b4cb50ff5997b67d2feb2b98d220ce3480866b2ba76e6c29"
+    },
+    "scope": "Fixed split and global seeds; vary only RandomForest random_state.",
+    "cost_note": "No Azure training job. Local runtime is not priced as Azure compute."
+  },
+  "split_seed": 20260101,
+  "global_seed": 20260101,
+  "python_hash_seed": 20260101,
+  "splits": {
+    "train": {
+      "rows": 3600,
+      "machines": 144,
+      "reading_ids_sha256": "61504ef43059d9a0e2145dc34d733a10cdbc42a62ba674281b79b295565c2c57"
+    },
+    "validation": {
+      "rows": 1200,
+      "machines": 48,
+      "reading_ids_sha256": "7c0a02c553c3e07d5069602e3d53b93e69e777b1337f8f01a226bc03e37ef60b"
+    },
+    "test": {
+      "rows": 1200,
+      "machines": 48,
+      "reading_ids_sha256": "9c1f08072bbc4e52c5367c07ddf456f4611422f9fe45c68c609cc48f6a5a1c5c"
+    }
+  },
+  "baseline_model_params": {
+    "bootstrap": true,
+    "ccp_alpha": 0.0,
+    "class_weight": null,
+    "criterion": "gini",
+    "max_depth": 12,
+    "max_features": "sqrt",
+    "max_leaf_nodes": null,
+    "max_samples": null,
+    "min_impurity_decrease": 0.0,
+    "min_samples_leaf": 10,
+    "min_samples_split": 2,
+    "min_weight_fraction_leaf": 0.0,
+    "monotonic_cst": null,
+    "n_estimators": 100,
+    "n_jobs": -1,
+    "oob_score": false,
+    "random_state": 20260101,
+    "verbose": 0,
+    "warm_start": false
+  },
+  "baseline_check": {
+    "passed": true,
+    "absolute_tolerance": 1e-12,
+    "deltas": {
+      "val_roc_auc": 0.0,
+      "val_pr_auc": 0.0
+    }
+  },
+  "results": [
+    {
+      "model_seed": 20260101,
+      "val_roc_auc": 0.8444994217173845,
+      "val_pr_auc": 0.4044125077384774
+    },
+    {
+      "model_seed": 20260102,
+      "val_roc_auc": 0.8339984221692875,
+      "val_pr_auc": 0.38990559326666774
+    },
+    {
+      "model_seed": 20260103,
+      "val_roc_auc": 0.8397429514625572,
+      "val_pr_auc": 0.4081344108260187
+    },
+    {
+      "model_seed": 20260104,
+      "val_roc_auc": 0.8406390980323072,
+      "val_pr_auc": 0.3980409081829547
+    },
+    {
+      "model_seed": 20260105,
+      "val_roc_auc": 0.8393140266086597,
+      "val_pr_auc": 0.4070661494639996
+    }
+  ],
+  "summary": {
+    "val_roc_auc": {
+      "n": 5,
+      "mean": 0.8396387839980393,
+      "sample_variance": 1.4139106746933687e-05,
+      "sample_stddev": 0.003760200359945423,
+      "min": 0.8339984221692875,
+      "max": 0.8444994217173845
+    },
+    "val_pr_auc": {
+      "n": 5,
+      "mean": 0.40151191389562363,
+      "sample_variance": 5.746875054570346e-05,
+      "sample_stddev": 0.007580814636020555,
+      "min": 0.38990559326666774,
+      "max": 0.4081344108260187
+    }
+  },
+  "limits": [
+    "One seed cannot estimate variance; null does not mean zero variance.",
+    "Results are conditional on one fixed group split, not different datasets.",
+    "Only this configuration is checked; this does not prove equivalence to 300 trees.",
+    "Do not pick a lucky seed or replace the original candidate artifact from this check."
+  ]
+}

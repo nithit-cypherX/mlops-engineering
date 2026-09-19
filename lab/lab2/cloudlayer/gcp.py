@@ -15,8 +15,6 @@ Hints for Lab 1:
 """
 from __future__ import annotations
 
-from typing import Any
-
 from cloudlayer.base import CloudAdapter
 
 

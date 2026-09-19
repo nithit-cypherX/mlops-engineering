@@ -1,0 +1,283 @@
+{
+  "checked_at_utc": "2026-09-19T07:17:13.649904+00:00",
+  "reference": {
+    "study_id": "34f2f83bfb9641e38347f8ddb04c1caf",
+    "image": "itcs355u6688124.azurecr.io/itcs355-lab2@sha256:df878435dd990605f1c63dc4538b9cb86dacd31384d0a730c6b2d1c0399b282d",
+    "training_code_commit": "610e7cfefbfe080d711a7f621e1d6992fa803ad3",
+    "raw_sha256": "422cccb9136e814061b83e4f041cff21ba7372c6f7fb0feb2c321555c6a6341f",
+    "dvc_hash": "1c886b512c8a5c9bf723da1cd119fc80.dir",
+    "split_seed": 20260101,
+    "validation_reading_ids_sha256": "7c0a02c553c3e07d5069602e3d53b93e69e777b1337f8f01a226bc03e37ef60b"
+  },
+  "method": {
+    "operation": "predict_proba",
+    "rows_per_call": 1200,
+    "features": [
+      "temp_c",
+      "vibration_mm_s",
+      "pressure_kpa",
+      "hours_since_service",
+      "load_pct",
+      "ambient_humidity"
+    ],
+    "warmups_per_model_after_verification": 5,
+    "measured_calls_per_model": 50,
+    "order": "100,300 then 300,100; alternating",
+    "percentile_method": "NumPy linear interpolation",
+    "timing_excludes": [
+      "download",
+      "load_model",
+      "data loading/splitting",
+      "feature selection",
+      "metric calculation",
+      "output verification"
+    ]
+  },
+  "execution": {
+    "location": "local Docker, not an Azure endpoint",
+    "python": "3.11.16",
+    "scikit_learn": "1.8.0",
+    "joblib": "1.4.2",
+    "numpy": "2.4.4",
+    "machine": "x86_64",
+    "effective_cpus": 2,
+    "cpu_quota": "200000 100000",
+    "native_thread_limits": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1"
+    },
+    "benchmark_script_sha256": "934af14a918a47ced82f1b551d29d751cb04851989d5fb13711a5672535fe170",
+    "seed_checker_sha256": "966eee1818fc44e2180b3cc9ca86281fefe19d565597130d5e8ed6bf580d575a"
+  },
+  "models": {
+    "100": {
+      "run_id": "8087ae5c-d06f-411e-b6b0-7f7891ffe7ed",
+      "params": {
+        "bootstrap": true,
+        "ccp_alpha": 0.0,
+        "class_weight": null,
+        "criterion": "gini",
+        "max_depth": 12,
+        "max_features": "sqrt",
+        "max_leaf_nodes": null,
+        "max_samples": null,
+        "min_impurity_decrease": 0.0,
+        "min_samples_leaf": 10,
+        "min_samples_split": 2,
+        "min_weight_fraction_leaf": 0.0,
+        "monotonic_cst": null,
+        "n_estimators": 100,
+        "n_jobs": -1,
+        "oob_score": false,
+        "random_state": 20260101,
+        "verbose": 0,
+        "warm_start": false
+      },
+      "validation_metrics": {
+        "val_roc_auc": 0.8444994217173845,
+        "val_pr_auc": 0.4044125077384774
+      },
+      "files": {
+        "MLmodel": {
+          "bytes": 548,
+          "sha256": "7d48256cc1367a44e6f16dd6f77e25ecb0bef2c294405bb0acdca72a69b805c3"
+        },
+        "conda.yaml": {
+          "bytes": 248,
+          "sha256": "ba39459a8e200161891bccf96abc11193b03f345fff49f95d6afe89867cb2b0f"
+        },
+        "model.pkl": {
+          "bytes": 1532532,
+          "sha256": "ebe4f91523f5b872a5290effb8484b59398756fecd97f8fe069e293e5d4def61"
+        },
+        "python_env.yaml": {
+          "bytes": 121,
+          "sha256": "78684e6b92addee523d4c6d4a10fed277333552a84c0c86ae85ffc06f230c46c"
+        },
+        "requirements.txt": {
+          "bytes": 124,
+          "sha256": "3ad246847c27dc893b9e83c08dce4f706dcda674e1b1e84574e366e08410cb78"
+        }
+      },
+      "model_pkl_bytes": 1532532,
+      "artifact_directory_bytes": 1533573,
+      "latency": {
+        "n": 50,
+        "median_ms": 34.553127,
+        "p95_ms": 52.55015619999996,
+        "min_ms": 33.280705,
+        "max_ms": 70.137609
+      },
+      "latency_samples_ms": [
+        34.067228,
+        45.340416,
+        34.836216,
+        34.7704,
+        44.352666,
+        33.717267,
+        33.98773,
+        34.658076,
+        33.280705,
+        33.773086,
+        34.535402,
+        34.532973,
+        45.843432,
+        68.419812,
+        70.137609,
+        44.969984,
+        44.963252,
+        34.235128,
+        33.400557,
+        34.570852,
+        34.241041,
+        34.963626,
+        33.65573,
+        34.52504,
+        34.676702,
+        33.670473,
+        34.160985,
+        33.653337,
+        34.592081,
+        34.212803,
+        45.057108,
+        33.624094,
+        34.729849,
+        44.070101,
+        33.791471,
+        44.848321,
+        44.411151,
+        33.887584,
+        33.359958,
+        45.83035,
+        58.037476,
+        33.928971,
+        34.341532,
+        34.847308,
+        34.677447,
+        33.379879,
+        33.502029,
+        45.47573,
+        34.572889,
+        33.531669
+      ]
+    },
+    "300": {
+      "run_id": "4a785cc0-6aef-41d3-a009-9f07bae57dba",
+      "params": {
+        "bootstrap": true,
+        "ccp_alpha": 0.0,
+        "class_weight": null,
+        "criterion": "gini",
+        "max_depth": 12,
+        "max_features": "sqrt",
+        "max_leaf_nodes": null,
+        "max_samples": null,
+        "min_impurity_decrease": 0.0,
+        "min_samples_leaf": 10,
+        "min_samples_split": 2,
+        "min_weight_fraction_leaf": 0.0,
+        "monotonic_cst": null,
+        "n_estimators": 300,
+        "n_jobs": -1,
+        "oob_score": false,
+        "random_state": 20260101,
+        "verbose": 0,
+        "warm_start": false
+      },
+      "validation_metrics": {
+        "val_roc_auc": 0.8450585559019294,
+        "val_pr_auc": 0.40444499941701934
+      },
+      "files": {
+        "MLmodel": {
+          "bytes": 548,
+          "sha256": "c2067aa1b0e1a9f58651948ebad9e6d7aaa4cb5e1fc28ff0e12ab900e7c9e640"
+        },
+        "conda.yaml": {
+          "bytes": 248,
+          "sha256": "ba39459a8e200161891bccf96abc11193b03f345fff49f95d6afe89867cb2b0f"
+        },
+        "model.pkl": {
+          "bytes": 4588951,
+          "sha256": "f02d57868622a4fb7637cfe0430997cfd41fd21b044e9cac2f056f940046c94e"
+        },
+        "python_env.yaml": {
+          "bytes": 121,
+          "sha256": "78684e6b92addee523d4c6d4a10fed277333552a84c0c86ae85ffc06f230c46c"
+        },
+        "requirements.txt": {
+          "bytes": 124,
+          "sha256": "3ad246847c27dc893b9e83c08dce4f706dcda674e1b1e84574e366e08410cb78"
+        }
+      },
+      "model_pkl_bytes": 4588951,
+      "artifact_directory_bytes": 4589992,
+      "latency": {
+        "n": 50,
+        "median_ms": 86.7159905,
+        "p95_ms": 129.37988889999994,
+        "min_ms": 75.347619,
+        "max_ms": 173.191333
+      },
+      "latency_samples_ms": [
+        86.116014,
+        95.902898,
+        96.190977,
+        84.94375,
+        95.751362,
+        96.656525,
+        85.172098,
+        95.574682,
+        85.528604,
+        85.846833,
+        85.051105,
+        96.215803,
+        107.602495,
+        173.191333,
+        139.205845,
+        97.238424,
+        117.370387,
+        97.295311,
+        95.774582,
+        107.669088,
+        86.102147,
+        86.697264,
+        85.394037,
+        86.503865,
+        85.435866,
+        84.700402,
+        95.604481,
+        96.732886,
+        85.485485,
+        85.01191,
+        96.73419,
+        85.7138,
+        84.808415,
+        108.640888,
+        85.213673,
+        85.638776,
+        96.463456,
+        95.806793,
+        85.788291,
+        75.347619,
+        161.536434,
+        97.243554,
+        95.597677,
+        86.04625,
+        85.959623,
+        85.32337,
+        75.465699,
+        108.127682,
+        86.734717,
+        84.791807
+      ]
+    }
+  },
+  "limits": [
+    "Latency is for a warm batch of 1,200 rows, not a single request or an endpoint.",
+    "This measures these two saved models on one local machine in one benchmark session.",
+    "Serialized file size is not RAM usage; no memory or load-time benchmark was done.",
+    "No retraining, new seeds, cloud jobs, or MLflow writes were performed."
+  ]
+}
