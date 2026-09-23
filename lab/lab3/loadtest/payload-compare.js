@@ -115,7 +115,8 @@ export function runComparison(post = http.post, observe = () => {}) {
   for (let round = 0; round < rounds; round++) {
     for (let position = 0; position < payloadCases.length; position++) {
       const item = payloadCases[(round + position) % payloadCases.length];
-      send(item, 'measured', round + 1, reference, post, observe);
+      const result = send(item, 'measured', round + 1, reference, post, observe);
+      if (!result.valid) return; // Keep the failed record, then stop without retry.
     }
   }
 }

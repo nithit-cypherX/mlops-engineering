@@ -59,14 +59,19 @@ export default function () {
     verify('reject invalid HTTP duration ' + String(value), !inspectResponse({ ...response(), timings: { duration: value } }).valid);
   }
 
-  let calls = [], records = [], fault = null;
+  let calls = [], records = [], fault = null, faultAt = 5;
   const post = (url, body, params) => {
     calls.push({ url, body, params });
-    if (fault === 'warm-header') return response('');
-    if (calls.length === 5) {
+    if (calls.length === faultAt) {
       if (fault === 'header') return response('');
       if (fault === 'mismatch') return response(goodHeader, 0.8);
       if (fault === 'timeout') return { status: 0, error_code: 1050, headers: {}, timings: { duration: 10000 } };
+      if (fault === 'too-large') return { ...response(), status: 413 };
+      if (fault === 'server-error') return { ...response(), status: 503 };
+      if (fault === 'body-version') return { ...response(), json: () => ({ probability: 0.68, model_version: '2' }) };
+      if (fault === 'header-version') return { ...response(), headers: { 'Server-Timing': goodHeader, 'X-Model-Version': '2' } };
+      if (fault === 'http-timing') return { ...response(), timings: { duration: NaN } };
+      if (fault === 'invalid-json') return { ...response(), json() { throw new Error('bad JSON'); } };
     }
     return response();
   };
@@ -86,13 +91,18 @@ export default function () {
       && [0, 1, 2, 3].every(p => calls.slice(4).filter((c, i) => i % 4 === p && c.params.tags.case === item.name).length === 5));
   }
   verify('all valid outputs retained', records.every(r => r.valid && r.probability === 0.68 && r.server.json_share === 0.2));
-  for (const mode of ['header', 'mismatch', 'timeout']) {
-    calls = []; records = []; fault = mode;
-    runComparison(post, r => records.push(r));
-    verify(mode + ': keep failed sample without retry', calls.length === 84 && records.filter(r => !r.valid).length === 1
-      && !records[4].valid && (mode !== 'timeout' || records[4].timeout));
+  for (const mode of ['header', 'mismatch', 'timeout', 'too-large', 'server-error',
+    'body-version', 'header-version', 'http-timing', 'invalid-json']) {
+    // Last warm-up, first measurement, middle of the run, and final request.
+    for (const position of [4, 5, 40, 84]) {
+      calls = []; records = []; fault = mode; faultAt = position;
+      runComparison(post, r => records.push(r));
+      verify(mode + ' at ' + position + ': keep failure then stop without retry', calls.length === position
+        && records.length === position && records.filter(r => !r.valid).length === 1
+        && !records[position - 1].valid && (mode !== 'timeout' || records[position - 1].timeout));
+    }
   }
-  calls = []; records = []; fault = 'warm-header';
+  calls = []; records = []; fault = 'header'; faultAt = 1;
   runComparison(post, r => records.push(r));
   verify('bad warm-up stops before measurements', calls.length === 1 && records.length === 1 && !records[0].valid);
 
@@ -116,15 +126,15 @@ export default function () {
   const saved = summarize(metrics);
   verify('valid summary preserves native data', saved.lab3.valid_comparison && saved.k6.metrics.http_reqs.values.count === 84);
   verify('50 percent itself is not a majority', !saved.lab3.cases[2].json_majority
-    && saved.lab3.cases[3].json_majority && saved.lab3.first_tested_json_majority_bytes === 1048576);
+    && saved.lab3.cases[3].json_majority && saved.lab3.first_tested_json_majority_bytes === 16777216);
   verify('lowest tested majority, not exact crossover', saved.lab3.conclusion === 'json-majority-observed');
   const ratios = clone();
-  ratios['payload_json_share{case:100KiB}'].values = { count: 20, min: 0.2, med: 0.35, max: 0.5 };
-  ratios['payload_json_decode_ms{case:100KiB}'].values = { count: 20, min: 1, med: 2.5, max: 4 };
-  ratios['payload_processing_ms{case:100KiB}'].values = { count: 20, min: 2, med: 11, max: 20 };
+  ratios['payload_json_share{case:' + payloadCases[2].name + '}'].values = { count: 20, min: 0.2, med: 0.35, max: 0.5 };
+  ratios['payload_json_decode_ms{case:' + payloadCases[2].name + '}'].values = { count: 20, min: 1, med: 2.5, max: 4 };
+  ratios['payload_processing_ms{case:' + payloadCases[2].name + '}'].values = { count: 20, min: 2, med: 11, max: 20 };
   verify('median of request shares, not ratio of medians', summarize(ratios).lab3.cases[2].median_json_share === 0.35);
   const noMajority = clone();
-  noMajority['payload_json_share{case:1MiB}'].values = { count: 20, min: 0.4, med: 0.4, max: 0.4 };
+  noMajority['payload_json_share{case:' + payloadCases[3].name + '}'].values = { count: 20, min: 0.4, med: 0.4, max: 0.4 };
   verify('valid no-majority result is explicit', summarize(noMajority).lab3.conclusion === 'not-observed-in-tested-range'
     && summarize(noMajority).lab3.first_tested_json_majority_bytes === null);
   for (const key of ['payload_errors', 'payload_timeouts']) {
@@ -134,19 +144,19 @@ export default function () {
       && summarize(broken).lab3.cases.every(c => c.median_http_ms === null && c.json_majority === null));
   }
   for (const key of ['http_reqs', 'http_reqs{phase:warmup}', 'http_reqs{phase:measured}', 'iterations',
-    'payload_attempts', 'payload_completed', 'payload_measured{case:original}']) {
+    'payload_attempts', 'payload_completed', 'payload_measured{case:' + payloadCases[0].name + '}']) {
     const broken = clone(); broken[key].values.count -= 1;
     verify(key + ': incomplete cannot pass', !summarize(broken).lab3.valid_comparison);
   }
   const interrupted = clone(); interrupted.payload_completed.values.count = 83;
   verify('unfinished request counted', summarize(interrupted).lab3.unfinished_requests === 1);
-  for (const key of ['payload_errors', 'payload_timeouts', 'payload_json_decode_ms{case:original}']) {
+  for (const key of ['payload_errors', 'payload_timeouts', 'payload_json_decode_ms{case:' + payloadCases[0].name + '}']) {
     const broken = clone(); delete broken[key];
     verify(key + ': missing evidence cannot pass', !summarize(broken).lab3.valid_comparison);
   }
   for (const change of [{ count: 19 }, { med: NaN }, { min: -1 }, { med: 99 }]) {
     const broken = clone();
-    Object.assign(broken['payload_json_share{case:original}'].values, change);
+    Object.assign(broken['payload_json_share{case:' + payloadCases[0].name + '}'].values, change);
     verify('invalid trend stats ' + JSON.stringify(change), !summarize(broken).lab3.valid_comparison);
   }
   const failedCheck = clone(); failedCheck.checks.values.fails = 1;
