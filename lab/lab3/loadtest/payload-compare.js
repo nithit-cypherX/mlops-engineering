@@ -2,7 +2,8 @@
 import http from 'k6/http';
 import { check } from 'k6';
 import { Counter, Trend } from 'k6/metrics';
-import { validPrediction, setup as validateTarget } from './k6.js';
+import { validPrediction, setup as validateTarget, parseTiming } from './k6.js';
+export { parseTiming } from './k6.js';
 import { payloadCases } from './payload-cases.js';
 
 export const rounds = 20;
@@ -44,26 +45,6 @@ export const options = {
   thresholds,
 };
 export function setup() { validateTarget(); }
-
-// Parse our service's three-metric contract, not arbitrary Server-Timing extensions.
-export function parseTiming(header) {
-  if (typeof header !== 'string') return null;
-  const values = {};
-  const parts = header.split(',');
-  if (parts.length !== 3) return null;
-  for (const part of parts) {
-    const match = /^(json_decode|scoring|processing);dur=(\d+(?:\.\d+)?)$/.exec(part.trim());
-    if (!match || Object.hasOwn(values, match[1])) return null;
-    const value = Number(match[2]);
-    if (!Number.isFinite(value)) return null;
-    values[match[1]] = value;
-  }
-  if (!(values.processing > 0) || values.json_decode > values.processing
-    || values.scoring > values.processing
-    || values.json_decode + values.scoring > values.processing + 0.000002) return null;
-  return { json_decode_ms: values.json_decode, scoring_ms: values.scoring,
-    processing_ms: values.processing, json_share: values.json_decode / values.processing };
-}
 
 export function inspectResponse(res, reference = null) {
   const predictionValid = validPrediction(res);

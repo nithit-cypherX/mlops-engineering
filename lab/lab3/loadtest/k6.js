@@ -8,6 +8,13 @@ const latency = new Trend('predict_latency_ms', true);
 const failures = new Rate('predict_failures');
 const attempts = new Counter('predict_attempts');
 const timeouts = new Counter('predict_timeouts');
+const timingFailures = new Rate('predict_timing_failures');
+const timingSamples = new Counter('predict_timing_samples');
+const serverTimings = {
+  json_decode_ms: new Trend('predict_json_decode_ms', true),
+  scoring_ms: new Trend('predict_scoring_ms', true),
+  processing_ms: new Trend('predict_processing_ms', true),
+};
 const vus = Number(__ENV.VUS || 10);
 const duration = __ENV.DURATION || '60s';
 
@@ -21,6 +28,8 @@ export const options = {
     predict_latency_ms: ['p(95)<200'], // Agreed in Task 3.1, before load testing.
     predict_failures: ['rate==0'],
     predict_attempts: ['count>0'],
+    predict_timing_failures: ['rate==0'],
+    predict_timing_samples: ['count>0'],
   },
 };
 
@@ -50,15 +59,69 @@ export function validPrediction(res) {
     && body.model_version === '1' && res.headers['X-Model-Version'] === '1';
 }
 
-export default function () {
+// Shared with the payload comparison. Keep the existing three-metric contract.
+export function parseTiming(header) {
+  if (typeof header !== 'string') return null;
+  const values = {};
+  const parts = header.split(',');
+  if (parts.length !== 3) return null;
+  for (const part of parts) {
+    const match = /^(json_decode|scoring|processing);dur=(\d+(?:\.\d+)?)$/.exec(part.trim());
+    if (!match || Object.hasOwn(values, match[1])) return null;
+    const value = Number(match[2]);
+    if (!Number.isFinite(value)) return null;
+    values[match[1]] = value;
+  }
+  if (!(values.processing > 0) || values.json_decode > values.processing
+    || values.scoring > values.processing
+    || values.json_decode + values.scoring > values.processing + 0.000002) return null;
+  return { json_decode_ms: values.json_decode, scoring_ms: values.scoring,
+    processing_ms: values.processing, json_share: values.json_decode / values.processing };
+}
+
+export function timingRecord(res) {
+  const http = {};
+  for (const name of ['duration', 'sending', 'waiting', 'receiving']) {
+    const value = res.timings?.[name];
+    http[name + '_ms'] = typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : null;
+  }
+  const server = parseTiming(res.headers?.['Server-Timing']);
+  const predictionValid = validPrediction(res);
+  const requestId = res.headers?.['X-Request-Id'];
+  const hasRequestId = typeof requestId === 'string' && requestId.length > 0;
+  return {
+    kind: 'warm-request-timing', completed_utc: new Date().toISOString(),
+    vu: __VU, iteration: __ITER, request_id: hasRequestId ? requestId : null,
+    status: res.status, error_code: res.error_code || null,
+    prediction_valid: predictionValid,
+    timing_valid: predictionValid && server !== null && hasRequestId
+      && Object.values(http).every(value => value !== null),
+    http, server, server_timing_header: res.headers?.['Server-Timing'] || null,
+  };
+}
+
+export function runRequest(post = http.post, observe = record => console.log(JSON.stringify(record))) {
   attempts.add(1);
-  const res = http.post(__ENV.TARGET, payload, {
+  const res = post(__ENV.TARGET, payload, {
     headers: { 'Content-Type': 'application/json' }, timeout: '10s',
   });
   latency.add(res.timings.duration); // Include failed and slow responses too.
   timeouts.add(res.error_code === 1050 ? 1 : 0);
-  const valid = check(res, { 'valid prediction and model version': validPrediction });
-  failures.add(!valid);
+  const record = timingRecord(res);
+  failures.add(!record.prediction_valid);
+  timingFailures.add(!record.timing_valid);
+  timingSamples.add(record.timing_valid ? 1 : 0);
+  if (record.timing_valid) {
+    for (const [name, trend] of Object.entries(serverTimings)) trend.add(record.server[name]);
+  }
+  // Preserve a paired record even for missing headers, failed responses and timeouts.
+  observe(record);
+  return record;
+}
+
+export default function () {
+  const record = runRequest();
+  check(record.prediction_valid, { 'valid prediction and model version': value => value });
 }
 
 export function handleSummary(data) {
@@ -69,6 +132,14 @@ export function handleSummary(data) {
   const completed = errors + (failed.fails || 0);
   const elapsed = data.state.testRunDurationMs / 1000;
   const unfinished = Math.max(0, started - completed);
+  const timingFailuresSummary = data.metrics.predict_timing_failures?.values;
+  const timingSampleCount = data.metrics.predict_timing_samples?.values.count ?? 0;
+  const timingStats = Object.fromEntries(Object.keys(serverTimings).map(name =>
+    [name, data.metrics['predict_' + name]?.values || null]));
+  const timingComplete = completed > 0 && unfinished === 0 && errors === 0
+    && timingFailuresSummary?.passes === 0 && timingFailuresSummary?.fails === completed
+    && timingSampleCount === completed
+    && Object.values(timingStats).every(stats => stats?.count === completed);
   const result = {
     kind: 'warm-single-prediction', target: __ENV.TARGET,
     started_utc: __ENV.RUN_STARTED_UTC || null,
@@ -84,6 +155,13 @@ export function handleSummary(data) {
     p99_ms: timing['p(99)'] ?? null,
     meets_target: completed > 0 && unfinished === 0 && errors === 0
       && Number.isFinite(timing['p(95)']) && timing['p(95)'] < 200,
+    timing_evidence: {
+      complete: timingComplete, valid_samples: timingSampleCount,
+      invalid_samples: timingFailuresSummary?.passes ?? null,
+      server_ms: timingStats, paired_records: 'console.log: kind=warm-request-timing',
+      definition: 'Processing starts after body receipt and includes JSON decoding and scoring; not CPU time. '
+        + 'HTTP minus processing is not network-only time. Do not subtract separate percentiles.',
+    },
   };
   // Keep native metrics/threshold outcomes as well as the compact lab summary.
   return {
