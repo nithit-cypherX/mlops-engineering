@@ -3,11 +3,11 @@
 import { payload } from './k6.js';
 
 export const payloadCases = [
-  // Keep the previous run's 1 MiB body as the overlap; cap this run at 16 MiB.
+  // Keep the previous run's 1 MiB body as the overlap; cap this run at 8 MiB.
   { name: '1MiB', bytes: 1024 * 1024 },
+  { name: '2MiB', bytes: 2 * 1024 * 1024 },
   { name: '4MiB', bytes: 4 * 1024 * 1024 },
   { name: '8MiB', bytes: 8 * 1024 * 1024 },
-  { name: '16MiB', bytes: 16 * 1024 * 1024 },
 ].map(({ name, bytes }) => ({
   name, bytes,
   // The fixed sensor JSON is ASCII, so one character is one UTF-8 byte.

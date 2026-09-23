@@ -7,15 +7,15 @@ export const options = { vus: 1, iterations: 1, thresholds: { checks: ['rate==1'
 function verify(name, condition) { check(condition, { [name]: value => value === true }); }
 
 export default function () {
-  verify('four fixed sizes from 1 to 16 MiB', JSON.stringify(payloadCases.map(c => c.bytes))
-    === JSON.stringify([1048576, 4194304, 8388608, 16777216]));
+  verify('four fixed sizes from 1 to 8 MiB', JSON.stringify(payloadCases.map(c => c.bytes))
+    === JSON.stringify([1048576, 2097152, 4194304, 8388608]));
   verify('four unique labels', new Set(payloadCases.map(c => c.name)).size === 4);
   verify('labels match the approved sizes', JSON.stringify(payloadCases.map(c => c.name))
-    === JSON.stringify(['1MiB', '4MiB', '8MiB', '16MiB']));
+    === JSON.stringify(['1MiB', '2MiB', '4MiB', '8MiB']));
   verify('1 MiB overlaps the previous experiment with the same body', payloadCases[0].body
     === payload.slice(0, -1) + ' '.repeat(1048576 - payload.length) + '}');
-  verify('84 planned requests total 609 MiB of bodies', payloadCases.reduce((n, c) => n + c.bytes, 0) * 21
-    === 609 * 1048576);
+  verify('84 planned requests total 315 MiB of bodies', payloadCases.reduce((n, c) => n + c.bytes, 0) * 21
+    === 315 * 1048576);
   const original = JSON.parse(payload);
   for (const item of payloadCases) {
     verify(`${item.name}: ASCII makes character and byte counts equal`, /^[\x00-\x7f]*$/.test(item.body));

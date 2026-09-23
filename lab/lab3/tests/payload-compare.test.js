@@ -126,7 +126,7 @@ export default function () {
   const saved = summarize(metrics);
   verify('valid summary preserves native data', saved.lab3.valid_comparison && saved.k6.metrics.http_reqs.values.count === 84);
   verify('50 percent itself is not a majority', !saved.lab3.cases[2].json_majority
-    && saved.lab3.cases[3].json_majority && saved.lab3.first_tested_json_majority_bytes === 16777216);
+    && saved.lab3.cases[3].json_majority && saved.lab3.first_tested_json_majority_bytes === 8388608);
   verify('lowest tested majority, not exact crossover', saved.lab3.conclusion === 'json-majority-observed');
   const ratios = clone();
   ratios['payload_json_share{case:' + payloadCases[2].name + '}'].values = { count: 20, min: 0.2, med: 0.35, max: 0.5 };
