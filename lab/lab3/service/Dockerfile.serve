@@ -1,0 +1,30 @@
+# ITCS355 Lab 3 — serving image
+#
+# Reuse the verified Python 3.11 base from Lab 2; build for linux/amd64.
+FROM python:3.11-slim@sha256:9534e5a8e315485d4061ed659af0fd78a284c015f9b73661b41d6bab25604534 AS builder
+ENV PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
+WORKDIR /build
+COPY requirements-serve.txt ./
+RUN pip install --require-hashes --prefix=/install -r requirements-serve.txt
+
+FROM python:3.11-slim@sha256:9534e5a8e315485d4061ed659af0fd78a284c015f9b73661b41d6bab25604534 AS runtime
+RUN useradd --create-home --uid 10001 runner
+ENV PYTHONUNBUFFERED=1 PYTHONPATH=/app
+# Replace the base image's packaging with the version from our lock file.
+RUN python -m pip uninstall -y packaging
+COPY --from=builder /install /usr/local
+RUN python -m pip check
+WORKDIR /app
+COPY --chown=runner:runner service/ ./service/
+COPY --chown=runner:runner src/ ./src/
+COPY --chown=runner:runner cloudlayer/ ./cloudlayer/
+USER runner
+
+EXPOSE 8080
+# TODO(Lab 3): your provider expects specific health and predict paths.
+#   AWS SageMaker  -> /ping and /invocations
+#   Azure ML       -> configurable liveness route on the deployment
+#   Vertex AI      -> health and predict routes declared on the Model resource
+# Absorb the difference in cloudlayer/, or map the paths here. Do NOT rename the routes
+# in service/app.py — that is what makes the image non-portable.
+CMD ["uvicorn", "service.app:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "2"]

@@ -12,7 +12,7 @@ IMAGE ?= itcs355-lab3
 TAG ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo dev)
 PLATFORM ?= linux/amd64
 
-.PHONY: help setup serve serve-image deploy smoke loadtest loadtest-check cold-start cold-start-check batch-compare batch-compare-check test portability-audit
+.PHONY: help setup serve serve-image deploy smoke loadtest loadtest-check cold-start cold-start-check batch-compare batch-compare-check payload-compare payload-compare-check test portability-audit
 
 export TARGET VUS DURATION ZERO_REPLICAS_CONFIRMED_AT
 
@@ -29,6 +29,8 @@ help:
 	@echo "  cold-start-check   Check the cold-start script offline in Docker"
 	@echo "  batch-compare      Three warm pairs: 100 singles vs one 100-row batch; set TARGET"
 	@echo "  batch-compare-check  Check batch comparison offline in Docker"
+	@echo "  payload-compare    Four sizes, 20 measured requests each; set TARGET (requires timing headers)"
+	@echo "  payload-compare-check  Check payload comparison offline in Docker"
 	@echo "  test               Run service and adapter tests offline"
 	@echo "  portability-audit  Check for provider details outside cloudlayer/"
 
@@ -64,6 +66,12 @@ batch-compare:
 
 batch-compare-check:
 	bash scripts/loadtest.sh batch-check
+
+payload-compare:
+	bash scripts/loadtest.sh payload
+
+payload-compare-check:
+	bash scripts/loadtest.sh payload-check
 
 # Unit tests use offline registry/model stubs, not training or live cloud access.
 test:

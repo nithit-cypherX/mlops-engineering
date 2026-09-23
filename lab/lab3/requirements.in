@@ -1,0 +1,8 @@
+# Local Lab 3 environment: runtime plus service-test tools.
+# Constrain runtime packages to the serving lock so tests use the same versions.
+-r requirements-serve.in
+-c requirements-serve.txt
+
+pytest==9.1.1
+# The pinned Starlette TestClient uses httpx2; reuse Lab 2's existing version.
+httpx2==2.12.0

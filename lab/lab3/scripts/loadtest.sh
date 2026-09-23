@@ -7,10 +7,11 @@ readonly K6_IMAGE='grafana/k6@sha256:9bd01d6941fca969cb61bb57d2da5ee9b385fe2aa88
 mode=${1:-run}
 script=k6.js
 case "$mode" in
-  check|cold-check|batch-check)
+  check|cold-check|batch-check|payload-check)
     test_script=k6.test.js
     if [[ "$mode" == cold-check ]]; then test_script=cold-start.test.js; fi
     if [[ "$mode" == batch-check ]]; then test_script=batch-compare.test.js; fi
+    if [[ "$mode" == payload-check ]]; then test_script=payload-compare.test.js; fi
     exec docker run --rm --pull=never --network none --read-only --cap-drop ALL \
       --security-opt no-new-privileges \
       --mount "type=bind,src=$PWD/loadtest,dst=/work/loadtest,readonly" \
@@ -20,7 +21,8 @@ case "$mode" in
   run) ;;
   cold) script=cold-start.js ;;
   batch) script=batch-compare.js ;;
-  *) printf 'Use run, check, cold, cold-check, batch or batch-check\n' >&2; exit 2 ;;
+  payload) script=payload-compare.js ;;
+  *) printf 'Use run, check, cold, cold-check, batch, batch-check, payload or payload-check\n' >&2; exit 2 ;;
 esac
 
 : "${TARGET:?Set TARGET to the HTTPS endpoint followed by /predict}"
@@ -35,6 +37,10 @@ if [[ "$mode" == batch ]]; then
   VUS=1
   DURATION=60s # Not used: the comparison has three fixed pairs, capped at 180s.
 fi
+if [[ "$mode" == payload ]]; then
+  VUS=1
+  DURATION=60s # Not used: four warm-ups + 80 measured requests; hard stop at 180s.
+fi
 if [[ ! "$TARGET" =~ ^https://[a-zA-Z0-9.-]+(:[0-9]+)?/predict$ ]] \
   || [[ ! "$VUS" =~ ^([1-9]|[1-4][0-9]|50)$ ]] \
   || [[ ! "$DURATION" =~ ^[1-9][0-9]{0,2}s$ ]] || (( ${DURATION%s} > 300 )); then
@@ -46,16 +52,21 @@ mkdir -p reports/loadtest
 prefix=run
 if [[ "$mode" == cold ]]; then prefix=cold-start; fi
 if [[ "$mode" == batch ]]; then prefix=batch-compare; fi
+if [[ "$mode" == payload ]]; then prefix=payload-compare; fi
 run_dir=$(mktemp -d "$PWD/reports/loadtest/$prefix-$(date -u +%Y%m%dT%H%M%SZ)-vus${VUS}-XXXXXX")
 git_sha=$(git rev-parse HEAD)
 git_dirty=false
 if [[ -n "$(git status --porcelain -- . ':!reports/loadtest')" ]]; then git_dirty=true; fi
 script_sha=$(sha256sum "loadtest/$script" | cut -d ' ' -f 1)
 shared_script_sha=$(sha256sum loadtest/k6.js | cut -d ' ' -f 1)
+payload_cases_sha=
+if [[ "$mode" == payload ]]; then payload_cases_sha=$(sha256sum loadtest/payload-cases.js | cut -d ' ' -f 1); fi
 if [[ "$mode" == cold ]]; then
   printf 'One first request only. Zero replicas must already be confirmed; do not warm up. Results: %s\n' "$run_dir"
 elif [[ "$mode" == batch ]]; then
   printf 'Warm comparison: 2 warm-ups and 3 pairs (100 singles vs 1 batch), one user. Results: %s\n' "$run_dir"
+elif [[ "$mode" == payload ]]; then
+  printf 'Warm payload comparison: 4 warm-ups + 80 measured requests, one user. Results: %s\n' "$run_dir"
 else
   printf 'Warm round only. Readiness must already be confirmed. Results: %s\n' "$run_dir"
 fi
@@ -71,6 +82,7 @@ docker run --rm --pull=never --read-only --cap-drop ALL --security-opt no-new-pr
   -e "GIT_SHA=$git_sha" -e "GIT_DIRTY=$git_dirty" \
   -e "SCRIPT_SHA256=$script_sha" -e "K6_IMAGE=$K6_IMAGE" \
   -e "SHARED_SCRIPT_SHA256=$shared_script_sha" \
+  -e "PAYLOAD_CASES_SHA256=$payload_cases_sha" \
   -e "ZERO_REPLICAS_CONFIRMED_AT=${ZERO_REPLICAS_CONFIRMED_AT:-}" \
   "/work/loadtest/$script" 2>&1 | tee "$run_dir/console.log"
 statuses=("${PIPESTATUS[@]}")
