@@ -7,9 +7,10 @@ readonly K6_IMAGE='grafana/k6@sha256:9bd01d6941fca969cb61bb57d2da5ee9b385fe2aa88
 mode=${1:-run}
 script=k6.js
 case "$mode" in
-  check|cold-check)
+  check|cold-check|batch-check)
     test_script=k6.test.js
     if [[ "$mode" == cold-check ]]; then test_script=cold-start.test.js; fi
+    if [[ "$mode" == batch-check ]]; then test_script=batch-compare.test.js; fi
     exec docker run --rm --pull=never --network none --read-only --cap-drop ALL \
       --security-opt no-new-privileges \
       --mount "type=bind,src=$PWD/loadtest,dst=/work/loadtest,readonly" \
@@ -18,7 +19,8 @@ case "$mode" in
     ;;
   run) ;;
   cold) script=cold-start.js ;;
-  *) printf 'Use run, check, cold or cold-check\n' >&2; exit 2 ;;
+  batch) script=batch-compare.js ;;
+  *) printf 'Use run, check, cold, cold-check, batch or batch-check\n' >&2; exit 2 ;;
 esac
 
 : "${TARGET:?Set TARGET to the HTTPS endpoint followed by /predict}"
@@ -28,6 +30,10 @@ if [[ "$mode" == cold ]]; then
   : "${ZERO_REPLICAS_CONFIRMED_AT:?Confirm zero replicas through Azure first; use its UTC check time}"
   VUS=1
   DURATION=60s # Not used by the cold script, which has one iteration and a fixed timeout.
+fi
+if [[ "$mode" == batch ]]; then
+  VUS=1
+  DURATION=60s # Not used: the comparison has three fixed pairs, capped at 180s.
 fi
 if [[ ! "$TARGET" =~ ^https://[a-zA-Z0-9.-]+(:[0-9]+)?/predict$ ]] \
   || [[ ! "$VUS" =~ ^([1-9]|[1-4][0-9]|50)$ ]] \
@@ -39,6 +45,7 @@ docker image inspect "$K6_IMAGE" >/dev/null
 mkdir -p reports/loadtest
 prefix=run
 if [[ "$mode" == cold ]]; then prefix=cold-start; fi
+if [[ "$mode" == batch ]]; then prefix=batch-compare; fi
 run_dir=$(mktemp -d "$PWD/reports/loadtest/$prefix-$(date -u +%Y%m%dT%H%M%SZ)-vus${VUS}-XXXXXX")
 git_sha=$(git rev-parse HEAD)
 git_dirty=false
@@ -47,6 +54,8 @@ script_sha=$(sha256sum "loadtest/$script" | cut -d ' ' -f 1)
 shared_script_sha=$(sha256sum loadtest/k6.js | cut -d ' ' -f 1)
 if [[ "$mode" == cold ]]; then
   printf 'One first request only. Zero replicas must already be confirmed; do not warm up. Results: %s\n' "$run_dir"
+elif [[ "$mode" == batch ]]; then
+  printf 'Warm comparison: 2 warm-ups and 3 pairs (100 singles vs 1 batch), one user. Results: %s\n' "$run_dir"
 else
   printf 'Warm round only. Readiness must already be confirmed. Results: %s\n' "$run_dir"
 fi
