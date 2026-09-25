@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import copy
 import ipaddress
 import os
 import re
@@ -22,6 +23,248 @@ from cloudlayer.base import CloudAdapter
 class AzureAdapter(CloudAdapter):
     _APP_API = "2025-07-01"
     _DEPLOY_TIMEOUT = 600
+
+    def _canary_request(self, method, path="", body=None, deadline=None):
+        """Scoped REST for the drill; PATCH/POST can return an empty body."""
+        root, query = self._app_url(self.cfg.endpoint_name).split("?", 1)
+        timeout = 30 if deadline is None else min(30, deadline - time.monotonic())
+        if timeout <= 0:
+            raise TimeoutError("Canary operation reached its deadline")
+        args = ["az", "rest", "--method", method, "--url", root + path + "?" + query]
+        if body is not None:
+            args += ["--headers", "Content-Type=application/json", "--body", json.dumps(body)]
+        result = subprocess.run(
+            [*args, "--only-show-errors", "--output", "json"], check=True,
+            capture_output=True, text=True, timeout=timeout,
+            env={**os.environ, "AZURE_EXTENSION_USE_DYNAMIC_INSTALL": "no"},
+        )
+        return json.loads(result.stdout) if result.stdout.strip() else {}
+
+    def canary_state(self, deadline=None):
+        app = self._canary_request("get", deadline=deadline)
+        self._require_lab3(app)
+        expected = (f"{self._scope()}/providers/Microsoft.App/managedEnvironments/"
+                    f"{self.cfg.azure_containerapps_environment}")
+        if app["properties"].get("environmentId", "").lower() != expected.lower():
+            raise ValueError("Unexpected serving environment")
+        result = self._canary_request("get", "/revisions", deadline=deadline)
+        if result.get("nextLink"):
+            raise ValueError("Unexpected revision pagination; inspect before proceeding")
+        return app, result["value"]
+
+    def _canary_template(self, template, version):
+        containers = template.get("containers", [])
+        if len(containers) != 1 or template.get("initContainers"):
+            raise ValueError("Expected only the existing API container")
+        container = containers[0]
+        env = {item["name"]: item.get("value") for item in container.get("env", [])}
+        expected = {"CLOUD_PROVIDER": "azure", "MLFLOW_TRACKING_URI": self.cfg.mlflow_tracking_uri,
+                    "MODEL_REGISTRY_NAME": self.cfg.model_registry_name, "MODEL_VERSION": version}
+        if (any(env.get(k) != v for k, v in expected.items())
+                or set(env) != set(expected) | {"AZURE_CLIENT_ID"}
+                or len(env) != len(container.get("env", []))
+                or any("secretRef" in item for item in container.get("env", []))):
+            raise ValueError("Unexpected model configuration or secret environment variable")
+        UUID(env["AZURE_CLIENT_ID"])
+        if (container.get("image") != self.cfg.serving_image
+                or not re.fullmatch(re.escape(self.cfg.container_registry.rstrip("/"))
+                                    + r"@sha256:[0-9a-f]{64}", self.cfg.serving_image)
+                or container.get("resources", {}).get("cpu") != 0.5
+                or container.get("resources", {}).get("memory") != "1Gi"
+                or container.get("command") != ["uvicorn"]
+                or container.get("args") != ["service.app:app", "--host", "0.0.0.0",
+                                             "--port", "8080", "--workers", "1"]
+                or template.get("scale", {}).get("minReplicas") != 0
+                or template.get("scale", {}).get("maxReplicas") != 1):
+            raise ValueError("Expected pinned image, one worker and the 0.5 CPU / 1 GiB baseline")
+
+    def canary_plan(self, baseline, candidate_version, suffix):
+        """Read-only preflight. No registration, download, build or app start."""
+        if (not re.fullmatch(re.escape(self.cfg.endpoint_name) + r"--[a-z0-9-]+", baseline)
+                or not re.fullmatch(r"cny-[a-z0-9]{6,20}", suffix)
+                or not re.fullmatch(r"[1-9][0-9]*", candidate_version)
+                or candidate_version == self.cfg.model_version):
+            raise ValueError("Use an explicit baseline, fresh cny- suffix and different numbered version")
+        app, revisions = self.canary_state()
+        props = app["properties"]
+        configuration = props["configuration"]
+        ingress = configuration["ingress"]
+        active = [r["name"] for r in revisions if r["properties"].get("active")]
+        if (props.get("runningStatus") != "Stopped" or props.get("provisioningState") != "Succeeded"
+                or configuration.get("activeRevisionsMode") != "Single"
+                or props.get("latestRevisionName") != baseline or active != [baseline]
+                or any(r["properties"].get("replicas") != 0 for r in revisions)):
+            raise ValueError("Expected stopped Single-mode app, one active baseline and zero replicas")
+        if ingress.get("traffic") not in ([{"latestRevision": True, "weight": 100}],
+                                          [{"revisionName": baseline, "weight": 100}]):
+            raise ValueError("Unexpected initial traffic configuration")
+        rules = ingress.get("ipSecurityRestrictions", [])
+        if (len(rules) != 1 or rules[0].get("action") != "Allow"
+                or rules[0].get("ipAddressRange") != self.cfg.serving_allowed_ip
+                or ingress.get("allowInsecure") or ingress.get("stickySessions")
+                or configuration.get("secrets")):
+            raise ValueError("Expected existing restricted ingress without secrets or sticky sessions")
+        candidate = self.cfg.endpoint_name + "--" + suffix
+        if any(r["name"] == candidate for r in revisions):
+            raise ValueError("Candidate revision already exists; do not reuse a drill")
+        original = next(r for r in revisions if r["name"] == baseline)["properties"]["template"]
+        self._canary_template(original, self.cfg.model_version)
+        template = copy.deepcopy(original)
+        template["revisionSuffix"] = suffix
+        for item in template["containers"][0]["env"]:
+            if item["name"] == "MODEL_VERSION":
+                item["value"] = candidate_version
+        from mlflow.tracking import MlflowClient
+        client = MlflowClient(tracking_uri=self.cfg.mlflow_tracking_uri,
+                              registry_uri=self.cfg.mlflow_tracking_uri)
+        models = {}
+        for version in (self.cfg.model_version, candidate_version):
+            model = client.get_model_version(self.cfg.model_registry_name, version)
+            if model.status != "READY":
+                raise ValueError("Both registered versions must be READY")
+            models[version] = {"run_id": model.run_id, "status": model.status}
+        return {"baseline": baseline, "candidate": candidate, "candidate_version": candidate_version,
+                "baseline_version": self.cfg.model_version, "template": template,
+                "location": app["location"], "models": models,
+                "endpoint": self._https_endpoint("https://" + ingress["fqdn"])}
+
+    def _canary_guard(self, plan, revisions):
+        if (plan["baseline_version"] != self.cfg.model_version
+                or not re.fullmatch(re.escape(self.cfg.endpoint_name) + r"--[a-z0-9-]+", plan["baseline"])
+                or not re.fullmatch(re.escape(self.cfg.endpoint_name) + r"--cny-[a-z0-9]{6,20}", plan["candidate"])):
+            raise ValueError("Plan does not belong to this app")
+        by_name = {r["name"]: r["properties"] for r in revisions}
+        if plan["baseline"] not in by_name or not by_name[plan["baseline"]].get("active"):
+            raise ValueError("Baseline is missing or inactive")
+        for key in ("baseline", "candidate"):
+            if plan[key] in by_name:
+                self._canary_template(by_name[plan[key]]["template"], plan[key + "_version"])
+        if any(r.get("active") and name not in (plan["baseline"], plan["candidate"])
+               for name, r in by_name.items()):
+            raise ValueError("An unrelated revision is active")
+        return by_name
+
+    def canary_route(self, plan, weight, deadline=None):
+        """Only 90/10 or an explicit baseline-only rollback, never latestRevision."""
+        if weight not in (0, 10):
+            raise ValueError("Only candidate weights 0 and 10 are allowed")
+        deadline = deadline if deadline is not None else time.monotonic() + 60
+        app, revisions = self.canary_state(deadline)
+        by_name = self._canary_guard(plan, revisions)
+        if weight and not by_name.get(plan["candidate"], {}).get("active"):
+            raise ValueError("Candidate revision is not active")
+        traffic = [{"revisionName": plan["baseline"], "weight": 100 - weight}]
+        if weight:
+            traffic.append({"revisionName": plan["candidate"], "weight": weight})
+        self._canary_request("patch", body={"location": app["location"], "properties": {
+            "configuration": {"activeRevisionsMode": "Multiple", "ingress": {"traffic": traffic}}}},
+            deadline=deadline)
+        while time.monotonic() < deadline:
+            current, _ = self.canary_state(deadline)
+            config = current["properties"]["configuration"]
+            actual = config["ingress"].get("traffic", [])
+            weights = {r.get("revisionName"): r["weight"] for r in actual if r["weight"]}
+            if (current["properties"].get("provisioningState") == "Succeeded"
+                    and config.get("activeRevisionsMode") == "Multiple"
+                    and not any(r.get("latestRevision") for r in actual)
+                    and weights == {r["revisionName"]: r["weight"] for r in traffic}):
+                return traffic
+            time.sleep(min(2, max(0, deadline - time.monotonic())))
+        raise TimeoutError("Traffic change was not confirmed")
+
+    def canary_prepare(self, plan):
+        # Validate the outgoing revision before even changing traffic.
+        self._canary_template(plan["template"], plan["candidate_version"])
+        if self.cfg.endpoint_name + "--" + plan["template"].get("revisionSuffix", "") != plan["candidate"]:
+            raise ValueError("Candidate template suffix does not match the preflight plan")
+        deadline = time.monotonic() + 300
+        self.canary_route(plan, 0, deadline)
+        self._canary_request("patch", body={"location": plan["location"],
+                             "properties": {"template": plan["template"]}}, deadline=deadline)
+        while time.monotonic() < deadline:
+            app, revisions = self.canary_state(deadline)
+            by_name = self._canary_guard(plan, revisions)
+            if app["properties"].get("provisioningState") in ("Failed", "Canceled"):
+                raise RuntimeError("Candidate deployment failed")
+            if (plan["candidate"] in by_name
+                    and app["properties"].get("provisioningState") == "Succeeded"):
+                break
+            time.sleep(min(2, max(0, deadline - time.monotonic())))
+        else:
+            raise TimeoutError("Candidate revision was not created")
+        self._canary_request("post", "/start", deadline=deadline)
+        ready = set()
+        while time.monotonic() < deadline:
+            _, revisions = self.canary_state(deadline)
+            by_name = self._canary_guard(plan, revisions)
+            for key in ("baseline", "candidate"):
+                if key in ready:
+                    continue
+                fqdn = by_name.get(plan[key], {}).get("fqdn")
+                if not fqdn:
+                    continue
+                endpoint = self._https_endpoint("https://" + fqdn)
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    break
+                try:
+                    response = requests.get(endpoint + "/ready", timeout=min(5, remaining),
+                                            allow_redirects=False, headers={"Connection": "close"})
+                except (requests.Timeout, requests.ConnectionError):
+                    continue  # Readiness polling only, not a rerun of the experiment.
+                if response.status_code == 200:
+                    if response.json().get("model_version") != plan[key + "_version"]:
+                        raise RuntimeError("Ready endpoint returned the wrong model")
+                    ready.add(key)
+                elif response.status_code not in (502, 503, 504):
+                    raise RuntimeError("Readiness failed; check ingress/access before retrying")
+            if len(ready) == 2 and time.monotonic() < deadline:
+                return
+            time.sleep(min(2, max(0, deadline - time.monotonic())))
+        raise TimeoutError("Both revisions did not become ready within five minutes")
+
+    def invoke_batch(self, endpoint, rows, timeout=10):
+        endpoint = self._https_endpoint(endpoint)
+        response = requests.post(endpoint + "/predict/batch", json={"rows": rows},
+                                 timeout=timeout, allow_redirects=False,
+                                 headers={"Connection": "close"})
+        if response.status_code != 200:
+            raise RuntimeError(f"Batch returned HTTP {response.status_code}")
+        return response.json(), response.headers.get("x-request-id")
+
+    def canary_cleanup(self, plan):
+        """Attempt every cleanup stage; a failed check is never a pass."""
+        errors = []
+        try:
+            self.canary_route(plan, 0)
+        except Exception as exc:
+            errors.append("restore_traffic:" + type(exc).__name__)
+        try:
+            _, revisions = self.canary_state()
+            by_name = self._canary_guard(plan, revisions)
+            if plan["candidate"] in by_name and by_name[plan["candidate"]].get("active"):
+                self._canary_request("post", f"/revisions/{plan['candidate']}/deactivate")
+        except Exception as exc:
+            errors.append("deactivate_candidate:" + type(exc).__name__)
+        stopped = False
+        candidate_inactive = False
+        try:
+            self.canary_state()  # Recheck ownership before stopping this app.
+            self._canary_request("post", "/stop")
+            deadline = time.monotonic() + 120
+            while time.monotonic() < deadline:
+                app, revisions = self.canary_state(deadline)
+                stopped = (app["properties"].get("runningStatus") == "Stopped"
+                           and all(r["properties"].get("replicas") == 0 for r in revisions))
+                candidate_inactive = all(not r["properties"].get("active") for r in revisions
+                                         if r["name"] == plan["candidate"])
+                if stopped and candidate_inactive:
+                    break
+                time.sleep(min(2, max(0, deadline - time.monotonic())))
+        except Exception as exc:
+            errors.append("stop_or_check:" + type(exc).__name__)
+        return {"stopped_zero_replicas": stopped, "candidate_inactive": candidate_inactive,
+                "errors": errors, "ok": stopped and candidate_inactive and not errors}
 
     def _blob_location(self, uri: str) -> dict[str, str]:
         """Resolve a credential-free file URI strictly below this lab's Blob prefix."""

@@ -1,0 +1,172 @@
+{
+  "audited_at": "2026-09-23T13:41:03.664646+00:00",
+  "kind": "local-only-original-versus-serialized",
+  "rounds": {
+    "original": {
+      "completed": 2149,
+      "unique_request_ids": 2149,
+      "vus": 10,
+      "sequential_iterations_per_vu": true,
+      "all_predictions_match_reference": true,
+      "timing_records_complete": true,
+      "http_components_sum_matches": true,
+      "elapsed_seconds": 60.110120206,
+      "requests_per_second": 35.751051447498085,
+      "p50_ms": 291.145061,
+      "p95_ms": 389.5123628,
+      "p99_ms": 407.23373116,
+      "error_count": 0,
+      "timeout_count": 0,
+      "unfinished_requests": 0,
+      "server_intervals_ms": {
+        "json_decode_ms": {
+          "med": 0.012468,
+          "p(95)": 0.0187272,
+          "p(99)": 0.026427559999999996
+        },
+        "scoring_ms": {
+          "med": 205.098438,
+          "p(95)": 295.93951519999996,
+          "p(99)": 366.12042808
+        },
+        "processing_ms": {
+          "med": 228.080693,
+          "p(95)": 325.8701459999999,
+          "p(99)": 389.56690827999995
+        }
+      },
+      "max_active_score_calls": 10,
+      "model_load_calls": 1,
+      "k6_exit_code": 99,
+      "failed_thresholds": {
+        "predict_latency_ms": [
+          "p(95)<200"
+        ]
+      },
+      "cpu_stat_delta": {
+        "usage_usec": 30116144,
+        "user_usec": 21472057,
+        "system_usec": 8644087,
+        "nice_usec": 0,
+        "nr_periods": 605,
+        "nr_throttled": 602,
+        "throttled_usec": 234170096,
+        "nr_bursts": 0,
+        "burst_usec": 0
+      },
+      "throttled_enforcement_period_fraction": 0.9950413223140496,
+      "service_cpu_ms_per_response": 14.014026989297347,
+      "native_files": {
+        "console.log": {
+          "sha256": "87603b5292a0c2f329088e5bba0c34a8fb06fa944fb85333dd13e0ccc438c53d",
+          "bytes": 1521073
+        },
+        "runtime.log": {
+          "sha256": "8db68f4fa54dd7077e9b0ddd6e2e45c947b26088d6043223f4985d40d3be71c1",
+          "bytes": 264
+        },
+        "summary.json": {
+          "sha256": "e2dbcbf2ad3d924518a6bf631cb3b57a5e31deb162b6e76e942d1a84c2ef49a0",
+          "bytes": 9876
+        }
+      }
+    },
+    "serialized": {
+      "completed": 3092,
+      "unique_request_ids": 3092,
+      "vus": 10,
+      "sequential_iterations_per_vu": true,
+      "all_predictions_match_reference": true,
+      "timing_records_complete": true,
+      "http_components_sum_matches": true,
+      "elapsed_seconds": 60.126091128,
+      "requests_per_second": 51.425262178071186,
+      "p50_ms": 196.5664845,
+      "p95_ms": 280.6036762,
+      "p99_ms": 310.01999494000006,
+      "error_count": 0,
+      "timeout_count": 0,
+      "unfinished_requests": 0,
+      "server_intervals_ms": {
+        "json_decode_ms": {
+          "med": 0.0114895,
+          "p(95)": 0.02139945,
+          "p(99)": 0.03394362000000005
+        },
+        "scoring_ms": {
+          "med": 89.643932,
+          "p(95)": 176.72491935,
+          "p(99)": 195.68102326000005
+        },
+        "processing_ms": {
+          "med": 122.26075349999999,
+          "p(95)": 206.39928675,
+          "p(99)": 273.8999505500002
+        }
+      },
+      "max_active_score_calls": 1,
+      "model_load_calls": 1,
+      "k6_exit_code": 99,
+      "failed_thresholds": {
+        "predict_latency_ms": [
+          "p(95)<200"
+        ]
+      },
+      "cpu_stat_delta": {
+        "usage_usec": 30150585,
+        "user_usec": 24630012,
+        "system_usec": 5520572,
+        "nice_usec": 0,
+        "nr_periods": 606,
+        "nr_throttled": 602,
+        "throttled_usec": 52243565,
+        "nr_bursts": 0,
+        "burst_usec": 0
+      },
+      "throttled_enforcement_period_fraction": 0.9933993399339934,
+      "service_cpu_ms_per_response": 9.751159443725744,
+      "native_files": {
+        "console.log": {
+          "sha256": "679bce77132fa1de86c4536d16ab81b89c596e31176e3db0a6bb16d249e3d48e",
+          "bytes": 2183394
+        },
+        "runtime.log": {
+          "sha256": "d3a58d37c696e462fc0a00c7c233f6915bcdfc128152527654bf896269679fdc",
+          "bytes": 264
+        },
+        "summary.json": {
+          "sha256": "92dc43a58516b573f237fa47cfac1063798de6a8267f74b8c8b049e8706bfcd3",
+          "bytes": 9976
+        }
+      }
+    }
+  },
+  "harness_sha256": {
+    "server.py": "425acb52556488fde9c6730499d5e26df3cf0c3deace544b1c795fc6edafde8e",
+    "k6-local.js": "ca7e41db3b39fccafcf5dffc699de1063749e8306a0d94073ebeedd8436b9227",
+    "run_pair.py": "2b026c8a3e9ac6afddcaa5d9397508505557aff93671ba7e0c3abd29582c5d43"
+  },
+  "comparison": {
+    "p95_reduction_pct": 27.96026442321692,
+    "throughput_increase_pct": 43.84265663792108,
+    "total_audited_predictions": 5241,
+    "target_p95_ms": 200,
+    "both_failed_latency_target": true
+  },
+  "preservation_before_report_append": {
+    "original_files_byte_identical": 82,
+    "report_lines": 621,
+    "report_sha256": "6e1f82e3ec36655859384d0da8a6322e9e72aa1ecabaa4d7345950f640ec8c22"
+  },
+  "limitations": [
+    "One fixed-order pair on local Docker/WSL; no repeatability, statistical significance, or Azure performance claim.",
+    "The same per-request instrumentation is present in both variants and may affect timings.",
+    "Serialized scoring_ms includes waiting for the scoring lock; it is not pure model CPU time.",
+    "The reported CPU deltas cover the whole service cgroup and include diagnostic probe overhead.",
+    "throttled_usec is not a wall-time percentage. Enforcement-period fraction is a different measure.",
+    "Prediction agreement covers only the unchanged 120-byte load-test payload.",
+    "Native script_sha256 identifies the reused loadtest/k6.js; harness_sha256 identifies the actual local wrapper and controller.",
+    "k6 ignored the inherited top-level gracefulStop setting and used its default; both rounds had zero unfinished requests.",
+    "Model files were downloaded once before testing; measured requests used loopback with no external network."
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "schema": "lab3-task4-ip-reconciliation/v1",
+  "status": "ip_aligned_read_only_preflight_passed",
+  "scope": "Replace only the existing single-host Allow rule's IP and the local SERVING_ALLOWED_IP value; rerun read-only preflight. No canary execution.",
+  "before": {
+    "at": "2026-09-24T03:20:34.399653+00:00",
+    "inherited_override_present": false,
+    "effective_config_matches_file": true,
+    "current_ip_matched_cloud": false,
+    "current_ip_matched_local": false,
+    "allowed_hosts": 1,
+    "prefix_length": 32,
+    "app_stopped": true,
+    "total_replicas": 0
+  },
+  "cloud_update_events": [
+    {
+      "event": "ip_rule_update_requested",
+      "at": "2026-09-24T03:21:51.148816+00:00",
+      "changed_field": "configuration.ingress.ipSecurityRestrictions[0].ipAddressRange",
+      "allowed_hosts": 1,
+      "prefix_length": 32
+    },
+    {
+      "event": "ip_rule_update_verified",
+      "at": "2026-09-24T03:22:06.020848+00:00",
+      "only_ip_rule_changed": true,
+      "allowed_hosts": 1,
+      "prefix_length": 32,
+      "name_and_action_preserved": true,
+      "app_stopped": true,
+      "total_replicas": 0,
+      "traffic_unchanged": true,
+      "identity_unchanged": true,
+      "revisions_unchanged": true
+    }
+  ],
+  "post_checks": [
+    {
+      "event": "local_configuration_verified",
+      "at": "2026-09-24T03:23:23.046722+00:00",
+      "only_serving_allowed_ip_changed": true,
+      "ignored_by_git": true,
+      "no_inherited_override": true
+    },
+    {
+      "event": "ip_alignment_verified",
+      "at": "2026-09-24T03:23:25.161768+00:00",
+      "current_ip_matches_local_and_cloud": true,
+      "allowed_hosts": 1,
+      "prefix_length": 32,
+      "app_stopped": true,
+      "total_replicas": 0,
+      "mode": "Single",
+      "traffic": [
+        {
+          "latestRevision": true,
+          "weight": 100
+        }
+      ]
+    },
+    {
+      "event": "validation_data_verified",
+      "at": "2026-09-24T03:23:25.209790+00:00",
+      "rows": 1200,
+      "positives": 121,
+      "unique_ids": 1200
+    },
+    {
+      "event": "canary_preflight_passed",
+      "at": "2026-09-24T03:23:32.797709+00:00",
+      "baseline": "ca-itcs355-u6688124-lab3--0000003",
+      "candidate_version": "2",
+      "models": {
+        "1": {
+          "run_id": "8087ae5c-d06f-411e-b6b0-7f7891ffe7ed",
+          "status": "READY"
+        },
+        "2": {
+          "run_id": "1730032f-4352-4781-99dc-687b35f1778c",
+          "status": "READY"
+        }
+      },
+      "image": "itcs355u6688124.azurecr.io/itcs355-lab3@sha256:688d36dd527294d20107908fd610df7261feb69db2ead30d585208f96aba3061",
+      "cpu": 0.5,
+      "memory": "1Gi",
+      "max_replicas_per_revision": 1,
+      "readiness_not_tested": true,
+      "live_experiment_started": false
+    }
+  ],
+  "file_checks": {
+    "existing_git_visible_files_unchanged": 165,
+    "local_cloud_env_other_lines_unchanged": true,
+    "cloud_env_ignored_by_git": true,
+    "source_and_readme_unchanged": true
+  },
+  "limitations": [
+    "No request was sent to the serving endpoints; readiness and inference are not verified.",
+    "No candidate revision was created and no live 90/10 experiment or rollback was run.",
+    "The client IP must still match the /32 allow rule at the time of the future live run."
+  ],
+  "privacy": "Actual public IP values are deliberately omitted."
+}

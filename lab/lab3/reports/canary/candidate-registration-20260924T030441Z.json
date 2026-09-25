@@ -1,0 +1,259 @@
+{
+  "schema": "lab3-task4-candidate-registration/v1",
+  "status": "registered_ready_not_deployed",
+  "scope": "Register the reviewed existing Lab 2 candidate only; no training, model download, image build, stage transition, app start, deployment or traffic change.",
+  "method": {
+    "path": "lab/lab2/cloudlayer/azure.py",
+    "function": "AzureAdapter.register_model",
+    "sha256": "42d74098331d87605bd971e411129dbf6b001b904128a267f3a02d0d08bae367",
+    "calls": 1
+  },
+  "registry_before": {
+    "event": "registry_before",
+    "at": "2026-09-24T03:02:51.181451+00:00",
+    "name": "itcs355-u6688124",
+    "versions": [
+      {
+        "version": "1",
+        "run_id": "8087ae5c-d06f-411e-b6b0-7f7891ffe7ed",
+        "status": "READY",
+        "stage": "Staging",
+        "tags": {
+          "git_commit": "610e7cfefbfe080d711a7f621e1d6992fa803ad3",
+          "data_version": "1c886b512c8a5c9bf723da1cd119fc80.dir",
+          "mlflow_run_id": "8087ae5c-d06f-411e-b6b0-7f7891ffe7ed",
+          "training_job_id": "lab2-d4f87c7c872c42c8bbca1b179e554b3f",
+          "image_digest": "sha256:df878435dd990605f1c63dc4538b9cb86dacd31384d0a730c6b2d1c0399b282d",
+          "seed": "20260101",
+          "metric_val": "0.8444994217173845",
+          "metric_test": "0.8466731943553135"
+        }
+      }
+    ]
+  },
+  "source_runs": [
+    {
+      "event": "source_run",
+      "at": "2026-09-24T03:03:01.047888+00:00",
+      "role": "baseline",
+      "run_id": "8087ae5c-d06f-411e-b6b0-7f7891ffe7ed",
+      "status": "FINISHED",
+      "params": {
+        "seed": "20260101",
+        "n_estimators": "100",
+        "max_depth": "12",
+        "min_samples_leaf": "10"
+      },
+      "metrics": {
+        "val_roc_auc": 0.8444994217173845,
+        "val_pr_auc": 0.4044125077384774,
+        "test_roc_auc": 0.8466731943553135
+      },
+      "tags": {
+        "git_commit": "610e7cfefbfe080d711a7f621e1d6992fa803ad3",
+        "dvc_hash": "1c886b512c8a5c9bf723da1cd119fc80.dir",
+        "data_fingerprint": "422cccb9136e8140",
+        "mlflow.parentRunId": "lab2-d4f87c7c872c42c8bbca1b179e554b3f",
+        "image_uri": "itcs355u6688124.azurecr.io/itcs355-lab2@sha256:df878435dd990605f1c63dc4538b9cb86dacd31384d0a730c6b2d1c0399b282d"
+      },
+      "artifact_files": [
+        "model/MLmodel",
+        "model/conda.yaml",
+        "model/model.pkl",
+        "model/python_env.yaml",
+        "model/requirements.txt"
+      ]
+    },
+    {
+      "event": "source_run",
+      "at": "2026-09-24T03:03:07.973631+00:00",
+      "role": "candidate",
+      "run_id": "1730032f-4352-4781-99dc-687b35f1778c",
+      "status": "FINISHED",
+      "params": {
+        "seed": "20260101",
+        "n_estimators": "100",
+        "max_depth": "12",
+        "min_samples_leaf": "1"
+      },
+      "metrics": {
+        "val_roc_auc": 0.8268292496112868,
+        "val_pr_auc": 0.3897741780060529,
+        "test_roc_auc": 0.8414830202909673
+      },
+      "tags": {
+        "git_commit": "610e7cfefbfe080d711a7f621e1d6992fa803ad3",
+        "dvc_hash": "1c886b512c8a5c9bf723da1cd119fc80.dir",
+        "data_fingerprint": "422cccb9136e8140",
+        "mlflow.parentRunId": "lab2-d4f87c7c872c42c8bbca1b179e554b3f",
+        "image_uri": "itcs355u6688124.azurecr.io/itcs355-lab2@sha256:df878435dd990605f1c63dc4538b9cb86dacd31384d0a730c6b2d1c0399b282d"
+      },
+      "artifact_files": [
+        "model/MLmodel",
+        "model/conda.yaml",
+        "model/model.pkl",
+        "model/python_env.yaml",
+        "model/requirements.txt"
+      ]
+    }
+  ],
+  "training_lineage_check": {
+    "event": "training_lineage_verified",
+    "at": "2026-09-24T03:03:14.740022+00:00",
+    "job_id": "lab2-d4f87c7c872c42c8bbca1b179e554b3f",
+    "job_status": "Completed",
+    "image_matches": true
+  },
+  "attempt": {
+    "event": "registration_attempt_started",
+    "at": "2026-09-24T03:04:41.319093+00:00",
+    "name": "itcs355-u6688124",
+    "run_id": "1730032f-4352-4781-99dc-687b35f1778c",
+    "attempt": 1
+  },
+  "result": {
+    "event": "registration_verified",
+    "at": "2026-09-24T03:05:10.626869+00:00",
+    "action": "created_once",
+    "model_uri": "models:/itcs355-u6688124/2",
+    "candidate": {
+      "version": "2",
+      "run_id": "1730032f-4352-4781-99dc-687b35f1778c",
+      "status": "READY",
+      "stage": "None",
+      "tags": {
+        "git_commit": "610e7cfefbfe080d711a7f621e1d6992fa803ad3",
+        "data_version": "1c886b512c8a5c9bf723da1cd119fc80.dir",
+        "mlflow_run_id": "1730032f-4352-4781-99dc-687b35f1778c",
+        "training_job_id": "lab2-d4f87c7c872c42c8bbca1b179e554b3f",
+        "image_digest": "sha256:df878435dd990605f1c63dc4538b9cb86dacd31384d0a730c6b2d1c0399b282d",
+        "seed": "20260101",
+        "metric_val": "0.8268292496112868",
+        "metric_test": "0.8414830202909673"
+      }
+    },
+    "baseline_unchanged": true,
+    "versions_after": [
+      {
+        "version": "2",
+        "run_id": "1730032f-4352-4781-99dc-687b35f1778c",
+        "status": "READY",
+        "stage": "None",
+        "tags": {
+          "git_commit": "610e7cfefbfe080d711a7f621e1d6992fa803ad3",
+          "data_version": "1c886b512c8a5c9bf723da1cd119fc80.dir",
+          "mlflow_run_id": "1730032f-4352-4781-99dc-687b35f1778c",
+          "training_job_id": "lab2-d4f87c7c872c42c8bbca1b179e554b3f",
+          "image_digest": "sha256:df878435dd990605f1c63dc4538b9cb86dacd31384d0a730c6b2d1c0399b282d",
+          "seed": "20260101",
+          "metric_val": "0.8268292496112868",
+          "metric_test": "0.8414830202909673"
+        }
+      },
+      {
+        "version": "1",
+        "run_id": "8087ae5c-d06f-411e-b6b0-7f7891ffe7ed",
+        "status": "READY",
+        "stage": "Staging",
+        "tags": {
+          "git_commit": "610e7cfefbfe080d711a7f621e1d6992fa803ad3",
+          "data_version": "1c886b512c8a5c9bf723da1cd119fc80.dir",
+          "mlflow_run_id": "8087ae5c-d06f-411e-b6b0-7f7891ffe7ed",
+          "training_job_id": "lab2-d4f87c7c872c42c8bbca1b179e554b3f",
+          "image_digest": "sha256:df878435dd990605f1c63dc4538b9cb86dacd31384d0a730c6b2d1c0399b282d",
+          "seed": "20260101",
+          "metric_val": "0.8444994217173845",
+          "metric_test": "0.8466731943553135"
+        }
+      }
+    ]
+  },
+  "serving_before": {
+    "event": "serving_before",
+    "at": "2026-09-24T03:03:17.884036+00:00",
+    "app": "ca-itcs355-u6688124-lab3",
+    "running_status": "Stopped",
+    "mode": "Single",
+    "traffic": [
+      {
+        "latestRevision": true,
+        "weight": 100
+      }
+    ],
+    "revisions": [
+      {
+        "name": "ca-itcs355-u6688124-lab3--w041wkb",
+        "active": false,
+        "replicas": 0
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--0000001",
+        "active": false,
+        "replicas": 0
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--0000002",
+        "active": false,
+        "replicas": 0
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--0000003",
+        "active": true,
+        "replicas": 0
+      }
+    ],
+    "state_hash": "9b088fe691190a1fec279c13c85de35641f90c0445e7d994e85c6532373bdf50"
+  },
+  "serving_after": {
+    "event": "serving_after",
+    "at": "2026-09-24T03:05:58.198440+00:00",
+    "app": "ca-itcs355-u6688124-lab3",
+    "running_status": "Stopped",
+    "mode": "Single",
+    "traffic": [
+      {
+        "latestRevision": true,
+        "weight": 100
+      }
+    ],
+    "revisions": [
+      {
+        "name": "ca-itcs355-u6688124-lab3--w041wkb",
+        "active": false,
+        "replicas": 0
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--0000001",
+        "active": false,
+        "replicas": 0
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--0000002",
+        "active": false,
+        "replicas": 0
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--0000003",
+        "active": true,
+        "replicas": 0
+      }
+    ],
+    "state_hash": "9b088fe691190a1fec279c13c85de35641f90c0445e7d994e85c6532373bdf50"
+  },
+  "checks": {
+    "candidate_status": "READY",
+    "candidate_stage": "None",
+    "candidate_lineage_tags_verified": 8,
+    "baseline_metadata_unchanged": true,
+    "serving_resource_state_hash_unchanged": true,
+    "all_revisions_zero_replicas": true,
+    "protected_files_unchanged": 163,
+    "protected_files_checked_before_documenting": true,
+    "duplicate_candidate_versions": 0
+  },
+  "limitations": [
+    "Registry READY and artifact listings do not verify loading or inference in the serving image.",
+    "ROC-AUC numbers are existing Lab 2 results, not a live canary measurement.",
+    "No live 90/10 routing or rollback drill was run in this step."
+  ]
+}

@@ -1,0 +1,395 @@
+{
+  "kind": "local-concurrency-diagnostic",
+  "git_sha": "c86613a72d9816b586d32512112396cd131e0c4e",
+  "working_tree_dirty": true,
+  "scope": "One local original/serialized pair only; no production service edit, Azure app start, model retraining, deployment, dependency installation, commit, or push.",
+  "method": {
+    "order": [
+      "original",
+      "serialized"
+    ],
+    "measured_rounds": 2,
+    "vus": 10,
+    "configured_duration_seconds_per_round": 60,
+    "service_vcpu": 0.5,
+    "service_memory_bytes": 1073741824,
+    "workers": 1,
+    "thread_pool_tokens": 40,
+    "warmup_requests_per_round": 5,
+    "payload_bytes": 120,
+    "reference_probability": 0.00737357519563027,
+    "absolute_prediction_tolerance": 1e-9,
+    "original": "Existing image service code plus the same measurement wrapper and local model loader used in both modes.",
+    "serialized": "Only the original scoring call is protected by a threading.Lock. HTTP duration and scoring_ms include waiting for this lock.",
+    "model_loading": "Download registered model version 1 once before the pair, then load the identical local artifact; registry networking is excluded from measured requests.",
+    "network": "Service uses Docker network none; k6 shares that service network namespace. Only loopback is used, with no published host ports.",
+    "k6": "Actual entry point is k6-local.js; it imports the unchanged loadtest/k6.js and adds prediction agreement checks. Native summary script_sha256 identifies the imported file, not this wrapper.",
+    "runtime_warning": "Inherited top-level gracefulStop is ignored by k6. Both rounds finished with zero unfinished requests; no setting change or measurement rerun."
+  },
+  "preflight": {
+    "checked_at": "2026-09-23T13:27:35.971010+00:00",
+    "images": {
+      "itcs355-lab3:0606ecb": "sha256:e92a8d6ef68cf94d487f7b3803bba251c2f5843d9dc4d1974b479006a29cfb6c",
+      "grafana/k6@sha256:9bd01d6941fca969cb61bb57d2da5ee9b385fe2aa8881df3798c196564d6ace6": "sha256:00cfdae7945825029ce3270b3479992e411f309c2dc968820543d2183d0bbe5e"
+    },
+    "protected_files": 82,
+    "protected_file_check": "All 82 files byte-identical before appending this experiment report; see comparison.json.",
+    "source_sha256": {
+      "service/app.py": "69ade607fc4fdb64413d82a4a382b5efb2d37b112dd3bea8df19eb863ed49cfe",
+      "loadtest/k6.js": "0ec2465a18892281498f4a7ccecfe08125e2d25997669aed5c2e8455b4dd2c1d",
+      "requirements-serve.txt": "0809a8e9f7b4626cdf60d251bd47d180d8b2db3203666ebf9caac696817ee966",
+      "reports/lab3-load.md": "6e1f82e3ec36655859384d0da8a6322e9e72aa1ecabaa4d7345950f640ec8c22"
+    }
+  },
+  "model": {
+    "downloaded_at": "2026-09-23T13:27:56.185034+00:00",
+    "model_dir": "/tmp/lab3-concurrency-67msjqpa/model",
+    "model_name": "itcs355-u6688124",
+    "model_version": "1",
+    "run_id": "8087ae5c-d06f-411e-b6b0-7f7891ffe7ed",
+    "files": {
+      "MLmodel": {
+        "sha256": "7d48256cc1367a44e6f16dd6f77e25ecb0bef2c294405bb0acdca72a69b805c3",
+        "bytes": 548
+      },
+      "conda.yaml": {
+        "sha256": "ba39459a8e200161891bccf96abc11193b03f345fff49f95d6afe89867cb2b0f",
+        "bytes": 248
+      },
+      "model.pkl": {
+        "sha256": "ebe4f91523f5b872a5290effb8484b59398756fecd97f8fe069e293e5d4def61",
+        "bytes": 1532532
+      },
+      "python_env.yaml": {
+        "sha256": "78684e6b92addee523d4c6d4a10fed277333552a84c0c86ae85ffc06f230c46c",
+        "bytes": 121
+      },
+      "requirements.txt": {
+        "sha256": "3ad246847c27dc893b9e83c08dce4f706dcda674e1b1e84574e366e08410cb78",
+        "bytes": 124
+      }
+    }
+  },
+  "harness_sha256": {
+    "server.py": "425acb52556488fde9c6730499d5e26df3cf0c3deace544b1c795fc6edafde8e",
+    "k6-local.js": "ca7e41db3b39fccafcf5dffc699de1063749e8306a0d94073ebeedd8436b9227",
+    "run_pair.py": "2b026c8a3e9ac6afddcaa5d9397508505557aff93671ba7e0c3abd29582c5d43"
+  },
+  "startup_preparation": {
+    "measured_requests": 0,
+    "issue": "The first controller preparation failed an assertion before warm-up HTTP calls or k6: Python's payload literal used 68.0 and 55.0 (124 bytes), while the reused JavaScript workload serializes 68 and 55 (120 bytes).",
+    "fix": "Correct only the temporary controller warm-up literal to the exact 120-byte workload. The original service container was removed, then the sole measured pair ran into new result directories.",
+    "events": [
+      {
+        "event": "local_service_started",
+        "at": "2026-09-23T13:32:31.822180+00:00",
+        "mode": "original",
+        "container": "cf0c19b532c4ef3ccded345d79381233c8773d107c551a7bd9d13e1db573e32c"
+      },
+      {
+        "event": "local_experiment_error",
+        "at": "2026-09-23T13:32:38.358113+00:00",
+        "error": "RuntimeError: ['docker', 'exec', 'local-concurrency-20260923T132735Z-original']: Traceback (most recent call last):\n  File \"<string>\", line 4, in <module>\nAssertionError\n"
+      },
+      {
+        "event": "local_controller_finished",
+        "at": "2026-09-23T13:32:39.394829+00:00",
+        "error": "RuntimeError: ['docker', 'exec', 'local-concurrency-20260923T132735Z-original']: Traceback (most recent call last):\n  File \"<string>\", line 4, in <module>\nAssertionError\n",
+        "cleanup_errors": [],
+        "remaining_containers": []
+      }
+    ]
+  },
+  "events": [
+    {
+      "event": "local_service_started",
+      "at": "2026-09-23T13:33:51.309078+00:00",
+      "mode": "original",
+      "container": "1b237c19ba20d39b32f3633ecfa5053ef44a16042de324e24f7ccb3c46d63142"
+    },
+    {
+      "event": "local_ready",
+      "at": "2026-09-23T13:33:57.942198+00:00",
+      "mode": "original",
+      "state": {
+        "active": 0,
+        "max_active": 1,
+        "calls": 6,
+        "mismatches": 0,
+        "load_calls": 1,
+        "mode": "original",
+        "model_version": "1",
+        "n_estimators": 100,
+        "model_n_jobs": -1,
+        "effective_n_jobs": 1,
+        "thread_tokens": 40,
+        "cpu_max": "50000 100000",
+        "memory_max": "1073741824",
+        "cpu_stat": {
+          "usage_usec": "3109098",
+          "user_usec": "2513659",
+          "system_usec": "595439",
+          "nice_usec": "0",
+          "nr_periods": "65",
+          "nr_throttled": "60",
+          "throttled_usec": "8191620",
+          "nr_bursts": "0",
+          "burst_usec": "0"
+        }
+      },
+      "warmup_predictions": [
+        {
+          "probability": 0.00737357519563027,
+          "model_version": "1"
+        },
+        {
+          "probability": 0.00737357519563027,
+          "model_version": "1"
+        },
+        {
+          "probability": 0.00737357519563027,
+          "model_version": "1"
+        },
+        {
+          "probability": 0.00737357519563027,
+          "model_version": "1"
+        },
+        {
+          "probability": 0.00737357519563027,
+          "model_version": "1"
+        }
+      ],
+      "user": "runner",
+      "image_id": "sha256:e92a8d6ef68cf94d487f7b3803bba251c2f5843d9dc4d1974b479006a29cfb6c"
+    },
+    {
+      "event": "local_measurement_started",
+      "at": "2026-09-23T13:33:57.942398+00:00",
+      "mode": "original",
+      "vus": 10,
+      "duration": "60s"
+    },
+    {
+      "event": "local_measurement_finished",
+      "at": "2026-09-23T13:34:58.461900+00:00",
+      "mode": "original",
+      "exit_code": 99,
+      "before": {
+        "active": 0,
+        "max_active": 1,
+        "calls": 6,
+        "mismatches": 0,
+        "load_calls": 1,
+        "mode": "original",
+        "model_version": "1",
+        "n_estimators": 100,
+        "model_n_jobs": -1,
+        "effective_n_jobs": 1,
+        "thread_tokens": 40,
+        "cpu_max": "50000 100000",
+        "memory_max": "1073741824",
+        "cpu_stat": {
+          "usage_usec": "3109098",
+          "user_usec": "2513659",
+          "system_usec": "595439",
+          "nice_usec": "0",
+          "nr_periods": "65",
+          "nr_throttled": "60",
+          "throttled_usec": "8191620",
+          "nr_bursts": "0",
+          "burst_usec": "0"
+        }
+      },
+      "after": {
+        "active": 0,
+        "max_active": 10,
+        "calls": 2155,
+        "mismatches": 0,
+        "load_calls": 1,
+        "mode": "original",
+        "model_version": "1",
+        "n_estimators": 100,
+        "model_n_jobs": -1,
+        "effective_n_jobs": 1,
+        "thread_tokens": 40,
+        "cpu_max": "50000 100000",
+        "memory_max": "1073741824",
+        "cpu_stat": {
+          "usage_usec": "33225242",
+          "user_usec": "23985716",
+          "system_usec": "9239526",
+          "nice_usec": "0",
+          "nr_periods": "670",
+          "nr_throttled": "662",
+          "throttled_usec": "242361716",
+          "nr_bursts": "0",
+          "burst_usec": "0"
+        }
+      },
+      "failed_thresholds": {
+        "predict_latency_ms": [
+          "p(95)<200"
+        ]
+      },
+      "native_summary": "original-measured/summary.json"
+    },
+    {
+      "event": "local_service_removed",
+      "at": "2026-09-23T13:34:59.375602+00:00",
+      "mode": "original"
+    },
+    {
+      "event": "local_service_started",
+      "at": "2026-09-23T13:34:59.543626+00:00",
+      "mode": "serialized",
+      "container": "b9d241ef524301d9be3ec0871fb56bf4f841d0996034310ea2c363d9fb1fc561"
+    },
+    {
+      "event": "local_ready",
+      "at": "2026-09-23T13:35:05.018225+00:00",
+      "mode": "serialized",
+      "state": {
+        "active": 0,
+        "max_active": 1,
+        "calls": 6,
+        "mismatches": 0,
+        "load_calls": 1,
+        "mode": "serialized",
+        "model_version": "1",
+        "n_estimators": 100,
+        "model_n_jobs": -1,
+        "effective_n_jobs": 1,
+        "thread_tokens": 40,
+        "cpu_max": "50000 100000",
+        "memory_max": "1073741824",
+        "cpu_stat": {
+          "usage_usec": "2644506",
+          "user_usec": "2280381",
+          "system_usec": "364125",
+          "nice_usec": "0",
+          "nr_periods": "54",
+          "nr_throttled": "51",
+          "throttled_usec": "8423645",
+          "nr_bursts": "0",
+          "burst_usec": "0"
+        }
+      },
+      "warmup_predictions": [
+        {
+          "probability": 0.00737357519563027,
+          "model_version": "1"
+        },
+        {
+          "probability": 0.00737357519563027,
+          "model_version": "1"
+        },
+        {
+          "probability": 0.00737357519563027,
+          "model_version": "1"
+        },
+        {
+          "probability": 0.00737357519563027,
+          "model_version": "1"
+        },
+        {
+          "probability": 0.00737357519563027,
+          "model_version": "1"
+        }
+      ],
+      "user": "runner",
+      "image_id": "sha256:e92a8d6ef68cf94d487f7b3803bba251c2f5843d9dc4d1974b479006a29cfb6c"
+    },
+    {
+      "event": "local_measurement_started",
+      "at": "2026-09-23T13:35:05.018329+00:00",
+      "mode": "serialized",
+      "vus": 10,
+      "duration": "60s"
+    },
+    {
+      "event": "local_measurement_finished",
+      "at": "2026-09-23T13:36:05.518999+00:00",
+      "mode": "serialized",
+      "exit_code": 99,
+      "before": {
+        "active": 0,
+        "max_active": 1,
+        "calls": 6,
+        "mismatches": 0,
+        "load_calls": 1,
+        "mode": "serialized",
+        "model_version": "1",
+        "n_estimators": 100,
+        "model_n_jobs": -1,
+        "effective_n_jobs": 1,
+        "thread_tokens": 40,
+        "cpu_max": "50000 100000",
+        "memory_max": "1073741824",
+        "cpu_stat": {
+          "usage_usec": "2644506",
+          "user_usec": "2280381",
+          "system_usec": "364125",
+          "nice_usec": "0",
+          "nr_periods": "54",
+          "nr_throttled": "51",
+          "throttled_usec": "8423645",
+          "nr_bursts": "0",
+          "burst_usec": "0"
+        }
+      },
+      "after": {
+        "active": 0,
+        "max_active": 1,
+        "calls": 3098,
+        "mismatches": 0,
+        "load_calls": 1,
+        "mode": "serialized",
+        "model_version": "1",
+        "n_estimators": 100,
+        "model_n_jobs": -1,
+        "effective_n_jobs": 1,
+        "thread_tokens": 40,
+        "cpu_max": "50000 100000",
+        "memory_max": "1073741824",
+        "cpu_stat": {
+          "usage_usec": "32795091",
+          "user_usec": "26910393",
+          "system_usec": "5884697",
+          "nice_usec": "0",
+          "nr_periods": "660",
+          "nr_throttled": "653",
+          "throttled_usec": "60667210",
+          "nr_bursts": "0",
+          "burst_usec": "0"
+        }
+      },
+      "failed_thresholds": {
+        "predict_latency_ms": [
+          "p(95)<200"
+        ]
+      },
+      "native_summary": "serialized-measured/summary.json"
+    },
+    {
+      "event": "local_service_removed",
+      "at": "2026-09-23T13:36:06.500629+00:00",
+      "mode": "serialized"
+    },
+    {
+      "event": "local_controller_finished",
+      "at": "2026-09-23T13:36:06.786120+00:00",
+      "error": null,
+      "cleanup_errors": [],
+      "remaining_containers": []
+    }
+  ],
+  "controller_exit_code": 0,
+  "cleanup": {
+    "verified_at": "2026-09-23T13:41:52Z",
+    "temporary_model_copy_removed": true,
+    "empty_startup_attempt_directory_removed": true,
+    "model_can_be_downloaded_again": true,
+    "remaining_owned_containers": [],
+    "remaining_containers_checked_before_file_cleanup": true
+  }
+}

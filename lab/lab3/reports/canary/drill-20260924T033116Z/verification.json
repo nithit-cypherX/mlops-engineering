@@ -1,0 +1,313 @@
+{
+  "schema": "lab3-task4-canary-verification/v1",
+  "outcome": "quality_detection_and_rollback_verified_cleanup_reconciled",
+  "live_experiments_run": 1,
+  "entrypoint": "python -m scripts.canary --execute",
+  "preflight": {
+    "event": "preflight_passed",
+    "at": "2026-09-24T03:31:23.386974+00:00",
+    "baseline": "ca-itcs355-u6688124-lab3--0000003",
+    "candidate": "ca-itcs355-u6688124-lab3--cny-20260924033116",
+    "suffix": "cny-20260924033116",
+    "output": "reports/canary/drill-20260924T033116Z",
+    "rows": 1200,
+    "positives": 121,
+    "current_ip_allowed": true,
+    "app_stopped": true,
+    "image": "itcs355u6688124.azurecr.io/itcs355-lab3@sha256:688d36dd527294d20107908fd610df7261feb69db2ead30d585208f96aba3061",
+    "models": {
+      "1": {
+        "run_id": "8087ae5c-d06f-411e-b6b0-7f7891ffe7ed",
+        "status": "READY"
+      },
+      "2": {
+        "run_id": "1730032f-4352-4781-99dc-687b35f1778c",
+        "status": "READY"
+      }
+    },
+    "unchanged_properties_hash": "b323abfbf9cfad30585163ca48585ea383e5e3228d2859100a27ccb3a3eb53fe",
+    "unchanged_configuration_hash": "ab8fb261e3cdbb50f9bab281efd3576aac41198052d57c91e670de62fe0faf95",
+    "unchanged_ingress_hash": "41f56b9aab903c2c76ec0f192d2aaab8ef1e38ee4ee1bc86d9c726cd2cc7ee3b",
+    "identity_hash": "24032c370e90d7adacdc9ea217ba42eb108a0ec6b6d26eaf7ceea85f6f4a3108",
+    "original_revision_names": [
+      "ca-itcs355-u6688124-lab3--w041wkb",
+      "ca-itcs355-u6688124-lab3--0000001",
+      "ca-itcs355-u6688124-lab3--0000002",
+      "ca-itcs355-u6688124-lab3--0000003"
+    ]
+  },
+  "observed_cloud_90_10": {
+    "at": "2026-09-24T03:34:01.828159+00:00",
+    "running_status": "Running",
+    "provisioning_state": "Succeeded",
+    "mode": "Multiple",
+    "traffic": [
+      {
+        "revisionName": "ca-itcs355-u6688124-lab3--0000003",
+        "weight": 90
+      },
+      {
+        "revisionName": "ca-itcs355-u6688124-lab3--cny-20260924033116",
+        "weight": 10
+      }
+    ],
+    "revisions": [
+      {
+        "name": "ca-itcs355-u6688124-lab3--w041wkb",
+        "active": false,
+        "replicas": 0,
+        "provisioning_state": "Provisioned",
+        "running_state": "Stopped",
+        "health_state": "Healthy"
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--0000001",
+        "active": false,
+        "replicas": 0,
+        "provisioning_state": "Provisioned",
+        "running_state": "Stopped",
+        "health_state": "Healthy"
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--0000002",
+        "active": false,
+        "replicas": 0,
+        "provisioning_state": "Provisioned",
+        "running_state": "Stopped",
+        "health_state": "Healthy"
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--0000003",
+        "active": true,
+        "replicas": 1,
+        "provisioning_state": "Provisioned",
+        "running_state": "RunningAtMaxScale",
+        "health_state": "Healthy"
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--cny-20260924033116",
+        "active": true,
+        "replicas": 1,
+        "provisioning_state": "Provisioned",
+        "running_state": "RunningAtMaxScale",
+        "health_state": "Healthy"
+      }
+    ]
+  },
+  "independent_replay_verification": {
+    "event": "independent_replay_verification",
+    "at": "2026-09-24T03:37:07.784573+00:00",
+    "unique_rows_per_group": {
+      "A": 1200,
+      "B": 1200
+    },
+    "positives": 121,
+    "negatives": 1079,
+    "pairwise_auc": {
+      "A": 0.8444994217173845,
+      "B": 0.8268292496112869
+    },
+    "decision": {
+      "at": "2026-09-24T03:34:33.107778+00:00",
+      "event": "blind_decision",
+      "status": "degradation",
+      "lower_group": "B",
+      "roc_auc": {
+        "A": 0.8444994217173845,
+        "B": 0.8268292496112868
+      },
+      "gap": 0.01767017210609767,
+      "threshold": 0.01,
+      "unique_rows": {
+        "A": 1200,
+        "B": 1200
+      }
+    },
+    "group_for_version": {
+      "1": "A",
+      "2": "B"
+    },
+    "measured_requests": {
+      "A": 183,
+      "B": 22
+    },
+    "measured_predictions": {
+      "A": 18300,
+      "B": 2200
+    },
+    "observed_candidate_request_fraction": 0.1073170731707317,
+    "rollback_baseline_requests": 50,
+    "request_ids_present": true,
+    "timestamps": {
+      "prepare_requested": "2026-09-24T03:32:14.197968+00:00",
+      "both_ready": "2026-09-24T03:33:44.739789+00:00",
+      "split_requested": "2026-09-24T03:33:44.739921+00:00",
+      "split_confirmed": "2026-09-24T03:33:59.379124+00:00",
+      "blind_decision": "2026-09-24T03:34:33.107778+00:00",
+      "unblind": "2026-09-24T03:34:33.107863+00:00",
+      "rollback_requested": "2026-09-24T03:34:33.107874+00:00",
+      "rollback_config_confirmed": "2026-09-24T03:34:48.206639+00:00",
+      "rollback_observed": "2026-09-24T03:34:55.089260+00:00"
+    },
+    "summary_exists": false
+  },
+  "native_process": {
+    "exit_code": 1,
+    "status": "cleanup_unconfirmed",
+    "cleanup": {
+      "stopped_zero_replicas": true,
+      "candidate_inactive": false,
+      "errors": [
+        "stop_or_check:TimeoutExpired"
+      ],
+      "ok": false
+    },
+    "note": "The original summary is preserved. Do not read it as an automatic cleanup pass."
+  },
+  "cleanup_readback_before_reconciliation": {
+    "at": "2026-09-24T03:37:42.381225+00:00",
+    "running_status": "Stopped",
+    "provisioning_state": "Succeeded",
+    "traffic": [
+      {
+        "revisionName": "ca-itcs355-u6688124-lab3--0000003",
+        "weight": 100
+      }
+    ],
+    "mode": "Multiple",
+    "revisions": [
+      {
+        "name": "ca-itcs355-u6688124-lab3--w041wkb",
+        "active": false,
+        "replicas": 0,
+        "running_state": "Stopped",
+        "health_state": "Healthy"
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--0000001",
+        "active": false,
+        "replicas": 0,
+        "running_state": "Stopped",
+        "health_state": "Healthy"
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--0000002",
+        "active": false,
+        "replicas": 0,
+        "running_state": "Stopped",
+        "health_state": "Healthy"
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--0000003",
+        "active": true,
+        "replicas": 0,
+        "running_state": "Stopped",
+        "health_state": "Healthy"
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--cny-20260924033116",
+        "active": true,
+        "replicas": 0,
+        "running_state": "Stopped",
+        "health_state": "Healthy"
+      }
+    ]
+  },
+  "cleanup_reconciliation": [
+    {
+      "event": "cleanup_reconciliation_requested",
+      "at": "2026-09-24T03:39:46.781072+00:00",
+      "action": "deactivate_only_existing_candidate",
+      "candidate": "ca-itcs355-u6688124-lab3--cny-20260924033116",
+      "app_stopped": true,
+      "total_replicas": 0
+    },
+    {
+      "event": "cleanup_reconciliation_verified",
+      "at": "2026-09-24T03:39:49.259885+00:00",
+      "candidate_inactive": true,
+      "app_stopped": true,
+      "total_replicas": 0,
+      "baseline_traffic": 100,
+      "mode": "Multiple",
+      "live_experiments_run": 1,
+      "no_app_restart": true,
+      "native_summary_preserved": true
+    }
+  ],
+  "final_cloud_verification": {
+    "event": "final_cloud_verification",
+    "at": "2026-09-24T03:41:26.858083+00:00",
+    "running_status": "Stopped",
+    "mode": "Multiple",
+    "traffic": [
+      {
+        "revisionName": "ca-itcs355-u6688124-lab3--0000003",
+        "weight": 100
+      }
+    ],
+    "revisions": [
+      {
+        "name": "ca-itcs355-u6688124-lab3--w041wkb",
+        "active": false,
+        "replicas": 0,
+        "model_version": "1",
+        "image": "itcs355u6688124.azurecr.io/itcs355-lab3@sha256:99ce0052c62042bf4a60962675f8e20871a4844b3933dc11cf59ab08753d0aba"
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--0000001",
+        "active": false,
+        "replicas": 0,
+        "model_version": "1",
+        "image": "itcs355u6688124.azurecr.io/itcs355-lab3@sha256:688d36dd527294d20107908fd610df7261feb69db2ead30d585208f96aba3061"
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--0000002",
+        "active": false,
+        "replicas": 0,
+        "model_version": "1",
+        "image": "itcs355u6688124.azurecr.io/itcs355-lab3@sha256:688d36dd527294d20107908fd610df7261feb69db2ead30d585208f96aba3061"
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--0000003",
+        "active": true,
+        "replicas": 0,
+        "model_version": "1",
+        "image": "itcs355u6688124.azurecr.io/itcs355-lab3@sha256:688d36dd527294d20107908fd610df7261feb69db2ead30d585208f96aba3061"
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--cny-20260924033116",
+        "active": false,
+        "replicas": 0,
+        "model_version": "2",
+        "image": "itcs355u6688124.azurecr.io/itcs355-lab3@sha256:688d36dd527294d20107908fd610df7261feb69db2ead30d585208f96aba3061"
+      }
+    ],
+    "unchanged_properties_hash": "b323abfbf9cfad30585163ca48585ea383e5e3228d2859100a27ccb3a3eb53fe",
+    "unchanged_configuration_hash": "ab8fb261e3cdbb50f9bab281efd3576aac41198052d57c91e670de62fe0faf95",
+    "unchanged_ingress_hash": "41f56b9aab903c2c76ec0f192d2aaab8ef1e38ee4ee1bc86d9c726cd2cc7ee3b",
+    "identity_hash": "24032c370e90d7adacdc9ea217ba42eb108a0ec6b6d26eaf7ceea85f6f4a3108"
+  },
+  "integrity": {
+    "existing_files_unchanged": 166,
+    "native_artifact_sha256": {
+      "preflight.json": "7a691b0e5a060dbe0edbccc098952919183645e53537f83f3855558bca593fa5",
+      "events.jsonl": "fc6a4b355b32139e9d68430c96c7772f9ca0fad7a0ac94635b9f9441eb10806f",
+      "summary.json": "2ccf666a697d5491a4dbb26c9c19e89967e7ea1e02fe04d59c373d1837c61b89"
+    },
+    "script_sha256": "ed35d90c9883854be49e1ad23de7ae320059e58833caf0c95b4d1920e00bf719",
+    "adapter_sha256": "0c604b82a935392cd5959d1151479d1d55c4b78e29a7a1da8aa296b18d096d25",
+    "unrelated_app_properties_unchanged": true,
+    "other_configuration_unchanged": true,
+    "ingress_security_unchanged": true,
+    "identity_unchanged": true
+  },
+  "limitations": [
+    "This was one fixed labeled validation replay, not a future-data generalization or statistical-significance test.",
+    "The 0.01 AUC gap was the approved drill threshold, not a course-mandated value.",
+    "Post-rollback evidence covers 50 observed requests, not every future request.",
+    "Candidate prediction counts cover measured replay batches, excluding warm-up/readiness scoring.",
+    "Task 3's p95 latency target remains unmet; this quality drill does not close that requirement.",
+    "The five-line Task 4 README explanation has not yet been added."
+  ]
+}

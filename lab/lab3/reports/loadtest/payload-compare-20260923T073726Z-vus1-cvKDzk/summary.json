@@ -1,0 +1,796 @@
+{
+  "lab3": {
+    "kind": "warm-payload-comparison",
+    "target": "https://ca-itcs355-u6688124-lab3.kindgrass-9f6d03ba.malaysiawest.azurecontainerapps.io/predict",
+    "started_utc": "2026-09-23T07:37:27Z",
+    "git_sha": "a41ec75e1b8c9bc2f41a908ced5437bec5309a68",
+    "git_dirty": "true",
+    "script_sha256": "5002db961f086bfc10086d40f9924d7dbdb4e4b13f21143b5291dc9bacafc751",
+    "shared_script_sha256": "49bb20dddf1b902c986711b636ac5c8444d02cf3c5da4d43f9845c12d3cbf221",
+    "payload_cases_sha256": "509daa724ff04df3179077f452551d90514e94811a34949136d8f22cef79d06e",
+    "k6_image": "grafana/k6@sha256:9bd01d6941fca969cb61bb57d2da5ee9b385fe2aa8881df3798c196564d6ace6",
+    "model_version": "1",
+    "vus": 1,
+    "rounds": 20,
+    "rows_per_request": 1,
+    "request_timeout": "10s",
+    "max_duration": "180s",
+    "graceful_stop": "0s",
+    "absolute_tolerance": 1e-9,
+    "timing": "HTTP duration separate from server timings; bodies prebuilt; warm-up excluded from medians",
+    "order": "case index = (zero-based round + position) modulo 4",
+    "majority_rule": "median of per-request json_decode / processing > 0.5; not share of HTTP time",
+    "requests": 4,
+    "warmup_requests": 4,
+    "measured_requests": 0,
+    "attempts": 4,
+    "completed_requests": 4,
+    "unfinished_requests": 0,
+    "error_count": 1,
+    "timeout_count": 1,
+    "valid_comparison": false,
+    "cases": [
+      {
+        "case": "1MiB",
+        "bytes": 1048576,
+        "measured_requests": 0,
+        "timing_samples": 0,
+        "complete": false,
+        "median_http_ms": null,
+        "median_json_decode_ms": null,
+        "median_scoring_ms": null,
+        "median_processing_ms": null,
+        "median_json_share": null,
+        "json_majority": null
+      },
+      {
+        "case": "4MiB",
+        "bytes": 4194304,
+        "measured_requests": 0,
+        "timing_samples": 0,
+        "complete": false,
+        "median_http_ms": null,
+        "median_json_decode_ms": null,
+        "median_scoring_ms": null,
+        "median_processing_ms": null,
+        "median_json_share": null,
+        "json_majority": null
+      },
+      {
+        "case": "8MiB",
+        "bytes": 8388608,
+        "measured_requests": 0,
+        "timing_samples": 0,
+        "complete": false,
+        "median_http_ms": null,
+        "median_json_decode_ms": null,
+        "median_scoring_ms": null,
+        "median_processing_ms": null,
+        "median_json_share": null,
+        "json_majority": null
+      },
+      {
+        "case": "16MiB",
+        "bytes": 16777216,
+        "measured_requests": 0,
+        "timing_samples": 0,
+        "complete": false,
+        "median_http_ms": null,
+        "median_json_decode_ms": null,
+        "median_scoring_ms": null,
+        "median_processing_ms": null,
+        "median_json_share": null,
+        "json_majority": null
+      }
+    ],
+    "conclusion": "invalid-comparison",
+    "first_tested_json_majority_bytes": null
+  },
+  "k6": {
+    "root_group": {
+      "name": "",
+      "path": "",
+      "id": "d41d8cd98f00b204e9800998ecf8427e",
+      "groups": [],
+      "checks": [
+          {
+            "path": "::valid prediction and separate timings",
+            "id": "ac9aca976a4af764b43db618896c7e38",
+            "passes": 3,
+            "fails": 1,
+            "name": "valid prediction and separate timings"
+          }
+        ]
+    },
+    "options": {
+      "summaryTrendStats": [
+        "min",
+        "med",
+        "max",
+        "count"
+      ],
+      "summaryTimeUnit": "",
+      "noColor": false
+    },
+    "state": {
+      "isStdOutTTY": false,
+      "isStdErrTTY": false,
+      "testRunDurationMs": 15366.293673
+    },
+    "metrics": {
+      "payload_http_ms": {
+        "type": "trend",
+        "contains": "time",
+        "values": {
+          "med": 0,
+          "max": 0,
+          "count": 0,
+          "min": 0
+        }
+      },
+      "payload_processing_ms{case:16MiB}": {
+        "type": "trend",
+        "contains": "time",
+        "values": {
+          "min": 0,
+          "med": 0,
+          "max": 0,
+          "count": 0
+        },
+        "thresholds": {
+          "min>0": {
+            "ok": false
+          }
+        }
+      },
+      "payload_json_decode_ms": {
+        "type": "trend",
+        "contains": "time",
+        "values": {
+          "max": 0,
+          "count": 0,
+          "min": 0,
+          "med": 0
+        }
+      },
+      "http_reqs": {
+        "type": "counter",
+        "contains": "default",
+        "values": {
+          "count": 4,
+          "rate": 0.26031000611607275
+        },
+        "thresholds": {
+          "count==84": {
+            "ok": false
+          }
+        }
+      },
+      "payload_http_ms{case:8MiB}": {
+        "type": "trend",
+        "contains": "time",
+        "values": {
+          "max": 0,
+          "count": 0,
+          "min": 0,
+          "med": 0
+        },
+        "thresholds": {
+          "min>=0": {
+            "ok": true
+          }
+        }
+      },
+      "payload_measured{case:8MiB}": {
+        "type": "counter",
+        "contains": "default",
+        "values": {
+          "count": 0,
+          "rate": 0
+        },
+        "thresholds": {
+          "count==20": {
+            "ok": false
+          }
+        }
+      },
+      "payload_scoring_ms{case:4MiB}": {
+        "thresholds": {
+          "min>=0": {
+            "ok": true
+          }
+        },
+        "type": "trend",
+        "contains": "time",
+        "values": {
+          "min": 0,
+          "med": 0,
+          "max": 0,
+          "count": 0
+        }
+      },
+      "http_req_sending": {
+        "type": "trend",
+        "contains": "time",
+        "values": {
+          "max": 9788.996043,
+          "count": 4,
+          "min": 32.006782,
+          "med": 1956.567445
+        }
+      },
+      "payload_errors": {
+        "values": {
+          "count": 1,
+          "rate": 0.06507750152901819
+        },
+        "thresholds": {
+          "count==0": {
+            "ok": false
+          }
+        },
+        "type": "counter",
+        "contains": "default"
+      },
+      "data_received": {
+        "type": "counter",
+        "contains": "data",
+        "values": {
+          "count": 10904,
+          "rate": 709.6050766724144
+        }
+      },
+      "http_req_duration{expected_response:true}": {
+        "type": "trend",
+        "contains": "time",
+        "values": {
+          "count": 3,
+          "min": 266.541951,
+          "med": 758.606017,
+          "max": 4188.205838
+        }
+      },
+      "http_req_tls_handshaking": {
+        "type": "trend",
+        "contains": "time",
+        "values": {
+          "count": 4,
+          "min": 0,
+          "med": 0,
+          "max": 29.971576
+        }
+      },
+      "http_req_blocked": {
+        "type": "trend",
+        "contains": "time",
+        "values": {
+          "max": 68.796189,
+          "count": 4,
+          "min": 0.000247,
+          "med": 0.000343
+        }
+      },
+      "payload_measured": {
+        "type": "counter",
+        "contains": "default",
+        "values": {
+          "rate": 0,
+          "count": 0
+        }
+      },
+      "payload_scoring_ms{case:1MiB}": {
+        "contains": "time",
+        "values": {
+          "min": 0,
+          "med": 0,
+          "max": 0,
+          "count": 0
+        },
+        "thresholds": {
+          "min>=0": {
+            "ok": true
+          }
+        },
+        "type": "trend"
+      },
+      "http_req_receiving": {
+        "type": "trend",
+        "contains": "time",
+        "values": {
+          "min": 0,
+          "med": 0.08644550000000001,
+          "max": 0.117521,
+          "count": 4
+        }
+      },
+      "checks": {
+        "type": "rate",
+        "contains": "default",
+        "values": {
+          "rate": 0.75,
+          "passes": 3,
+          "fails": 1
+        },
+        "thresholds": {
+          "rate==1": {
+            "ok": false
+          }
+        }
+      },
+      "payload_json_share": {
+        "type": "trend",
+        "contains": "default",
+        "values": {
+          "min": 0,
+          "med": 0,
+          "max": 0,
+          "count": 0
+        }
+      },
+      "vus_max": {
+        "contains": "default",
+        "values": {
+          "value": 1,
+          "min": 1,
+          "max": 1
+        },
+        "type": "gauge"
+      },
+      "http_req_connecting": {
+        "type": "trend",
+        "contains": "time",
+        "values": {
+          "min": 0,
+          "med": 0,
+          "max": 28.683644,
+          "count": 4
+        }
+      },
+      "payload_scoring_ms{case:16MiB}": {
+        "type": "trend",
+        "contains": "time",
+        "values": {
+          "med": 0,
+          "max": 0,
+          "count": 0,
+          "min": 0
+        },
+        "thresholds": {
+          "min>=0": {
+            "ok": true
+          }
+        }
+      },
+      "payload_measured{case:16MiB}": {
+        "type": "counter",
+        "contains": "default",
+        "values": {
+          "rate": 0,
+          "count": 0
+        },
+        "thresholds": {
+          "count==20": {
+            "ok": false
+          }
+        }
+      },
+      "payload_json_decode_ms{case:16MiB}": {
+        "type": "trend",
+        "contains": "time",
+        "values": {
+          "min": 0,
+          "med": 0,
+          "max": 0,
+          "count": 0
+        },
+        "thresholds": {
+          "min>=0": {
+            "ok": true
+          }
+        }
+      },
+      "payload_json_decode_ms{case:8MiB}": {
+        "values": {
+          "min": 0,
+          "med": 0,
+          "max": 0,
+          "count": 0
+        },
+        "thresholds": {
+          "min>=0": {
+            "ok": true
+          }
+        },
+        "type": "trend",
+        "contains": "time"
+      },
+      "http_req_waiting": {
+        "type": "trend",
+        "contains": "time",
+        "values": {
+          "med": 283.30753450000003,
+          "max": 701.306653,
+          "count": 4,
+          "min": 208.734529
+        }
+      },
+      "http_req_duration": {
+        "type": "trend",
+        "contains": "time",
+        "values": {
+          "min": 266.541951,
+          "med": 2473.4059275,
+          "max": 9997.730572,
+          "count": 4
+        }
+      },
+      "data_sent": {
+        "contains": "data",
+        "values": {
+          "count": 30509222,
+          "rate": 1985463.9413541553
+        },
+        "type": "counter"
+      },
+      "payload_json_decode_ms{case:4MiB}": {
+        "values": {
+          "count": 0,
+          "min": 0,
+          "med": 0,
+          "max": 0
+        },
+        "thresholds": {
+          "min>=0": {
+            "ok": true
+          }
+        },
+        "type": "trend",
+        "contains": "time"
+      },
+      "payload_timeouts": {
+        "thresholds": {
+          "count==0": {
+            "ok": false
+          }
+        },
+        "type": "counter",
+        "contains": "default",
+        "values": {
+          "count": 1,
+          "rate": 0.06507750152901819
+        }
+      },
+      "payload_processing_ms{case:4MiB}": {
+        "type": "trend",
+        "contains": "time",
+        "values": {
+          "min": 0,
+          "med": 0,
+          "max": 0,
+          "count": 0
+        },
+        "thresholds": {
+          "min>0": {
+            "ok": false
+          }
+        }
+      },
+      "payload_http_ms{case:16MiB}": {
+        "thresholds": {
+          "min>=0": {
+            "ok": true
+          }
+        },
+        "type": "trend",
+        "contains": "time",
+        "values": {
+          "med": 0,
+          "max": 0,
+          "count": 0,
+          "min": 0
+        }
+      },
+      "payload_measured{case:1MiB}": {
+        "type": "counter",
+        "contains": "default",
+        "values": {
+          "count": 0,
+          "rate": 0
+        },
+        "thresholds": {
+          "count==20": {
+            "ok": false
+          }
+        }
+      },
+      "payload_scoring_ms{case:8MiB}": {
+        "type": "trend",
+        "contains": "time",
+        "values": {
+          "min": 0,
+          "med": 0,
+          "max": 0,
+          "count": 0
+        },
+        "thresholds": {
+          "min>=0": {
+            "ok": true
+          }
+        }
+      },
+      "http_reqs{phase:measured}": {
+        "type": "counter",
+        "contains": "default",
+        "values": {
+          "count": 0,
+          "rate": 0
+        },
+        "thresholds": {
+          "count==80": {
+            "ok": false
+          }
+        }
+      },
+      "payload_json_share{case:1MiB}": {
+        "type": "trend",
+        "contains": "default",
+        "values": {
+          "med": 0,
+          "max": 0,
+          "count": 0,
+          "min": 0
+        },
+        "thresholds": {
+          "max<=1": {
+            "ok": true
+          },
+          "min>=0": {
+            "ok": true
+          }
+        }
+      },
+      "payload_json_share{case:4MiB}": {
+        "type": "trend",
+        "contains": "default",
+        "values": {
+          "max": 0,
+          "count": 0,
+          "min": 0,
+          "med": 0
+        },
+        "thresholds": {
+          "max<=1": {
+            "ok": true
+          },
+          "min>=0": {
+            "ok": true
+          }
+        }
+      },
+      "payload_attempts": {
+        "thresholds": {
+          "count==84": {
+            "ok": false
+          }
+        },
+        "type": "counter",
+        "contains": "default",
+        "values": {
+          "count": 4,
+          "rate": 0.26031000611607275
+        }
+      },
+      "payload_processing_ms": {
+        "contains": "time",
+        "values": {
+          "count": 0,
+          "min": 0,
+          "med": 0,
+          "max": 0
+        },
+        "type": "trend"
+      },
+      "payload_http_ms{case:4MiB}": {
+        "thresholds": {
+          "min>=0": {
+            "ok": true
+          }
+        },
+        "type": "trend",
+        "contains": "time",
+        "values": {
+          "count": 0,
+          "min": 0,
+          "med": 0,
+          "max": 0
+        }
+      },
+      "payload_completed": {
+        "thresholds": {
+          "count==84": {
+            "ok": false
+          }
+        },
+        "type": "counter",
+        "contains": "default",
+        "values": {
+          "count": 4,
+          "rate": 0.26031000611607275
+        }
+      },
+      "payload_measured{case:4MiB}": {
+        "type": "counter",
+        "contains": "default",
+        "values": {
+          "count": 0,
+          "rate": 0
+        },
+        "thresholds": {
+          "count==20": {
+            "ok": false
+          }
+        }
+      },
+      "payload_scoring_ms": {
+        "type": "trend",
+        "contains": "time",
+        "values": {
+          "med": 0,
+          "max": 0,
+          "count": 0,
+          "min": 0
+        }
+      },
+      "payload_processing_ms{case:1MiB}": {
+        "contains": "time",
+        "values": {
+          "min": 0,
+          "med": 0,
+          "max": 0,
+          "count": 0
+        },
+        "thresholds": {
+          "min>0": {
+            "ok": false
+          }
+        },
+        "type": "trend"
+      },
+      "http_req_failed": {
+        "type": "rate",
+        "contains": "default",
+        "values": {
+          "fails": 3,
+          "rate": 0.25,
+          "passes": 1
+        }
+      },
+      "payload_http_ms{case:1MiB}": {
+        "values": {
+          "min": 0,
+          "med": 0,
+          "max": 0,
+          "count": 0
+        },
+        "thresholds": {
+          "min>=0": {
+            "ok": true
+          }
+        },
+        "type": "trend",
+        "contains": "time"
+      },
+      "http_reqs{phase:warmup}": {
+        "contains": "default",
+        "values": {
+          "rate": 0.26031000611607275,
+          "count": 4
+        },
+        "thresholds": {
+          "count==4": {
+            "ok": true
+          }
+        },
+        "type": "counter"
+      },
+      "payload_json_decode_ms{case:1MiB}": {
+        "values": {
+          "max": 0,
+          "count": 0,
+          "min": 0,
+          "med": 0
+        },
+        "thresholds": {
+          "min>=0": {
+            "ok": true
+          }
+        },
+        "type": "trend",
+        "contains": "time"
+      },
+      "payload_json_share{case:16MiB}": {
+        "type": "trend",
+        "contains": "default",
+        "values": {
+          "min": 0,
+          "med": 0,
+          "max": 0,
+          "count": 0
+        },
+        "thresholds": {
+          "min>=0": {
+            "ok": true
+          },
+          "max<=1": {
+            "ok": true
+          }
+        }
+      },
+      "payload_json_share{case:8MiB}": {
+        "type": "trend",
+        "contains": "default",
+        "values": {
+          "min": 0,
+          "med": 0,
+          "max": 0,
+          "count": 0
+        },
+        "thresholds": {
+          "min>=0": {
+            "ok": true
+          },
+          "max<=1": {
+            "ok": true
+          }
+        }
+      },
+      "payload_processing_ms{case:8MiB}": {
+        "contains": "time",
+        "values": {
+          "min": 0,
+          "med": 0,
+          "max": 0,
+          "count": 0
+        },
+        "thresholds": {
+          "min>0": {
+            "ok": false
+          }
+        },
+        "type": "trend"
+      },
+      "vus": {
+        "type": "gauge",
+        "contains": "default",
+        "values": {
+          "min": 1,
+          "max": 1,
+          "value": 1
+        }
+      },
+      "iterations": {
+        "type": "counter",
+        "contains": "default",
+        "values": {
+          "count": 1,
+          "rate": 0.06507750152901819
+        },
+        "thresholds": {
+          "count==1": {
+            "ok": true
+          }
+        }
+      },
+      "iteration_duration": {
+        "type": "trend",
+        "contains": "time",
+        "values": {
+          "count": 1,
+          "min": 15294.201415,
+          "med": 15294.201415,
+          "max": 15294.201415
+        }
+      }
+    }
+  }
+}

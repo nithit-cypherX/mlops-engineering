@@ -64,7 +64,8 @@ export default function () {
   verify('timing completeness has a separate threshold', loadOptions.thresholds.predict_timing_failures[0] === 'rate==0'
     && loadOptions.thresholds.predict_timing_samples[0] === 'count>0');
   verify('duration and load shape unchanged', loadOptions.vus === 10 && loadOptions.duration === '60s'
-    && loadOptions.gracefulStop === '15s' && loadOptions.maxRedirects === 0);
+    && loadOptions.maxRedirects === 0);
+  verify('no unsupported top-level gracefulStop', !Object.hasOwn(loadOptions, 'gracefulStop'));
   const missing = { ...good, headers: { ...good.headers, 'Server-Timing': undefined } };
   const badHeader = { ...good, headers: { ...good.headers, 'Server-Timing': 'processing;dur=10' } };
   const timeout = { status: 0, error_code: 1050, headers: {},

@@ -1,0 +1,502 @@
+{
+  "experiment": "warm latency diagnostic — readiness gate stopped the attempt",
+  "outcome": "stopped-before-load-test",
+  "git_sha": "c86613a72d9816b586d32512112396cd131e0c4e",
+  "approved_scope": {
+    "temporary_allowed_ip": "PUBLIC_IP_4/32",
+    "restore_allowed_ip": "PUBLIC_IP_1/32",
+    "planned_vus": 10,
+    "planned_duration": "60s",
+    "max_startup_and_test_seconds": 600,
+    "measurement_retries": 0
+  },
+  "preflight": {
+    "checked_at": "2026-09-23T12:44:26.304028+00:00",
+    "account": {
+      "id": "d9385e82-8bee-4612-8a76-967c241112c8",
+      "state": "Enabled"
+    },
+    "state": {
+      "runningStatus": "Stopped",
+      "provisioningState": "Succeeded",
+      "latestRevisionName": "ca-itcs355-u6688124-lab3--0000003",
+      "latestReadyRevisionName": "ca-itcs355-u6688124-lab3--0000002"
+    },
+    "wsl_ipv4": "PUBLIC_IP_4",
+    "docker_ipv4": "PUBLIC_IP_4",
+    "original_configuration": {
+      "id": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.App/containerapps/ca-itcs355-u6688124-lab3",
+      "location": "Malaysia West",
+      "tags": {
+        "course": "itcs355",
+        "lab": "3",
+        "student": "itcs355-u6688124"
+      },
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourcegroups/itcs355-u6688124/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-itcs355-u6688124-lab3": {
+            "clientId": "75aec690-afbb-4f2f-a645-236eeb671024",
+            "principalId": "14012060-3ce7-4438-a324-844f522e5ad7"
+          }
+        }
+      },
+      "properties": {
+        "configuration": {
+          "activeRevisionsMode": "Single",
+          "dapr": null,
+          "identitySettings": [],
+          "ingress": {
+            "additionalPortMappings": null,
+            "allowInsecure": false,
+            "clientCertificateMode": null,
+            "corsPolicy": null,
+            "customDomains": null,
+            "exposedPort": 0,
+            "external": true,
+            "fqdn": "ca-itcs355-u6688124-lab3.kindgrass-9f6d03ba.malaysiawest.azurecontainerapps.io",
+            "ipSecurityRestrictions": [
+              {
+                "action": "Allow",
+                "ipAddressRange": "PUBLIC_IP_1/32",
+                "name": "lab3-client"
+              }
+            ],
+            "stickySessions": null,
+            "targetPort": 8080,
+            "traffic": [
+              {
+                "latestRevision": true,
+                "weight": 100
+              }
+            ],
+            "transport": "Auto"
+          },
+          "maxInactiveRevisions": 100,
+          "registries": [
+            {
+              "identity": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourcegroups/itcs355-u6688124/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-itcs355-u6688124-lab3",
+              "passwordSecretRef": "",
+              "server": "itcs355u6688124.azurecr.io",
+              "username": ""
+            }
+          ],
+          "runtime": null,
+          "secrets": null,
+          "service": null
+        },
+        "environmentId": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.App/managedEnvironments/cae-itcs355-u6688124-lab3",
+        "managedEnvironmentId": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.App/managedEnvironments/cae-itcs355-u6688124-lab3",
+        "template": {
+          "containers": [
+            {
+              "args": [
+                "service.app:app",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "8080",
+                "--workers",
+                "1"
+              ],
+              "command": [
+                "uvicorn"
+              ],
+              "env": [
+                {
+                  "name": "CLOUD_PROVIDER",
+                  "value": "azure"
+                },
+                {
+                  "name": "MLFLOW_TRACKING_URI",
+                  "value": "azureml://malaysiawest.api.azureml.ms/mlflow/v1.0/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.MachineLearningServices/workspaces/mlw-itcs355-u6688124"
+                },
+                {
+                  "name": "MODEL_REGISTRY_NAME",
+                  "value": "itcs355-u6688124"
+                },
+                {
+                  "name": "MODEL_VERSION",
+                  "value": "1"
+                },
+                {
+                  "name": "AZURE_CLIENT_ID",
+                  "value": "75aec690-afbb-4f2f-a645-236eeb671024"
+                }
+              ],
+              "image": "itcs355u6688124.azurecr.io/itcs355-lab3@sha256:688d36dd527294d20107908fd610df7261feb69db2ead30d585208f96aba3061",
+              "name": "api",
+              "probes": [
+                {
+                  "failureThreshold": 3,
+                  "httpGet": {
+                    "path": "/health",
+                    "port": 8080
+                  },
+                  "periodSeconds": 10,
+                  "timeoutSeconds": 5,
+                  "type": "Liveness"
+                },
+                {
+                  "failureThreshold": 3,
+                  "httpGet": {
+                    "path": "/ready",
+                    "port": 8080
+                  },
+                  "periodSeconds": 5,
+                  "timeoutSeconds": 5,
+                  "type": "Readiness"
+                },
+                {
+                  "failureThreshold": 10,
+                  "httpGet": {
+                    "path": "/ready",
+                    "port": 8080
+                  },
+                  "initialDelaySeconds": 1,
+                  "periodSeconds": 30,
+                  "timeoutSeconds": 5,
+                  "type": "Startup"
+                }
+              ],
+              "resources": {
+                "cpu": 0.5,
+                "ephemeralStorage": "2Gi",
+                "memory": "1Gi"
+              }
+            }
+          ],
+          "initContainers": null,
+          "revisionSuffix": "",
+          "scale": {
+            "cooldownPeriod": 300,
+            "maxReplicas": 1,
+            "minReplicas": 0,
+            "pollingInterval": 30,
+            "rules": [
+              {
+                "http": {
+                  "metadata": {
+                    "concurrentRequests": "10"
+                  }
+                },
+                "name": "http"
+              }
+            ]
+          },
+          "serviceBinds": null,
+          "terminationGracePeriodSeconds": null,
+          "volumes": null
+        },
+        "workloadProfileName": "Consumption",
+        "delegatedIdentities": []
+      }
+    }
+  },
+  "controller_events": [
+    {
+      "event": "preflight_reconfirmed",
+      "at": "2026-09-23T12:47:15.643195+00:00",
+      "state": {
+        "runningStatus": "Stopped",
+        "provisioningState": "Succeeded",
+        "latestRevisionName": "ca-itcs355-u6688124-lab3--0000003",
+        "latestReadyRevisionName": "ca-itcs355-u6688124-lab3--0000002"
+      },
+      "approved_temporary_cidr": "PUBLIC_IP_4/32"
+    },
+    {
+      "event": "temporary_allowlist_requested",
+      "at": "2026-09-23T12:47:15.643276+00:00",
+      "original_rules": [
+        {
+          "action": "Allow",
+          "ipAddressRange": "PUBLIC_IP_1/32",
+          "name": "lab3-client"
+        }
+      ],
+      "temporary_rules": [
+        {
+          "action": "Allow",
+          "ipAddressRange": "PUBLIC_IP_4/32",
+          "name": "lab3-client"
+        }
+      ]
+    },
+    {
+      "event": "temporary_allowlist_verified",
+      "at": "2026-09-23T12:47:28.837271+00:00",
+      "state": {
+        "runningStatus": "Stopped",
+        "provisioningState": "Succeeded",
+        "latestRevisionName": "ca-itcs355-u6688124-lab3--0000003",
+        "latestReadyRevisionName": "ca-itcs355-u6688124-lab3--0000002"
+      },
+      "other_configuration_unchanged": true
+    },
+    {
+      "event": "start_requested",
+      "at": "2026-09-23T12:47:28.837340+00:00"
+    },
+    {
+      "event": "experiment_error",
+      "at": "2026-09-23T12:48:24.470456+00:00",
+      "error": "AssertionError: Expected one active revision with one replica"
+    },
+    {
+      "event": "stop_requested",
+      "at": "2026-09-23T12:48:25.310678+00:00"
+    },
+    {
+      "event": "stop_verified",
+      "at": "2026-09-23T12:48:35.954327+00:00",
+      "state": {
+        "runningStatus": "Stopped",
+        "provisioningState": "Succeeded",
+        "latestRevisionName": "ca-itcs355-u6688124-lab3--0000003",
+        "latestReadyRevisionName": "ca-itcs355-u6688124-lab3--0000003"
+      },
+      "replicas": [
+        {
+          "name": "ca-itcs355-u6688124-lab3--w041wkb",
+          "active": false,
+          "replicas": 0,
+          "healthState": "Healthy",
+          "runningState": "Stopped"
+        },
+        {
+          "name": "ca-itcs355-u6688124-lab3--0000001",
+          "active": false,
+          "replicas": 0,
+          "healthState": "Healthy",
+          "runningState": "Stopped"
+        },
+        {
+          "name": "ca-itcs355-u6688124-lab3--0000002",
+          "active": false,
+          "replicas": 0,
+          "healthState": "Healthy",
+          "runningState": "Stopped"
+        },
+        {
+          "name": "ca-itcs355-u6688124-lab3--0000003",
+          "active": true,
+          "replicas": 0,
+          "healthState": "Healthy",
+          "runningState": "Stopped",
+          "replica_details": [
+            {
+              "name": "ca-itcs355-u6688124-lab3--0000003-67f4cf6757-4kxqh",
+              "properties": {
+                "runningState": "NotRunning",
+                "runningStateDetails": "System Container was terminated with reason: ProcessExited, exit code: 0. System Envoy Container was terminated with reason: Terminated, exit code: 0. System Proxy Container was terminated with reason: Terminated, exit code: 0. Container api was terminated with reason: Terminated, exit code: 0.",
+                "containers": [
+                  {
+                    "name": "api",
+                    "ready": true,
+                    "restartCount": 0,
+                    "runningState": "Running",
+                    "runningStateDetails": "Container started at: 9/23/2026 12:47:48 PM."
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "event": "original_allowlist_restore_requested",
+      "at": "2026-09-23T12:48:35.954406+00:00",
+      "rules": [
+        {
+          "action": "Allow",
+          "ipAddressRange": "PUBLIC_IP_1/32",
+          "name": "lab3-client"
+        }
+      ]
+    },
+    {
+      "event": "cleanup_verified",
+      "at": "2026-09-23T12:48:51.556988+00:00",
+      "state": {
+        "runningStatus": "Stopped",
+        "provisioningState": "Succeeded",
+        "latestRevisionName": "ca-itcs355-u6688124-lab3--0000003",
+        "latestReadyRevisionName": "ca-itcs355-u6688124-lab3--0000003"
+      },
+      "replicas": [
+        {
+          "name": "ca-itcs355-u6688124-lab3--w041wkb",
+          "active": false,
+          "replicas": 0,
+          "healthState": "Healthy",
+          "runningState": "Stopped"
+        },
+        {
+          "name": "ca-itcs355-u6688124-lab3--0000001",
+          "active": false,
+          "replicas": 0,
+          "healthState": "Healthy",
+          "runningState": "Stopped"
+        },
+        {
+          "name": "ca-itcs355-u6688124-lab3--0000002",
+          "active": false,
+          "replicas": 0,
+          "healthState": "Healthy",
+          "runningState": "Stopped"
+        },
+        {
+          "name": "ca-itcs355-u6688124-lab3--0000003",
+          "active": true,
+          "replicas": 0,
+          "healthState": "Healthy",
+          "runningState": "Stopped",
+          "replica_details": [
+            {
+              "name": "ca-itcs355-u6688124-lab3--0000003-67f4cf6757-4kxqh",
+              "properties": {
+                "runningState": "NotRunning",
+                "runningStateDetails": "System Container was terminated with reason: ProcessExited, exit code: 0. System Envoy Container was terminated with reason: Terminated, exit code: 0. System Proxy Container was terminated with reason: Terminated, exit code: 0. Container api was terminated with reason: Terminated, exit code: 0.",
+                "containers": [
+                  {
+                    "name": "api",
+                    "ready": true,
+                    "restartCount": 0,
+                    "runningState": "Running",
+                    "runningStateDetails": "Container started at: 9/23/2026 12:47:48 PM."
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "exact_original_configuration_restored": true,
+      "original_rules_restored": [
+        {
+          "action": "Allow",
+          "ipAddressRange": "PUBLIC_IP_1/32",
+          "name": "lab3-client"
+        }
+      ],
+      "elapsed_seconds": 97.54041716099982
+    },
+    {
+      "event": "controller_finished",
+      "at": "2026-09-23T12:48:51.558409+00:00",
+      "run_dir": null,
+      "error": "AssertionError: Expected one active revision with one replica",
+      "cleanup_errors": [],
+      "all_protected_files_unchanged": true,
+      "elapsed_seconds": 97.54183809699998
+    }
+  ],
+  "final_readback": {
+    "checked_at": "2026-09-23T12:50:11.196980+00:00",
+    "state": {
+      "runningStatus": "Stopped",
+      "provisioningState": "Succeeded"
+    },
+    "revisions": [
+      {
+        "name": "ca-itcs355-u6688124-lab3--w041wkb",
+        "active": false,
+        "replicas": 0,
+        "runningState": "Stopped"
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--0000001",
+        "active": false,
+        "replicas": 0,
+        "runningState": "Stopped"
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--0000002",
+        "active": false,
+        "replicas": 0,
+        "runningState": "Stopped"
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--0000003",
+        "active": true,
+        "replicas": 0,
+        "runningState": "Stopped",
+        "retained_replica_records": []
+      }
+    ],
+    "exact_original_configuration_restored": true
+  },
+  "measurement": {
+    "started": false,
+    "k6_invoked": false,
+    "new_measurement_directory": null,
+    "new_latency_result": null
+  },
+  "limitations": [
+    "The /ready success branch was reached, but the subsequent immediate gate requiring one active revision with replicas==1 failed.",
+    "The failed pre-measurement revision snapshot was not emitted before the assertion. The exact value that failed was not retained; control-plane propagation is a possibility, not a proven cause.",
+    "During cleanup, Azure briefly retained a replica record whose top-level runningState was NotRunning although nested container fields still said Running/ready. The later independent read returned no replica records.",
+    "The controller stopped immediately at that snapshot; it did not wait for the revision summary and live replica details to converge. No service/model failure or latency result is established."
+  ],
+  "protected_file_hashes_before": {
+    "README.md": "868315028025a0a4655d320cb3cdca49125a8267a147a4303aef6ae2e15198ff",
+    "reports/lab3-load.md": "b291ba1fe9b5352f9e1e989147d62ae25977d74c8fb201714b43ad42b2abf90e",
+    "cloud.env": "4ce98fca2c2803ef58dac2e1c25f0b1dae07b2b58ea0a0f46f9dbf635c91bcbc",
+    "scripts/loadtest.sh": "21f63c539e89342783811dbbe8ed965669ce325ef7f4e3754d399259ef801ef1",
+    "loadtest/k6.js": "0ec2465a18892281498f4a7ccecfe08125e2d25997669aed5c2e8455b4dd2c1d",
+    "loadtest/payload-compare.js": "e8f05ed7aaa37878eaf993f65741d0fc3e845a121d10dfdbdf1f806f4e27a664",
+    "tests/k6.test.js": "485ae61a56049843187ea4d789c14d1ef207b6bc11ab5dd5012a70ae1169b8ee",
+    "service/app.py": "69ade607fc4fdb64413d82a4a382b5efb2d37b112dd3bea8df19eb863ed49cfe",
+    "service/schemas.py": "76e0541a92144e52d2e0bea48df1d226bd685ab212f05aea5797db090db1b157",
+    "service/Dockerfile.serve": "9eeda79f48024f430d5690b7c40dd1a4be2bd52bc3ebe2cf4d1836139ee42c4f",
+    "src/__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "src/seeds.py": "687081113af72316fd029b0aa70195558959787108a18ead577251ad06cd5491",
+    "src/data.py": "4df8271b3193926b0c75d1b0213c8ade76d3beb16b62cc1bf177c542f2b50e49",
+    "src/config.py": "35319f45cd7f608ba706fbb6f16f170d97b7229164705565c8c24e9d554dec49",
+    "cloudlayer/__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "cloudlayer/factory.py": "87adb185301df447f5986b616b96e2c506c5c9c8d2851708bf1567b8ccfffe1a",
+    "cloudlayer/azure.py": "aa0d842942e7b7184d9907a3e2a6dd62572147f801336a0bfce1a3c946420adf",
+    "cloudlayer/base.py": "46956918fe9966693276355a4614e3866ecb07904f18feece8391c16d91a5f04",
+    "cloudlayer/tests/test_deployment.py": "ddaa8fca935778ee6e19572c5fd62332d266dba3c8a3938425fc7e11f723350e",
+    "reports/loadtest/run-20260921T125418Z-vus10-UkNvoc/console.log": "d9a547e40f2463de2b4d2c67f1f29122c6391dd7d11bd0a888a39e2a676b9d51",
+    "reports/loadtest/run-20260921T125418Z-vus10-UkNvoc/exit-code.txt": "7e332bcee418f7d700927c946d36341f0651d6d90997b58d3d5441dec96b2e74",
+    "reports/loadtest/run-20260921T125418Z-vus10-UkNvoc/summary.json": "a7eb103396270ee758460aa1dbf372550c4c943ab12d72a18aa314ecd8c4e9a7",
+    "reports/loadtest/payload-compare-20260923T073726Z-vus1-cvKDzk/azure-state.json": "dfce7ce92e0dd9fb9b963beac9c8558226685d5fb6fb40951b4fa39d8081d149",
+    "reports/loadtest/payload-compare-20260923T073726Z-vus1-cvKDzk/console.log": "b12ee24ab9b0052097d3f21978a177ffbea033a29d1a283a4b2cde3370c77795",
+    "reports/loadtest/payload-compare-20260923T073726Z-vus1-cvKDzk/exit-code.txt": "7e332bcee418f7d700927c946d36341f0651d6d90997b58d3d5441dec96b2e74",
+    "reports/loadtest/payload-compare-20260923T073726Z-vus1-cvKDzk/summary.json": "d4c0139cbf83ae90e2bc8d9a36aad41775cb4dd3da36f3a20c6bd60fac0323c4",
+    "reports/loadtest/run-20260921T125522Z-vus50-xASsQN/console.log": "9c955e9b727994964bbfc787976f37fabf674d80a7761841bd1dff7f5e8c0b6c",
+    "reports/loadtest/run-20260921T125522Z-vus50-xASsQN/exit-code.txt": "7e332bcee418f7d700927c946d36341f0651d6d90997b58d3d5441dec96b2e74",
+    "reports/loadtest/run-20260921T125522Z-vus50-xASsQN/summary.json": "74f783ff26e1fa356337a2522246438521121b93f19babad2391db15ebc166c3",
+    "reports/loadtest/run-20260923T082619Z-vus10-38S6Ty/console.log": "7c1dcdce8c35ebed98ea17cfbea77893ce99b0ee3f10c6cc8ab6cd268db70b36",
+    "reports/loadtest/run-20260923T082619Z-vus10-38S6Ty/exit-code.txt": "7e332bcee418f7d700927c946d36341f0651d6d90997b58d3d5441dec96b2e74",
+    "reports/loadtest/run-20260923T082619Z-vus10-38S6Ty/summary.json": "432809ff723d34792df08c47e6a93ac192810fe43673c10e07ce4ce49d4e0a23",
+    "reports/loadtest/payload-compare-20260923T080321Z-vus1-KwGliW/azure-state.json": "8a616972ff40f437897e39a720c6e6a126b7cdb1c90a37f9b50c06d845b15a87",
+    "reports/loadtest/payload-compare-20260923T080321Z-vus1-KwGliW/console.log": "5aff3a74b61aeedb2055999c6c04fc21b6bb6b9bd9338e6867ccaaeb7ea03dfb",
+    "reports/loadtest/payload-compare-20260923T080321Z-vus1-KwGliW/exit-code.txt": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "reports/loadtest/payload-compare-20260923T080321Z-vus1-KwGliW/summary.json": "34c11d7510e5de1fd17ebb647250532ab8a2a8e44f9d6b1c15f8a2ee29ad94ce",
+    "reports/loadtest/batch-compare-20260923T050412Z-vus1-WV9qzQ/azure-state.json": "217f475324e25cdf8e800f1b25f585c6fd2598df9ebbd5dd0149fb29519b95b3",
+    "reports/loadtest/batch-compare-20260923T050412Z-vus1-WV9qzQ/console.log": "558cb5a21a5b594c69b93c6a9dd2ae83412a41f599b20f0d931ee009b3eeea97",
+    "reports/loadtest/batch-compare-20260923T050412Z-vus1-WV9qzQ/exit-code.txt": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "reports/loadtest/batch-compare-20260923T050412Z-vus1-WV9qzQ/summary.json": "4e5da92aeb784ebd581e342d230344c922c3122a64ae0333a1adf8a019c47a4a",
+    "reports/loadtest/deploy-smoke-20260923T064737Z/azure-state.json": "571e60cb7c5396aa1da478cfab4d1ff2389c443d5facf1a49cf4b3467236c609",
+    "reports/loadtest/run-20260923T082341Z-vus10-mDq4V8/azure-state.json": "509c8e1dbd12b2af593b11f21255246ad63649218232df85e15ffc337a1206d9",
+    "reports/loadtest/run-20260923T082341Z-vus10-mDq4V8/console.log": "5cc65343fdf31044ec62cb89c841709626060ded6d45850386a9ba9b5d87b189",
+    "reports/loadtest/run-20260923T082341Z-vus10-mDq4V8/exit-code.txt": "7e332bcee418f7d700927c946d36341f0651d6d90997b58d3d5441dec96b2e74",
+    "reports/loadtest/run-20260923T082341Z-vus10-mDq4V8/summary.json": "79722b53e488e9bf7026621ba2f0aa32d12d951ffd4a94e6940b177af9d32e90",
+    "reports/loadtest/cold-start-20260922T065139Z-vus1-blYweB/azure-state.json": "0a86bd225ef0d7b142817ed5ce50c46417aa1c0cd5fdfb4e4cf92d5faac6e526",
+    "reports/loadtest/cold-start-20260922T065139Z-vus1-blYweB/console.log": "371aeb395a832fcf0879c24bcb2bd3bcbe6237bce2f4c26bd6d7eb512c56a6c0",
+    "reports/loadtest/cold-start-20260922T065139Z-vus1-blYweB/exit-code.txt": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "reports/loadtest/cold-start-20260922T065139Z-vus1-blYweB/summary.json": "679d1ecf2aa4ec9688639a99c29b0f39cc8f24ea9d4b300ecfed250ee7b8f632",
+    "reports/loadtest/payload-compare-20260923T070821Z-vus1-4SVIt8/azure-state.json": "ea2cc6025f22eceb701b295ac1bc5ae98d4824baf08d440ef9334b0bc75ab14b",
+    "reports/loadtest/payload-compare-20260923T070821Z-vus1-4SVIt8/console.log": "4ec50b9e568a7e9606cf85ca6c36c4864eb066e9be8477936d63d8440a1d797b",
+    "reports/loadtest/payload-compare-20260923T070821Z-vus1-4SVIt8/exit-code.txt": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "reports/loadtest/payload-compare-20260923T070821Z-vus1-4SVIt8/summary.json": "082e6889a23bd88078c0f7cb26ca5febec7ca70e749a67cbe4899d7d25daa901",
+    "reports/loadtest/run-20260921T125313Z-vus1-wzAVTM/console.log": "bdb4b8debd3a5ded4a9c0c5dbcaad77fcf15f72a5068a7dfa352300c9393727d",
+    "reports/loadtest/run-20260921T125313Z-vus1-wzAVTM/exit-code.txt": "7e332bcee418f7d700927c946d36341f0651d6d90997b58d3d5441dec96b2e74",
+    "reports/loadtest/run-20260921T125313Z-vus1-wzAVTM/summary.json": "7d3b7f6bafe6c198da0d01b2804bcc8f52c4b6854e3575a129eca64733e00aa6"
+  },
+  "older_evidence_files": 37
+}

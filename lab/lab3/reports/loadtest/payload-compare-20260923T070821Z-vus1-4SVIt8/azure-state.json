@@ -1,0 +1,537 @@
+{
+  "kind": "azure-warm-payload-experiment",
+  "preflight": {
+    "checked_at": "2026-09-23T07:05:51.901567+00:00",
+    "wsl_ipv4": "PUBLIC_IP_1",
+    "docker_ipv4": "PUBLIC_IP_1",
+    "desired": {
+      "id": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.App/containerapps/ca-itcs355-u6688124-lab3",
+      "location": "Malaysia West",
+      "tags": {
+        "course": "itcs355",
+        "lab": "3",
+        "student": "itcs355-u6688124"
+      },
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourcegroups/itcs355-u6688124/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-itcs355-u6688124-lab3": {
+            "clientId": "75aec690-afbb-4f2f-a645-236eeb671024",
+            "principalId": "14012060-3ce7-4438-a324-844f522e5ad7"
+          }
+        }
+      },
+      "properties": {
+        "configuration": {
+          "activeRevisionsMode": "Single",
+          "dapr": null,
+          "identitySettings": [],
+          "ingress": {
+            "additionalPortMappings": null,
+            "allowInsecure": false,
+            "clientCertificateMode": null,
+            "corsPolicy": null,
+            "customDomains": null,
+            "exposedPort": 0,
+            "external": true,
+            "fqdn": "ca-itcs355-u6688124-lab3.kindgrass-9f6d03ba.malaysiawest.azurecontainerapps.io",
+            "ipSecurityRestrictions": [
+              {
+                "action": "Allow",
+                "ipAddressRange": "PUBLIC_IP_1/32",
+                "name": "lab3-client"
+              }
+            ],
+            "stickySessions": null,
+            "targetPort": 8080,
+            "traffic": [
+              {
+                "latestRevision": true,
+                "weight": 100
+              }
+            ],
+            "transport": "Auto"
+          },
+          "maxInactiveRevisions": 100,
+          "registries": [
+            {
+              "identity": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourcegroups/itcs355-u6688124/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-itcs355-u6688124-lab3",
+              "passwordSecretRef": "",
+              "server": "itcs355u6688124.azurecr.io",
+              "username": ""
+            }
+          ],
+          "runtime": null,
+          "secrets": null,
+          "service": null
+        },
+        "environmentId": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.App/managedEnvironments/cae-itcs355-u6688124-lab3",
+        "managedEnvironmentId": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.App/managedEnvironments/cae-itcs355-u6688124-lab3",
+        "template": {
+          "containers": [
+            {
+              "args": [
+                "service.app:app",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "8080",
+                "--workers",
+                "1"
+              ],
+              "command": [
+                "uvicorn"
+              ],
+              "env": [
+                {
+                  "name": "CLOUD_PROVIDER",
+                  "value": "azure"
+                },
+                {
+                  "name": "MLFLOW_TRACKING_URI",
+                  "value": "azureml://malaysiawest.api.azureml.ms/mlflow/v1.0/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.MachineLearningServices/workspaces/mlw-itcs355-u6688124"
+                },
+                {
+                  "name": "MODEL_REGISTRY_NAME",
+                  "value": "itcs355-u6688124"
+                },
+                {
+                  "name": "MODEL_VERSION",
+                  "value": "1"
+                },
+                {
+                  "name": "AZURE_CLIENT_ID",
+                  "value": "75aec690-afbb-4f2f-a645-236eeb671024"
+                }
+              ],
+              "image": "itcs355u6688124.azurecr.io/itcs355-lab3@sha256:688d36dd527294d20107908fd610df7261feb69db2ead30d585208f96aba3061",
+              "name": "api",
+              "probes": [
+                {
+                  "failureThreshold": 3,
+                  "httpGet": {
+                    "path": "/health",
+                    "port": 8080
+                  },
+                  "periodSeconds": 10,
+                  "timeoutSeconds": 5,
+                  "type": "Liveness"
+                },
+                {
+                  "failureThreshold": 3,
+                  "httpGet": {
+                    "path": "/ready",
+                    "port": 8080
+                  },
+                  "periodSeconds": 5,
+                  "timeoutSeconds": 5,
+                  "type": "Readiness"
+                },
+                {
+                  "failureThreshold": 10,
+                  "httpGet": {
+                    "path": "/ready",
+                    "port": 8080
+                  },
+                  "initialDelaySeconds": 1,
+                  "periodSeconds": 30,
+                  "timeoutSeconds": 5,
+                  "type": "Startup"
+                }
+              ],
+              "resources": {
+                "cpu": 0.5,
+                "ephemeralStorage": "2Gi",
+                "memory": "1Gi"
+              }
+            }
+          ],
+          "initContainers": null,
+          "revisionSuffix": "",
+          "scale": {
+            "cooldownPeriod": 300,
+            "maxReplicas": 1,
+            "minReplicas": 0,
+            "pollingInterval": 30,
+            "rules": [
+              {
+                "http": {
+                  "metadata": {
+                    "concurrentRequests": "10"
+                  }
+                },
+                "name": "http"
+              }
+            ]
+          },
+          "serviceBinds": null,
+          "terminationGracePeriodSeconds": null,
+          "volumes": null
+        },
+        "workloadProfileName": "Consumption",
+        "delegatedIdentities": []
+      }
+    },
+    "state": {
+      "runningStatus": "Stopped",
+      "provisioningState": "Succeeded",
+      "latestRevisionName": "ca-itcs355-u6688124-lab3--0000001",
+      "latestReadyRevisionName": "ca-itcs355-u6688124-lab3--0000001"
+    },
+    "dirs_before": []
+  },
+  "readiness_checks": [
+    {
+      "checked_at": "2026-09-23T07:07:36.140839+00:00",
+      "error": "The read operation timed out"
+    },
+    {
+      "checked_at": "2026-09-23T07:07:51.269836+00:00",
+      "error": "The read operation timed out"
+    },
+    {
+      "checked_at": "2026-09-23T07:08:06.410158+00:00",
+      "error": "The read operation timed out"
+    },
+    {
+      "checked_at": "2026-09-23T07:08:20.134499+00:00",
+      "status": 200,
+      "body": {
+        "status": "ready",
+        "model_version": "1"
+      }
+    }
+  ],
+  "start_requested_at": "2026-09-23T07:07:24.832243+00:00",
+  "ready_at": "2026-09-23T07:08:20.134664+00:00",
+  "before_load_state": {
+    "runningStatus": "Running",
+    "provisioningState": "Succeeded",
+    "latestRevisionName": "ca-itcs355-u6688124-lab3--0000001",
+    "latestReadyRevisionName": "ca-itcs355-u6688124-lab3--0000001"
+  },
+  "replicas_before": {
+    "checked_at": "2026-09-23T07:08:21.804499+00:00",
+    "replicas": [
+      {
+        "name": "ca-itcs355-u6688124-lab3--0000001-d6fb49c4b-2gj4m",
+        "properties": {
+          "runningState": "Running",
+          "runningStateDetails": ""
+        },
+        "containers": [
+          {
+            "name": "api",
+            "ready": true,
+            "started": true,
+            "restartCount": 0,
+            "runningState": "Running",
+            "runningStateDetails": "Container started at: 9/23/2026 7:07:47 AM."
+          }
+        ]
+      }
+    ]
+  },
+  "load_started_at": "2026-09-23T07:08:21.804556+00:00",
+  "load_finished_at": "2026-09-23T07:08:27.632729+00:00",
+  "make_exit_code": 0,
+  "result_directories": [
+    "reports/loadtest/payload-compare-20260923T070821Z-vus1-4SVIt8"
+  ],
+  "replicas_after": {
+    "checked_at": "2026-09-23T07:08:28.404949+00:00",
+    "replicas": [
+      {
+        "name": "ca-itcs355-u6688124-lab3--0000001-d6fb49c4b-2gj4m",
+        "properties": {
+          "runningState": "Running",
+          "runningStateDetails": ""
+        },
+        "containers": [
+          {
+            "name": "api",
+            "ready": true,
+            "started": true,
+            "restartCount": 0,
+            "runningState": "Running",
+            "runningStateDetails": "Container started at: 9/23/2026 7:07:47 AM."
+          }
+        ]
+      }
+    ]
+  },
+  "after_load_state": {
+    "runningStatus": "Running",
+    "provisioningState": "Succeeded",
+    "latestRevisionName": "ca-itcs355-u6688124-lab3--0000001",
+    "latestReadyRevisionName": "ca-itcs355-u6688124-lab3--0000001"
+  },
+  "stop_requested_at": "2026-09-23T07:08:29.292544+00:00",
+  "stop_attempts": [
+    {
+      "at": "2026-09-23T07:08:30.247193+00:00",
+      "accepted": true
+    }
+  ],
+  "final_checked_at": "2026-09-23T07:08:36.726547+00:00",
+  "final_state": {
+    "runningStatus": "Stopped",
+    "provisioningState": "Succeeded",
+    "latestRevisionName": "ca-itcs355-u6688124-lab3--0000001",
+    "latestReadyRevisionName": "ca-itcs355-u6688124-lab3--0000001"
+  },
+  "final_desired": {
+    "id": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.App/containerapps/ca-itcs355-u6688124-lab3",
+    "location": "Malaysia West",
+    "tags": {
+      "course": "itcs355",
+      "lab": "3",
+      "student": "itcs355-u6688124"
+    },
+    "identity": {
+      "type": "UserAssigned",
+      "userAssignedIdentities": {
+        "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourcegroups/itcs355-u6688124/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-itcs355-u6688124-lab3": {
+          "clientId": "75aec690-afbb-4f2f-a645-236eeb671024",
+          "principalId": "14012060-3ce7-4438-a324-844f522e5ad7"
+        }
+      }
+    },
+    "properties": {
+      "configuration": {
+        "activeRevisionsMode": "Single",
+        "dapr": null,
+        "identitySettings": [],
+        "ingress": {
+          "additionalPortMappings": null,
+          "allowInsecure": false,
+          "clientCertificateMode": null,
+          "corsPolicy": null,
+          "customDomains": null,
+          "exposedPort": 0,
+          "external": true,
+          "fqdn": "ca-itcs355-u6688124-lab3.kindgrass-9f6d03ba.malaysiawest.azurecontainerapps.io",
+          "ipSecurityRestrictions": [
+            {
+              "action": "Allow",
+              "ipAddressRange": "PUBLIC_IP_1/32",
+              "name": "lab3-client"
+            }
+          ],
+          "stickySessions": null,
+          "targetPort": 8080,
+          "traffic": [
+            {
+              "latestRevision": true,
+              "weight": 100
+            }
+          ],
+          "transport": "Auto"
+        },
+        "maxInactiveRevisions": 100,
+        "registries": [
+          {
+            "identity": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourcegroups/itcs355-u6688124/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-itcs355-u6688124-lab3",
+            "passwordSecretRef": "",
+            "server": "itcs355u6688124.azurecr.io",
+            "username": ""
+          }
+        ],
+        "runtime": null,
+        "secrets": null,
+        "service": null
+      },
+      "environmentId": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.App/managedEnvironments/cae-itcs355-u6688124-lab3",
+      "managedEnvironmentId": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.App/managedEnvironments/cae-itcs355-u6688124-lab3",
+      "template": {
+        "containers": [
+          {
+            "args": [
+              "service.app:app",
+              "--host",
+              "0.0.0.0",
+              "--port",
+              "8080",
+              "--workers",
+              "1"
+            ],
+            "command": [
+              "uvicorn"
+            ],
+            "env": [
+              {
+                "name": "CLOUD_PROVIDER",
+                "value": "azure"
+              },
+              {
+                "name": "MLFLOW_TRACKING_URI",
+                "value": "azureml://malaysiawest.api.azureml.ms/mlflow/v1.0/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.MachineLearningServices/workspaces/mlw-itcs355-u6688124"
+              },
+              {
+                "name": "MODEL_REGISTRY_NAME",
+                "value": "itcs355-u6688124"
+              },
+              {
+                "name": "MODEL_VERSION",
+                "value": "1"
+              },
+              {
+                "name": "AZURE_CLIENT_ID",
+                "value": "75aec690-afbb-4f2f-a645-236eeb671024"
+              }
+            ],
+            "image": "itcs355u6688124.azurecr.io/itcs355-lab3@sha256:688d36dd527294d20107908fd610df7261feb69db2ead30d585208f96aba3061",
+            "name": "api",
+            "probes": [
+              {
+                "failureThreshold": 3,
+                "httpGet": {
+                  "path": "/health",
+                  "port": 8080
+                },
+                "periodSeconds": 10,
+                "timeoutSeconds": 5,
+                "type": "Liveness"
+              },
+              {
+                "failureThreshold": 3,
+                "httpGet": {
+                  "path": "/ready",
+                  "port": 8080
+                },
+                "periodSeconds": 5,
+                "timeoutSeconds": 5,
+                "type": "Readiness"
+              },
+              {
+                "failureThreshold": 10,
+                "httpGet": {
+                  "path": "/ready",
+                  "port": 8080
+                },
+                "initialDelaySeconds": 1,
+                "periodSeconds": 30,
+                "timeoutSeconds": 5,
+                "type": "Startup"
+              }
+            ],
+            "resources": {
+              "cpu": 0.5,
+              "ephemeralStorage": "2Gi",
+              "memory": "1Gi"
+            }
+          }
+        ],
+        "initContainers": null,
+        "revisionSuffix": "",
+        "scale": {
+          "cooldownPeriod": 300,
+          "maxReplicas": 1,
+          "minReplicas": 0,
+          "pollingInterval": 30,
+          "rules": [
+            {
+              "http": {
+                "metadata": {
+                  "concurrentRequests": "10"
+                }
+              },
+              "name": "http"
+            }
+          ]
+        },
+        "serviceBinds": null,
+        "terminationGracePeriodSeconds": null,
+        "volumes": null
+      },
+      "workloadProfileName": "Consumption",
+      "delegatedIdentities": []
+    }
+  },
+  "configuration_unchanged": true,
+  "stop_confirmed": true,
+  "independent_result_audit": {
+    "passed": true,
+    "raw_records": 84,
+    "warmup_records": 4,
+    "measured_records": 80,
+    "unique_request_ids": 84,
+    "all_predictions_match": true,
+    "all_statuses": 200,
+    "all_timing_headers_valid": true,
+    "rotating_order_verified": true,
+    "independent_medians_match_summary_and_native_k6": true,
+    "native_thresholds_passed": 37,
+    "error_count": 0,
+    "timeout_count": 0,
+    "unfinished_requests": 0,
+    "table": [
+      {
+        "case": "original",
+        "bytes": 120,
+        "samples": 20,
+        "median_http_ms": 41.313272999999995,
+        "median_json_decode_ms": 0.021101,
+        "median_scoring_ms": 8.735123999999999,
+        "median_processing_ms": 10.114959500000001,
+        "median_json_share": 0.0020793309440357553,
+        "json_share_range": [
+          0.0017409233920125887,
+          0.0039053127090759253
+        ]
+      },
+      {
+        "case": "10KiB",
+        "bytes": 10240,
+        "samples": 20,
+        "median_http_ms": 41.6703805,
+        "median_json_decode_ms": 0.0309505,
+        "median_scoring_ms": 8.2191105,
+        "median_processing_ms": 9.178036,
+        "median_json_share": 0.003376895945603099,
+        "json_share_range": [
+          0.0025855482357246685,
+          0.00502695988301225
+        ]
+      },
+      {
+        "case": "100KiB",
+        "bytes": 102400,
+        "samples": 20,
+        "median_http_ms": 45.5515025,
+        "median_json_decode_ms": 0.133303,
+        "median_scoring_ms": 8.1392085,
+        "median_processing_ms": 9.2633375,
+        "median_json_share": 0.014395057172425132,
+        "json_share_range": [
+          0.01006595322853876,
+          0.12654791571134513
+        ]
+      },
+      {
+        "case": "1MiB",
+        "bytes": 1048576,
+        "samples": 20,
+        "median_http_ms": 100.807587,
+        "median_json_decode_ms": 1.1572795,
+        "median_scoring_ms": 8.248562,
+        "median_processing_ms": 10.402017,
+        "median_json_share": 0.11280783561419158,
+        "json_share_range": [
+          0.09421861890393865,
+          0.20876119880449692
+        ]
+      }
+    ],
+    "readme_unchanged": true,
+    "private_config_unchanged": true,
+    "source_and_tooling_match_commit": "0606ecbe5cd977361798cfd8adf44c819f83b322",
+    "result_file_sha256": {
+      "summary.json": "082e6889a23bd88078c0f7cb26ca5febec7ca70e749a67cbe4899d7d25daa901",
+      "console.log": "4ec50b9e568a7e9606cf85ca6c36c4864eb066e9be8477936d63d8440a1d797b",
+      "exit-code.txt": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    }
+  },
+  "scope_note": "One approved four-size experiment only. Readiness GETs are separate from the 84 k6 POST requests. No deployment, scaling, IP rule, model, source, README, Git commit or push change.",
+  "result_interpretation": "JSON decode did not exceed 50% median share of measured server processing at any tested size (120 B to 1 MiB). A crossover was not located; these results do not establish that one exists or lies above 1 MiB."
+}

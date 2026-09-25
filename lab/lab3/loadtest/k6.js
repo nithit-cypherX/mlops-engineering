@@ -20,7 +20,7 @@ const duration = __ENV.DURATION || '60s';
 
 export const options = {
   vus, duration,
-  gracefulStop: '15s', // Longer than the 10s warm-request timeout.
+  // Use k6's default 30s grace period, as in the measured runs.
   maxRedirects: 0,
   summaryTrendStats: ['min', 'med', 'p(95)', 'p(99)', 'max', 'count'],
   summaryTimeUnit: 'ms',

@@ -1,0 +1,118 @@
+{
+  "baseline": "ca-itcs355-u6688124-lab3--0000003",
+  "candidate": "ca-itcs355-u6688124-lab3--cny-20260924033116",
+  "candidate_version": "2",
+  "baseline_version": "1",
+  "template": {
+    "containers": [
+      {
+        "args": [
+          "service.app:app",
+          "--host",
+          "0.0.0.0",
+          "--port",
+          "8080",
+          "--workers",
+          "1"
+        ],
+        "command": [
+          "uvicorn"
+        ],
+        "env": [
+          {
+            "name": "CLOUD_PROVIDER",
+            "value": "azure"
+          },
+          {
+            "name": "MLFLOW_TRACKING_URI",
+            "value": "azureml://malaysiawest.api.azureml.ms/mlflow/v1.0/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.MachineLearningServices/workspaces/mlw-itcs355-u6688124"
+          },
+          {
+            "name": "MODEL_REGISTRY_NAME",
+            "value": "itcs355-u6688124"
+          },
+          {
+            "name": "MODEL_VERSION",
+            "value": "2"
+          },
+          {
+            "name": "AZURE_CLIENT_ID",
+            "value": "75aec690-afbb-4f2f-a645-236eeb671024"
+          }
+        ],
+        "image": "itcs355u6688124.azurecr.io/itcs355-lab3@sha256:688d36dd527294d20107908fd610df7261feb69db2ead30d585208f96aba3061",
+        "name": "api",
+        "probes": [
+          {
+            "failureThreshold": 3,
+            "httpGet": {
+              "path": "/health",
+              "port": 8080
+            },
+            "periodSeconds": 10,
+            "timeoutSeconds": 5,
+            "type": "Liveness"
+          },
+          {
+            "failureThreshold": 3,
+            "httpGet": {
+              "path": "/ready",
+              "port": 8080
+            },
+            "periodSeconds": 5,
+            "timeoutSeconds": 5,
+            "type": "Readiness"
+          },
+          {
+            "failureThreshold": 10,
+            "httpGet": {
+              "path": "/ready",
+              "port": 8080
+            },
+            "initialDelaySeconds": 1,
+            "periodSeconds": 30,
+            "timeoutSeconds": 5,
+            "type": "Startup"
+          }
+        ],
+        "resources": {
+          "cpu": 0.5,
+          "memory": "1Gi"
+        }
+      }
+    ],
+    "initContainers": null,
+    "revisionSuffix": "cny-20260924033116",
+    "scale": {
+      "cooldownPeriod": null,
+      "maxReplicas": 1,
+      "minReplicas": 0,
+      "pollingInterval": null,
+      "rules": [
+        {
+          "http": {
+            "metadata": {
+              "concurrentRequests": "10"
+            }
+          },
+          "name": "http"
+        }
+      ]
+    },
+    "serviceBinds": null,
+    "terminationGracePeriodSeconds": null,
+    "volumes": null
+  },
+  "location": "Malaysia West",
+  "models": {
+    "1": {
+      "run_id": "8087ae5c-d06f-411e-b6b0-7f7891ffe7ed",
+      "status": "READY"
+    },
+    "2": {
+      "run_id": "1730032f-4352-4781-99dc-687b35f1778c",
+      "status": "READY"
+    }
+  },
+  "endpoint": "https://ca-itcs355-u6688124-lab3.kindgrass-9f6d03ba.malaysiawest.azurecontainerapps.io"
+}

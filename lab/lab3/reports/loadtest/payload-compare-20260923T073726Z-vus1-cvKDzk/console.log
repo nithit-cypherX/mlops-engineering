@@ -1,0 +1,156 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+
+     execution: local
+        script: /work/loadtest/payload-compare.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 1 max VUs, 3m0s max duration (incl. graceful stop):
+              * comparison: 1 iterations shared among 1 VUs (maxDuration: 3m0s)
+
+time="2026-09-23T07:37:27Z" level=info msg="{\"kind\":\"payload-comparison-request\",\"phase\":\"warmup\",\"round\":0,\"case\":\"1MiB\",\"bytes\":1048576,\"valid\":true,\"reason\":null,\"status\":200,\"error_code\":null,\"timeout\":false,\"probability\":0.00737357519563027,\"http_ms\":266.541951,\"server\":{\"json_decode_ms\":1.447837,\"scoring_ms\":7.677497,\"processing_ms\":9.904054,\"json_share\":0.14618629906500913},\"server_timing_header\":\"json_decode;dur=1.447837, scoring;dur=7.677497, processing;dur=9.904054\",\"request_id\":\"1bcac320-979b-461d-9e86-c4eb9ba011ed\"}" source=console
+
+running (0m00.9s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m00.9s/3m0s  0/1 shared iters
+time="2026-09-23T07:37:28Z" level=info msg="{\"kind\":\"payload-comparison-request\",\"phase\":\"warmup\",\"round\":0,\"case\":\"4MiB\",\"bytes\":4194304,\"valid\":true,\"reason\":null,\"status\":200,\"error_code\":null,\"timeout\":false,\"probability\":0.00737357519563027,\"http_ms\":758.606017,\"server\":{\"json_decode_ms\":5.644945,\"scoring_ms\":7.346188,\"processing_ms\":13.773754,\"json_share\":0.40983344119547943},\"server_timing_header\":\"json_decode;dur=5.644945, scoring;dur=7.346188, processing;dur=13.773754\",\"request_id\":\"05b76ad6-78d4-4d8b-adc0-b4110b871d45\"}" source=console
+
+running (0m01.9s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m01.9s/3m0s  0/1 shared iters
+
+running (0m02.9s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m02.9s/3m0s  0/1 shared iters
+
+running (0m03.9s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m03.9s/3m0s  0/1 shared iters
+
+running (0m04.9s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m04.9s/3m0s  0/1 shared iters
+time="2026-09-23T07:37:32Z" level=info msg="{\"kind\":\"payload-comparison-request\",\"phase\":\"warmup\",\"round\":0,\"case\":\"8MiB\",\"bytes\":8388608,\"valid\":true,\"reason\":null,\"status\":200,\"error_code\":null,\"timeout\":false,\"probability\":0.00737357519563027,\"http_ms\":4188.205838,\"server\":{\"json_decode_ms\":11.284489,\"scoring_ms\":8.472218,\"processing_ms\":20.65103,\"json_share\":0.5464371026529913},\"server_timing_header\":\"json_decode;dur=11.284489, scoring;dur=8.472218, processing;dur=20.651030\",\"request_id\":\"9729fb99-c8fe-4a28-a915-40d8c5287190\"}" source=console
+
+running (0m05.9s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m05.9s/3m0s  0/1 shared iters
+
+running (0m06.9s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m06.9s/3m0s  0/1 shared iters
+
+running (0m07.9s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m07.9s/3m0s  0/1 shared iters
+
+running (0m08.9s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m08.9s/3m0s  0/1 shared iters
+
+running (0m09.9s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m09.9s/3m0s  0/1 shared iters
+
+running (0m10.9s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m10.9s/3m0s  0/1 shared iters
+
+running (0m11.9s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m11.9s/3m0s  0/1 shared iters
+
+running (0m12.9s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m12.9s/3m0s  0/1 shared iters
+
+running (0m13.9s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m13.9s/3m0s  0/1 shared iters
+
+running (0m14.9s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m14.9s/3m0s  0/1 shared iters
+time="2026-09-23T07:37:42Z" level=warning msg="Request Failed" error="Post \"https://ca-itcs355-u6688124-lab3.kindgrass-9f6d03ba.malaysiawest.azurecontainerapps.io/predict\": request timeout"
+time="2026-09-23T07:37:42Z" level=info msg="{\"kind\":\"payload-comparison-request\",\"phase\":\"warmup\",\"round\":0,\"case\":\"16MiB\",\"bytes\":16777216,\"valid\":false,\"reason\":\"invalid-response\",\"status\":0,\"error_code\":1050,\"timeout\":true,\"probability\":null,\"http_ms\":9997.730572,\"server\":null,\"server_timing_header\":null,\"request_id\":null}" source=console
+{
+  "kind": "warm-payload-comparison",
+  "target": "https://ca-itcs355-u6688124-lab3.kindgrass-9f6d03ba.malaysiawest.azurecontainerapps.io/predict",
+  "started_utc": "2026-09-23T07:37:27Z",
+  "git_sha": "a41ec75e1b8c9bc2f41a908ced5437bec5309a68",
+  "git_dirty": "true",
+  "script_sha256": "5002db961f086bfc10086d40f9924d7dbdb4e4b13f21143b5291dc9bacafc751",
+  "shared_script_sha256": "49bb20dddf1b902c986711b636ac5c8444d02cf3c5da4d43f9845c12d3cbf221",
+  "payload_cases_sha256": "509daa724ff04df3179077f452551d90514e94811a34949136d8f22cef79d06e",
+  "k6_image": "grafana/k6@sha256:9bd01d6941fca969cb61bb57d2da5ee9b385fe2aa8881df3798c196564d6ace6",
+  "model_version": "1",
+  "vus": 1,
+  "rounds": 20,
+  "rows_per_request": 1,
+  "request_timeout": "10s",
+  "max_duration": "180s",
+  "graceful_stop": "0s",
+  "absolute_tolerance": 1e-9,
+  "timing": "HTTP duration separate from server timings; bodies prebuilt; warm-up excluded from medians",
+  "order": "case index = (zero-based round + position) modulo 4",
+  "majority_rule": "median of per-request json_decode / processing > 0.5; not share of HTTP time",
+  "requests": 4,
+  "warmup_requests": 4,
+  "measured_requests": 0,
+  "attempts": 4,
+  "completed_requests": 4,
+  "unfinished_requests": 0,
+  "error_count": 1,
+  "timeout_count": 1,
+  "valid_comparison": false,
+  "cases": [
+    {
+      "case": "1MiB",
+      "bytes": 1048576,
+      "measured_requests": 0,
+      "timing_samples": 0,
+      "complete": false,
+      "median_http_ms": null,
+      "median_json_decode_ms": null,
+      "median_scoring_ms": null,
+      "median_processing_ms": null,
+      "median_json_share": null,
+      "json_majority": null
+    },
+    {
+      "case": "4MiB",
+      "bytes": 4194304,
+      "measured_requests": 0,
+      "timing_samples": 0,
+      "complete": false,
+      "median_http_ms": null,
+      "median_json_decode_ms": null,
+      "median_scoring_ms": null,
+      "median_processing_ms": null,
+      "median_json_share": null,
+      "json_majority": null
+    },
+    {
+      "case": "8MiB",
+      "bytes": 8388608,
+      "measured_requests": 0,
+      "timing_samples": 0,
+      "complete": false,
+      "median_http_ms": null,
+      "median_json_decode_ms": null,
+      "median_scoring_ms": null,
+      "median_processing_ms": null,
+      "median_json_share": null,
+      "json_majority": null
+    },
+    {
+      "case": "16MiB",
+      "bytes": 16777216,
+      "measured_requests": 0,
+      "timing_samples": 0,
+      "complete": false,
+      "median_http_ms": null,
+      "median_json_decode_ms": null,
+      "median_scoring_ms": null,
+      "median_processing_ms": null,
+      "median_json_share": null,
+      "json_majority": null
+    }
+  ],
+  "conclusion": "invalid-comparison",
+  "first_tested_json_majority_bytes": null
+}
+
+running (0m15.4s), 0/1 VUs, 1 complete and 0 interrupted iterations
+comparison ✓ [ 100% ] 1 VUs  0m15.3s/3m0s  1/1 shared iters
+time="2026-09-23T07:37:42Z" level=error msg="thresholds on metrics 'checks, http_reqs, http_reqs{phase:measured}, payload_attempts, payload_completed, payload_errors, payload_measured{case:16MiB}, payload_measured{case:1MiB}, payload_measured{case:4MiB}, payload_measured{case:8MiB}, payload_processing_ms{case:16MiB}, payload_processing_ms{case:1MiB}, payload_processing_ms{case:4MiB}, payload_processing_ms{case:8MiB}, payload_timeouts' have been crossed"

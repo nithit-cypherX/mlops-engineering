@@ -1,0 +1,208 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+
+     execution: local
+        script: /work/loadtest/cold-start.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 1 max VUs, 2m15s max duration (incl. graceful stop):
+              * first_prediction: 1 iterations shared among 1 VUs (maxDuration: 2m10s, gracefulStop: 5s)
+
+
+running (0m01.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m01.0s/2m10s  0/1 shared iters
+
+running (0m02.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m02.0s/2m10s  0/1 shared iters
+
+running (0m03.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m03.0s/2m10s  0/1 shared iters
+
+running (0m04.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m04.0s/2m10s  0/1 shared iters
+
+running (0m05.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m05.0s/2m10s  0/1 shared iters
+
+running (0m06.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m06.0s/2m10s  0/1 shared iters
+
+running (0m07.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m07.0s/2m10s  0/1 shared iters
+
+running (0m08.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m08.0s/2m10s  0/1 shared iters
+
+running (0m09.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m09.0s/2m10s  0/1 shared iters
+
+running (0m10.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m10.0s/2m10s  0/1 shared iters
+
+running (0m11.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m11.0s/2m10s  0/1 shared iters
+
+running (0m12.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m12.0s/2m10s  0/1 shared iters
+
+running (0m13.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m13.0s/2m10s  0/1 shared iters
+
+running (0m14.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m14.0s/2m10s  0/1 shared iters
+
+running (0m15.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m15.0s/2m10s  0/1 shared iters
+
+running (0m16.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m16.0s/2m10s  0/1 shared iters
+
+running (0m17.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m17.0s/2m10s  0/1 shared iters
+
+running (0m18.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m18.0s/2m10s  0/1 shared iters
+
+running (0m19.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m19.0s/2m10s  0/1 shared iters
+
+running (0m20.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m20.0s/2m10s  0/1 shared iters
+
+running (0m21.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m21.0s/2m10s  0/1 shared iters
+
+running (0m22.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m22.0s/2m10s  0/1 shared iters
+
+running (0m23.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m23.0s/2m10s  0/1 shared iters
+
+running (0m24.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m24.0s/2m10s  0/1 shared iters
+
+running (0m25.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m25.0s/2m10s  0/1 shared iters
+
+running (0m26.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m26.0s/2m10s  0/1 shared iters
+
+running (0m27.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m27.0s/2m10s  0/1 shared iters
+
+running (0m28.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m28.0s/2m10s  0/1 shared iters
+
+running (0m29.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m29.0s/2m10s  0/1 shared iters
+
+running (0m30.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m30.0s/2m10s  0/1 shared iters
+
+running (0m31.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m31.0s/2m10s  0/1 shared iters
+
+running (0m32.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m32.0s/2m10s  0/1 shared iters
+
+running (0m33.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m33.0s/2m10s  0/1 shared iters
+
+running (0m34.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m34.0s/2m10s  0/1 shared iters
+
+running (0m35.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m35.0s/2m10s  0/1 shared iters
+
+running (0m36.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m36.0s/2m10s  0/1 shared iters
+
+running (0m37.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m37.0s/2m10s  0/1 shared iters
+
+running (0m38.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m38.0s/2m10s  0/1 shared iters
+
+running (0m39.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m39.0s/2m10s  0/1 shared iters
+
+running (0m40.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m40.0s/2m10s  0/1 shared iters
+
+running (0m41.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m41.0s/2m10s  0/1 shared iters
+
+running (0m42.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m42.0s/2m10s  0/1 shared iters
+
+running (0m43.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m43.0s/2m10s  0/1 shared iters
+
+running (0m44.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m44.0s/2m10s  0/1 shared iters
+
+running (0m45.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m45.0s/2m10s  0/1 shared iters
+
+running (0m46.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m46.0s/2m10s  0/1 shared iters
+
+running (0m47.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m47.0s/2m10s  0/1 shared iters
+
+running (0m48.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m48.0s/2m10s  0/1 shared iters
+
+running (0m49.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m49.0s/2m10s  0/1 shared iters
+
+running (0m50.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m50.0s/2m10s  0/1 shared iters
+
+running (0m51.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m51.0s/2m10s  0/1 shared iters
+
+running (0m52.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m52.0s/2m10s  0/1 shared iters
+
+running (0m53.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m53.0s/2m10s  0/1 shared iters
+
+running (0m54.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m54.0s/2m10s  0/1 shared iters
+
+running (0m55.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m55.0s/2m10s  0/1 shared iters
+
+running (0m56.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+first_prediction   [   0% ] 1 VUs  0m56.0s/2m10s  0/1 shared iters
+{
+  "kind": "cold-start-attempt",
+  "target": "https://ca-itcs355-u6688124-lab3.kindgrass-9f6d03ba.malaysiawest.azurecontainerapps.io/predict",
+  "started_utc": "2026-09-22T06:51:39Z",
+  "zero_replicas_confirmed_at": "2026-09-22T06:51:39Z",
+  "git_sha": "51ec9912b53e199f2d7092e78c2e51210412789a",
+  "git_dirty": "true",
+  "script_sha256": "d88b170396c32c3506b4639f4fd24cd5a35c5723fadd7ad98a2c123c3ddddb51",
+  "shared_script_sha256": "49bb20dddf1b902c986711b636ac5c8444d02cf3c5da4d43f9845c12d3cbf221",
+  "k6_image": "grafana/k6@sha256:9bd01d6941fca969cb61bb57d2da5ee9b385fe2aa8881df3798c196564d6ace6",
+  "model_version": "1",
+  "request_timeout": "120s",
+  "requests": 1,
+  "completed_requests": 1,
+  "http_status": 200,
+  "error_code": 0,
+  "timeout": false,
+  "valid_prediction": true,
+  "outcome": "valid_prediction",
+  "client_elapsed_ms": 56769,
+  "http_duration_ms": 56652.591991
+}
+
+running (0m56.8s), 0/1 VUs, 1 complete and 0 interrupted iterations
+first_prediction ✓ [ 100% ] 1 VUs  0m56.8s/2m10s  1/1 shared iters

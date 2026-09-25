@@ -1,0 +1,63 @@
+{
+  "schema": "lab3-task4-canary-preflight/v1",
+  "status": "blocked_before_live_experiment",
+  "checks": [
+    {
+      "event": "data_preflight",
+      "at": "2026-09-24T03:12:01.489530+00:00",
+      "rows": 1200,
+      "positives": 121,
+      "unique_ids": 1200
+    },
+    {
+      "event": "client_ip_check",
+      "at": "2026-09-24T03:12:02.026583+00:00",
+      "matches_existing_allowlist": false
+    }
+  ],
+  "confirmation": {
+    "event": "live_preflight_blocker_confirmed",
+    "at": "2026-09-24T03:12:56.586268+00:00",
+    "reason": "current_client_ip_not_allowed",
+    "cloud_allow_rule_count": 1,
+    "cloud_allowlist_matches_local_config": false,
+    "current_client_ip_allowed_on_cloud": false,
+    "all_cloud_allow_rules_are_host_only": true,
+    "app": "ca-itcs355-u6688124-lab3",
+    "running_status": "Stopped",
+    "mode": "Single",
+    "traffic": [
+      {
+        "latestRevision": true,
+        "weight": 100
+      }
+    ],
+    "revisions": [
+      {
+        "name": "ca-itcs355-u6688124-lab3--w041wkb",
+        "active": false,
+        "replicas": 0
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--0000001",
+        "active": false,
+        "replicas": 0
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--0000002",
+        "active": false,
+        "replicas": 0
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--0000003",
+        "active": true,
+        "replicas": 0
+      }
+    ],
+    "live_experiment_started": false,
+    "cloud_mutations": 0
+  },
+  "scope": "Read-only preflight only. No app start, revision creation, traffic change, IP-rule change or prediction request.",
+  "next_required_decision": "Approve reconciling the configured client IP and the existing single-host Azure allow rule before another preflight.",
+  "privacy": "Actual public IP addresses are omitted from this evidence."
+}

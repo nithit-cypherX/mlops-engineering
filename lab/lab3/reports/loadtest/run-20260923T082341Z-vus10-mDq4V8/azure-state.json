@@ -1,0 +1,610 @@
+{
+  "experiment": "Task 3.4.3 — one sequential pair, 10 VUs for 60 seconds per size",
+  "git_sha": "2693c980b634fd24d4bf0148a7c250959eeaee6f",
+  "preflight": {
+    "checked_at": "2026-09-23T08:20:26.991343+00:00",
+    "state": {
+      "runningStatus": "Stopped",
+      "provisioningState": "Succeeded",
+      "latestRevisionName": "ca-itcs355-u6688124-lab3--0000001",
+      "latestReadyRevisionName": "ca-itcs355-u6688124-lab3--0000001"
+    },
+    "wsl_ipv4": "PUBLIC_IP_1",
+    "docker_ipv4": "PUBLIC_IP_1",
+    "docker_version": "29.6.1",
+    "k6_image": "grafana/k6@sha256:9bd01d6941fca969cb61bb57d2da5ee9b385fe2aa8881df3798c196564d6ace6",
+    "quota": {
+      "currentValue": 0,
+      "limit": 100,
+      "name": {
+        "localizedValue": "Managed Environment Consumption Cores",
+        "value": "ManagedEnvironmentConsumptionCores"
+      },
+      "usage": 0
+    },
+    "original_configuration_reference": "../payload-compare-20260923T080321Z-vus1-KwGliW/azure-state.json: final_configuration; preflight verified exact equality",
+    "protected_file_hashes": {
+      "README.md": "eaee67d1d01459f98898c1d803112379ab5660d2535e67290726eaf9d8fd4713",
+      "cloud.env": "4ce98fca2c2803ef58dac2e1c25f0b1dae07b2b58ea0a0f46f9dbf635c91bcbc",
+      "reports/lab3-load.md": "0389edd385e4f5fd31f7442325270b7a81b5a0bcbf99ee4aaa8dacbef8bcb053",
+      "loadtest/k6.js": "49bb20dddf1b902c986711b636ac5c8444d02cf3c5da4d43f9845c12d3cbf221",
+      "scripts/loadtest.sh": "21f63c539e89342783811dbbe8ed965669ce325ef7f4e3754d399259ef801ef1"
+    },
+    "older_evidence_files": 30
+  },
+  "controller_progress": [
+    "Starting existing app at 2026-09-23T08:22:42.891381+00:00",
+    "baseline ready at 2026-09-23T08:23:41.174950+00:00 revision=ca-itcs355-u6688124-lab3--0000001",
+    "Running baseline: 10 users, 60 seconds at 2026-09-23T08:23:41.174997+00:00",
+    "Applying only CPU/RAM increase at 2026-09-23T08:24:44.324345+00:00",
+    "larger ready at 2026-09-23T08:26:19.429456+00:00 revision=ca-itcs355-u6688124-lab3--0000002",
+    "Running larger: 10 users, 60 seconds at 2026-09-23T08:26:19.429530+00:00",
+    "Restoring original CPU/RAM at 2026-09-23T08:27:23.866012+00:00",
+    "Stopping app at 2026-09-23T08:27:36.648999+00:00",
+    "Final: {\"runningStatus\": \"Stopped\", \"provisioningState\": \"Succeeded\", \"latestRevisionName\": \"ca-itcs355-u6688124-lab3--0000003\", \"latestReadyRevisionName\": \"ca-itcs355-u6688124-lab3--0000002\"} restored=True"
+  ],
+  "trace_limitation": "The terminal truncated the controller's final large JSON. Full live before/after replica snapshots were not retained. Both k6 result directories are intact. The controller checked unchanged configuration, revision/replica identity and readiness, and zero restarts at each round boundary before reporting completion. The final configuration and immutable revision templates were independently re-read afterward; those readbacks do not recreate missing live snapshots.",
+  "preflight_tool_note": "The serving image has no curl binary. The Docker outbound-IP check used its existing Python instead; no install or cloud mutation occurred in preflight.",
+  "final_readback": {
+    "checked_at": "2026-09-23T08:28:48.928494+00:00",
+    "state": {
+      "runningStatus": "Stopped",
+      "provisioningState": "Succeeded",
+      "latestRevisionName": "ca-itcs355-u6688124-lab3--0000003",
+      "latestReadyRevisionName": "ca-itcs355-u6688124-lab3--0000002"
+    },
+    "configuration": {
+      "id": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.App/containerapps/ca-itcs355-u6688124-lab3",
+      "location": "Malaysia West",
+      "tags": {
+        "course": "itcs355",
+        "lab": "3",
+        "student": "itcs355-u6688124"
+      },
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourcegroups/itcs355-u6688124/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-itcs355-u6688124-lab3": {
+            "clientId": "75aec690-afbb-4f2f-a645-236eeb671024",
+            "principalId": "14012060-3ce7-4438-a324-844f522e5ad7"
+          }
+        }
+      },
+      "properties": {
+        "configuration": {
+          "activeRevisionsMode": "Single",
+          "dapr": null,
+          "identitySettings": [],
+          "ingress": {
+            "additionalPortMappings": null,
+            "allowInsecure": false,
+            "clientCertificateMode": null,
+            "corsPolicy": null,
+            "customDomains": null,
+            "exposedPort": 0,
+            "external": true,
+            "fqdn": "ca-itcs355-u6688124-lab3.kindgrass-9f6d03ba.malaysiawest.azurecontainerapps.io",
+            "ipSecurityRestrictions": [
+              {
+                "action": "Allow",
+                "ipAddressRange": "PUBLIC_IP_1/32",
+                "name": "lab3-client"
+              }
+            ],
+            "stickySessions": null,
+            "targetPort": 8080,
+            "traffic": [
+              {
+                "latestRevision": true,
+                "weight": 100
+              }
+            ],
+            "transport": "Auto"
+          },
+          "maxInactiveRevisions": 100,
+          "registries": [
+            {
+              "identity": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourcegroups/itcs355-u6688124/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-itcs355-u6688124-lab3",
+              "passwordSecretRef": "",
+              "server": "itcs355u6688124.azurecr.io",
+              "username": ""
+            }
+          ],
+          "runtime": null,
+          "secrets": null,
+          "service": null
+        },
+        "environmentId": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.App/managedEnvironments/cae-itcs355-u6688124-lab3",
+        "managedEnvironmentId": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.App/managedEnvironments/cae-itcs355-u6688124-lab3",
+        "template": {
+          "containers": [
+            {
+              "args": [
+                "service.app:app",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "8080",
+                "--workers",
+                "1"
+              ],
+              "command": [
+                "uvicorn"
+              ],
+              "env": [
+                {
+                  "name": "CLOUD_PROVIDER",
+                  "value": "azure"
+                },
+                {
+                  "name": "MLFLOW_TRACKING_URI",
+                  "value": "azureml://malaysiawest.api.azureml.ms/mlflow/v1.0/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.MachineLearningServices/workspaces/mlw-itcs355-u6688124"
+                },
+                {
+                  "name": "MODEL_REGISTRY_NAME",
+                  "value": "itcs355-u6688124"
+                },
+                {
+                  "name": "MODEL_VERSION",
+                  "value": "1"
+                },
+                {
+                  "name": "AZURE_CLIENT_ID",
+                  "value": "75aec690-afbb-4f2f-a645-236eeb671024"
+                }
+              ],
+              "image": "itcs355u6688124.azurecr.io/itcs355-lab3@sha256:688d36dd527294d20107908fd610df7261feb69db2ead30d585208f96aba3061",
+              "name": "api",
+              "probes": [
+                {
+                  "failureThreshold": 3,
+                  "httpGet": {
+                    "path": "/health",
+                    "port": 8080
+                  },
+                  "periodSeconds": 10,
+                  "timeoutSeconds": 5,
+                  "type": "Liveness"
+                },
+                {
+                  "failureThreshold": 3,
+                  "httpGet": {
+                    "path": "/ready",
+                    "port": 8080
+                  },
+                  "periodSeconds": 5,
+                  "timeoutSeconds": 5,
+                  "type": "Readiness"
+                },
+                {
+                  "failureThreshold": 10,
+                  "httpGet": {
+                    "path": "/ready",
+                    "port": 8080
+                  },
+                  "initialDelaySeconds": 1,
+                  "periodSeconds": 30,
+                  "timeoutSeconds": 5,
+                  "type": "Startup"
+                }
+              ],
+              "resources": {
+                "cpu": 0.5,
+                "ephemeralStorage": "2Gi",
+                "memory": "1Gi"
+              }
+            }
+          ],
+          "initContainers": null,
+          "revisionSuffix": "",
+          "scale": {
+            "cooldownPeriod": 300,
+            "maxReplicas": 1,
+            "minReplicas": 0,
+            "pollingInterval": 30,
+            "rules": [
+              {
+                "http": {
+                  "metadata": {
+                    "concurrentRequests": "10"
+                  }
+                },
+                "name": "http"
+              }
+            ]
+          },
+          "serviceBinds": null,
+          "terminationGracePeriodSeconds": null,
+          "volumes": null
+        },
+        "workloadProfileName": "Consumption",
+        "delegatedIdentities": []
+      }
+    },
+    "exact_match_to_original": true,
+    "revisions": [
+      {
+        "name": "ca-itcs355-u6688124-lab3--w041wkb",
+        "active": false,
+        "createdTime": "2026-09-21T12:00:28+00:00",
+        "healthState": "Healthy",
+        "provisioningState": "Provisioned",
+        "runningState": "Stopped",
+        "trafficWeight": 0,
+        "replicas": 0,
+        "containers": [
+          {
+            "name": "api",
+            "image": "itcs355u6688124.azurecr.io/itcs355-lab3@sha256:99ce0052c62042bf4a60962675f8e20871a4844b3933dc11cf59ab08753d0aba",
+            "resources": {
+              "cpu": 0.5,
+              "memory": "1Gi"
+            },
+            "command": [
+              "uvicorn"
+            ],
+            "args": [
+              "service.app:app",
+              "--host",
+              "0.0.0.0",
+              "--port",
+              "8080",
+              "--workers",
+              "1"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--0000001",
+        "active": false,
+        "createdTime": "2026-09-23T06:50:47+00:00",
+        "healthState": "Healthy",
+        "provisioningState": "Provisioned",
+        "runningState": "Stopped",
+        "trafficWeight": 0,
+        "replicas": 0,
+        "containers": [
+          {
+            "name": "api",
+            "image": "itcs355u6688124.azurecr.io/itcs355-lab3@sha256:688d36dd527294d20107908fd610df7261feb69db2ead30d585208f96aba3061",
+            "resources": {
+              "cpu": 0.5,
+              "memory": "1Gi"
+            },
+            "command": [
+              "uvicorn"
+            ],
+            "args": [
+              "service.app:app",
+              "--host",
+              "0.0.0.0",
+              "--port",
+              "8080",
+              "--workers",
+              "1"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--0000002",
+        "active": false,
+        "createdTime": "2026-09-23T08:24:52+00:00",
+        "healthState": "Healthy",
+        "provisioningState": "Provisioned",
+        "runningState": "Stopped",
+        "trafficWeight": 0,
+        "replicas": 0,
+        "containers": [
+          {
+            "name": "api",
+            "image": "itcs355u6688124.azurecr.io/itcs355-lab3@sha256:688d36dd527294d20107908fd610df7261feb69db2ead30d585208f96aba3061",
+            "resources": {
+              "cpu": 0.75,
+              "memory": "1.5Gi"
+            },
+            "command": [
+              "uvicorn"
+            ],
+            "args": [
+              "service.app:app",
+              "--host",
+              "0.0.0.0",
+              "--port",
+              "8080",
+              "--workers",
+              "1"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "ca-itcs355-u6688124-lab3--0000003",
+        "active": true,
+        "createdTime": "2026-09-23T08:27:31+00:00",
+        "healthState": "Healthy",
+        "provisioningState": "Provisioned",
+        "runningState": "Stopped",
+        "trafficWeight": 100,
+        "replicas": 0,
+        "containers": [
+          {
+            "name": "api",
+            "image": "itcs355u6688124.azurecr.io/itcs355-lab3@sha256:688d36dd527294d20107908fd610df7261feb69db2ead30d585208f96aba3061",
+            "resources": {
+              "cpu": 0.5,
+              "memory": "1Gi"
+            },
+            "command": [
+              "uvicorn"
+            ],
+            "args": [
+              "service.app:app",
+              "--host",
+              "0.0.0.0",
+              "--port",
+              "8080",
+              "--workers",
+              "1"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "immutable_revision_template_comparison": {
+    "larger": [
+      {
+        "path": "/containers/0/resources/cpu",
+        "before": 0.5,
+        "after": 0.75
+      },
+      {
+        "path": "/containers/0/resources/memory",
+        "before": "1Gi",
+        "after": "1.5Gi"
+      }
+    ],
+    "restored": []
+  },
+  "ephemeral_storage_note": "A separate live read during the larger round showed 4Gi ephemeral storage, vs 2Gi at baseline/restored size. Azure assigns this based on vCPU; no volume/storage account was added.",
+  "restored_revision_note": "Revision 0000003 has the exact original template, is active but Stopped with 0 replicas. Revision 0000002 is inactive with 0 replicas. latestReadyRevisionName remains 0000002 because the app was stopped before a new readiness confirmation. No post-restore prediction test was run.",
+  "measurements": [
+    {
+      "directory": "reports/loadtest/run-20260923T082341Z-vus10-mDq4V8",
+      "k6_exit_code": 99,
+      "summary": {
+        "kind": "warm-single-prediction",
+        "target": "https://ca-itcs355-u6688124-lab3.kindgrass-9f6d03ba.malaysiawest.azurecontainerapps.io/predict",
+        "started_utc": "2026-09-23T08:23:41Z",
+        "git_sha": "2693c980b634fd24d4bf0148a7c250959eeaee6f",
+        "git_dirty": "true",
+        "script_sha256": "49bb20dddf1b902c986711b636ac5c8444d02cf3c5da4d43f9845c12d3cbf221",
+        "k6_image": "grafana/k6@sha256:9bd01d6941fca969cb61bb57d2da5ee9b385fe2aa8881df3798c196564d6ace6",
+        "model_version": "1",
+        "vus": 10,
+        "configured_duration": "60s",
+        "elapsed_seconds": 60.148557114000006,
+        "attempts": 2018,
+        "completed_responses": 2018,
+        "unfinished_requests": 0,
+        "error_count": 0,
+        "timeout_count": 0,
+        "error_rate": 0,
+        "requests_per_second": 33.55026449221832,
+        "p50_ms": 301.67564600000003,
+        "p95_ms": 418.24463015,
+        "p99_ms": 508.2317430599997,
+        "meets_target": false
+      }
+    },
+    {
+      "directory": "reports/loadtest/run-20260923T082619Z-vus10-38S6Ty",
+      "k6_exit_code": 99,
+      "summary": {
+        "kind": "warm-single-prediction",
+        "target": "https://ca-itcs355-u6688124-lab3.kindgrass-9f6d03ba.malaysiawest.azurecontainerapps.io/predict",
+        "started_utc": "2026-09-23T08:26:19Z",
+        "git_sha": "2693c980b634fd24d4bf0148a7c250959eeaee6f",
+        "git_dirty": "true",
+        "script_sha256": "49bb20dddf1b902c986711b636ac5c8444d02cf3c5da4d43f9845c12d3cbf221",
+        "k6_image": "grafana/k6@sha256:9bd01d6941fca969cb61bb57d2da5ee9b385fe2aa8881df3798c196564d6ace6",
+        "model_version": "1",
+        "vus": 10,
+        "configured_duration": "60s",
+        "elapsed_seconds": 60.16975196600001,
+        "attempts": 3288,
+        "completed_responses": 3288,
+        "unfinished_requests": 0,
+        "error_count": 0,
+        "timeout_count": 0,
+        "error_rate": 0,
+        "requests_per_second": 54.645397273000945,
+        "p50_ms": 189.6076,
+        "p95_ms": 256.5283182499999,
+        "p99_ms": 301.00291127,
+        "meets_target": false
+      }
+    }
+  ],
+  "load_generator_snapshots": {
+    "baseline": {
+      "checked_at": "2026-09-23T08:24:09.996430+00:00",
+      "running_k6_containers": 1,
+      "snapshot": {
+        "BlockIO": "50.7MB / 0B",
+        "CPUPerc": "2.51%",
+        "Container": "c82e720be82c",
+        "ID": "c82e720be82c",
+        "MemPerc": "0.26%",
+        "MemUsage": "20.28MiB / 7.604GiB",
+        "Name": "beautiful_hoover",
+        "NetIO": "530kB / 394kB",
+        "PIDs": "19"
+      }
+    },
+    "larger": {
+      "checked_at": "2026-09-23T08:27:17.885311+00:00",
+      "running_k6_containers": 1,
+      "snapshot": {
+        "BlockIO": "3.28MB / 0B",
+        "CPUPerc": "3.69%",
+        "Container": "023ddbab47f5",
+        "ID": "023ddbab47f5",
+        "MemPerc": "0.26%",
+        "MemUsage": "20MiB / 7.604GiB",
+        "Name": "stoic_haslett",
+        "NetIO": "1.55MB / 1.24MB",
+        "PIDs": "19"
+      }
+    },
+    "limitation": "One Docker snapshot in each round; does not rule out transient client or network effects."
+  },
+  "audit": {
+    "checked_at": "2026-09-23T08:30:07.550063+00:00",
+    "results": [
+      {
+        "directory": "reports/loadtest/run-20260923T082341Z-vus10-mDq4V8",
+        "native_metrics_checked": true,
+        "request_count": 2018,
+        "elapsed_seconds": 60.148557114000006,
+        "requests_per_second": 33.55026449221832,
+        "p50_ms": 301.67564600000003,
+        "p95_ms": 418.24463015,
+        "p99_ms": 508.2317430599997,
+        "errors": 0,
+        "timeouts": 0,
+        "unfinished_requests": 0,
+        "interrupted_iterations": 0,
+        "k6_exit": 99,
+        "only_failed_threshold": "p(95)<200"
+      },
+      {
+        "directory": "reports/loadtest/run-20260923T082619Z-vus10-38S6Ty",
+        "native_metrics_checked": true,
+        "request_count": 3288,
+        "elapsed_seconds": 60.16975196600001,
+        "requests_per_second": 54.645397273000945,
+        "p50_ms": 189.6076,
+        "p95_ms": 256.5283182499999,
+        "p99_ms": 301.00291127,
+        "errors": 0,
+        "timeouts": 0,
+        "unfinished_requests": 0,
+        "interrupted_iterations": 0,
+        "k6_exit": 99,
+        "only_failed_threshold": "p(95)<200"
+      }
+    ],
+    "p95_reduction_percent": 38.6654843224172,
+    "throughput_increase_percent": 62.87620410764707,
+    "cost_model": {
+      "basis": "Malaysia West USD retail active rates read 2026-09-23; before free grants/credit; modeled, not invoice",
+      "baseline_compute_usd_per_second": "0.0000180",
+      "larger_compute_usd_per_second": "0.00002700",
+      "baseline_compute_usd_per_hour": "0.0648000",
+      "larger_compute_usd_per_hour": "0.09720000",
+      "compute_rate_increase_percent": "50.0",
+      "measurement_compute_usd": [
+        "0.0010826740280520001080",
+        "0.0016245833030820002700"
+      ],
+      "measured_request_count": 5306,
+      "measurement_requests_usd": "0.002483208",
+      "excluded": "Startup, readiness, revision transitions, restore/stop, logs, network, shared services, taxes; not a whole-session bill"
+    },
+    "protected_files_unchanged": [
+      "README.md",
+      "cloud.env",
+      "reports/lab3-load.md",
+      "loadtest/k6.js",
+      "scripts/loadtest.sh"
+    ],
+    "older_evidence_files_unchanged": 30,
+    "git_sha": "2693c980b634fd24d4bf0148a7c250959eeaee6f",
+    "git_status": "M README.md\n M reports/lab3-load.md\n?? reports/loadtest/",
+    "limitations": [
+      "Native aggregate percentiles cross-checked; per-request latency samples are not exported by this existing warm runner.",
+      "One sequential pair, not repeated trials; network and time effects are not eliminated."
+    ]
+  },
+  "pricing": {
+    "queried_at": "2026-09-23T08:12:47.953139+00:00",
+    "filter": "serviceName eq 'Azure Container Apps' and armRegionName eq 'malaysiawest' and priceType eq 'Consumption'",
+    "meters": [
+      {
+        "currencyCode": "USD",
+        "tierMinimumUnits": 0,
+        "retailPrice": 0.000028,
+        "unitPrice": 0.000028,
+        "armRegionName": "malaysiawest",
+        "location": "MY West",
+        "effectiveStartDate": "2026-02-01T00:00:00Z",
+        "meterId": "3bcf4424-48a0-5905-bd13-8b047f92911c",
+        "meterName": "Standard vCPU Active Usage",
+        "productId": "DZH318Z0B0NC",
+        "skuId": "DZH318Z0B0NC/00C4",
+        "productName": "Azure Container Apps",
+        "skuName": "Standard",
+        "serviceName": "Azure Container Apps",
+        "serviceId": "DZH319F70F09",
+        "serviceFamily": "Compute",
+        "unitOfMeasure": "1 Second",
+        "type": "Consumption",
+        "isPrimaryMeterRegion": true,
+        "armSkuName": ""
+      },
+      {
+        "currencyCode": "USD",
+        "tierMinimumUnits": 0,
+        "retailPrice": 0.468,
+        "unitPrice": 0.468,
+        "armRegionName": "malaysiawest",
+        "location": "MY West",
+        "effectiveStartDate": "2026-02-01T00:00:00Z",
+        "meterId": "802df3a6-87ad-5923-91ba-484176d82de6",
+        "meterName": "Standard Requests",
+        "productId": "DZH318Z0B0NC",
+        "skuId": "DZH318Z0B0NC/00C4",
+        "productName": "Azure Container Apps",
+        "skuName": "Standard",
+        "serviceName": "Azure Container Apps",
+        "serviceId": "DZH319F70F09",
+        "serviceFamily": "Compute",
+        "unitOfMeasure": "1M",
+        "type": "Consumption",
+        "isPrimaryMeterRegion": true,
+        "armSkuName": ""
+      },
+      {
+        "currencyCode": "USD",
+        "tierMinimumUnits": 0,
+        "retailPrice": 0.000004,
+        "unitPrice": 0.000004,
+        "armRegionName": "malaysiawest",
+        "location": "MY West",
+        "effectiveStartDate": "2026-02-01T00:00:00Z",
+        "meterId": "cb9fb698-abec-5237-8fa1-960fb558b10e",
+        "meterName": "Standard Memory Active Usage",
+        "productId": "DZH318Z0B0NC",
+        "skuId": "DZH318Z0B0NC/00C4",
+        "productName": "Azure Container Apps",
+        "skuName": "Standard",
+        "serviceName": "Azure Container Apps",
+        "serviceId": "DZH319F70F09",
+        "serviceFamily": "Compute",
+        "unitOfMeasure": "1 GiB Second",
+        "type": "Consumption",
+        "isPrimaryMeterRegion": true,
+        "armSkuName": ""
+      }
+    ]
+  },
+  "sources": [
+    "https://learn.microsoft.com/en-us/azure/container-apps/storage-mounts#ephemeral-storage",
+    "https://learn.microsoft.com/en-us/azure/container-apps/revisions#zero-downtime-deployment",
+    "https://learn.microsoft.com/en-us/azure/container-apps/billing",
+    "https://learn.microsoft.com/en-us/rest/api/cost-management/retail-prices/azure-retail-prices"
+  ]
+}

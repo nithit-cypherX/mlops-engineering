@@ -1,0 +1,123 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+
+     execution: local
+        script: /work/loadtest/batch-compare.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 1 max VUs, 3m15s max duration (incl. graceful stop):
+              * comparison: 1 iterations shared among 1 VUs (maxDuration: 3m0s, gracefulStop: 15s)
+
+
+running (0m01.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m01.0s/3m0s  0/1 shared iters
+
+running (0m02.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m02.0s/3m0s  0/1 shared iters
+
+running (0m03.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m03.0s/3m0s  0/1 shared iters
+
+running (0m04.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m04.0s/3m0s  0/1 shared iters
+time="2026-09-23T05:04:17Z" level=info msg="{\"kind\":\"batch-comparison-pair\",\"pair\":1,\"order\":[\"single\",\"batch\"],\"single\":{\"elapsed_ms\":4047,\"requests\":100,\"valid_rows\":100,\"errors\":0,\"timeouts\":0},\"batch\":{\"elapsed_ms\":42,\"requests\":1,\"valid_rows\":100,\"errors\":0,\"timeouts\":0},\"equivalent\":true,\"speedup\":96.35714285714286}" source=console
+
+running (0m05.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m05.0s/3m0s  0/1 shared iters
+
+running (0m06.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m06.0s/3m0s  0/1 shared iters
+
+running (0m07.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m07.0s/3m0s  0/1 shared iters
+
+running (0m08.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m08.0s/3m0s  0/1 shared iters
+time="2026-09-23T05:04:21Z" level=info msg="{\"kind\":\"batch-comparison-pair\",\"pair\":2,\"order\":[\"batch\",\"single\"],\"single\":{\"elapsed_ms\":3995,\"requests\":100,\"valid_rows\":100,\"errors\":0,\"timeouts\":0},\"batch\":{\"elapsed_ms\":46,\"requests\":1,\"valid_rows\":100,\"errors\":0,\"timeouts\":0},\"equivalent\":true,\"speedup\":86.84782608695652}" source=console
+
+running (0m09.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m09.0s/3m0s  0/1 shared iters
+
+running (0m10.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m10.0s/3m0s  0/1 shared iters
+
+running (0m11.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m11.0s/3m0s  0/1 shared iters
+
+running (0m12.0s), 1/1 VUs, 0 complete and 0 interrupted iterations
+comparison   [   0% ] 1 VUs  0m12.0s/3m0s  0/1 shared iters
+time="2026-09-23T05:04:25Z" level=info msg="{\"kind\":\"batch-comparison-pair\",\"pair\":3,\"order\":[\"single\",\"batch\"],\"single\":{\"elapsed_ms\":3924,\"requests\":100,\"valid_rows\":100,\"errors\":0,\"timeouts\":0},\"batch\":{\"elapsed_ms\":63,\"requests\":1,\"valid_rows\":100,\"errors\":0,\"timeouts\":0},\"equivalent\":true,\"speedup\":62.285714285714285}" source=console
+{
+  "kind": "warm-batch-comparison",
+  "target": "https://ca-itcs355-u6688124-lab3.kindgrass-9f6d03ba.malaysiawest.azurecontainerapps.io/predict",
+  "started_utc": "2026-09-23T05:04:12Z",
+  "git_sha": "5c7abeabf05b33972a0928cac417aaf8f8d9d0be",
+  "git_dirty": "true",
+  "script_sha256": "1312dab7f1932eeb425c5958c441dc374d6b535445b1ff59d833c633b191eeba",
+  "shared_script_sha256": "49bb20dddf1b902c986711b636ac5c8444d02cf3c5da4d43f9845c12d3cbf221",
+  "k6_image": "grafana/k6@sha256:9bd01d6941fca969cb61bb57d2da5ee9b385fe2aa8881df3798c196564d6ace6",
+  "model_version": "1",
+  "vus": 1,
+  "rows_per_job": 100,
+  "request_timeout": "10s",
+  "max_duration": "180s",
+  "graceful_stop": "15s",
+  "absolute_tolerance": 1e-9,
+  "timing": "client elapsed time for all 100 rows, including response validation; payloads prebuilt; warm-up excluded",
+  "requests": 305,
+  "warmup_requests": 2,
+  "measured_requests": 303,
+  "attempts": 305,
+  "completed_requests": 305,
+  "unfinished_requests": 0,
+  "error_count": 0,
+  "timeout_count": 0,
+  "completed_pairs": 3,
+  "pairs": [
+    {
+      "pair": 1,
+      "order": [
+        "single",
+        "batch"
+      ],
+      "single_ms": 4047,
+      "batch_ms": 42,
+      "equivalent": true,
+      "speedup": 96.35714285714286
+    },
+    {
+      "pair": 2,
+      "order": [
+        "batch",
+        "single"
+      ],
+      "single_ms": 3995,
+      "batch_ms": 46,
+      "equivalent": true,
+      "speedup": 86.84782608695652
+    },
+    {
+      "pair": 3,
+      "order": [
+        "single",
+        "batch"
+      ],
+      "single_ms": 3924,
+      "batch_ms": 63,
+      "equivalent": true,
+      "speedup": 62.285714285714285
+    }
+  ],
+  "valid_comparison": true,
+  "median_single_ms": 3995,
+  "median_batch_ms": 46,
+  "speedup_ratio_of_medians": 86.84782608695652
+}
+
+running (0m12.3s), 0/1 VUs, 1 complete and 0 interrupted iterations
+comparison ✓ [ 100% ] 1 VUs  0m12.3s/3m0s  1/1 shared iters

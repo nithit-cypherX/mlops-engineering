@@ -1,0 +1,208 @@
+{
+  "checked_at": "2026-09-23T13:11:47.168944+00:00",
+  "run_dir": "/home/nirvana/ml-od/lab/lab3/reports/loadtest/run-20260923T130813Z-vus10-om7CQV",
+  "counts": {
+    "records": 1794,
+    "unique_request_ids": 1794,
+    "distinct_vus": 10,
+    "http_over_200ms": 1619,
+    "processing_over_200ms": 983,
+    "scoring_over_200ms": 460,
+    "negative_http_minus_processing": 0
+  },
+  "recomputed_statistics": {
+    "http_duration_ms": {
+      "count": 1794,
+      "min": 72.937053,
+      "median": 326.297345,
+      "p95": 487.4525186999999,
+      "p99": 587.25940401,
+      "max": 703.275754,
+      "mean": 333.95939832998886
+    },
+    "http_sending_ms": {
+      "count": 1794,
+      "min": 0.023575,
+      "median": 0.082171,
+      "p95": 0.15927249999999996,
+      "p99": 0.2694362599999999,
+      "max": 0.526383,
+      "mean": 0.09018185117056857
+    },
+    "http_waiting_ms": {
+      "count": 1794,
+      "min": 72.791716,
+      "median": 317.3777015,
+      "p95": 478.65639834999996,
+      "p99": 574.3417203399999,
+      "max": 685.43047,
+      "mean": 324.39087485395765
+    },
+    "http_receiving_ms": {
+      "count": 1794,
+      "min": 0.013225,
+      "median": 0.1252725,
+      "p95": 65.53079499999993,
+      "p99": 92.85462822999978,
+      "max": 393.397849,
+      "mean": 9.478341624860647
+    },
+    "json_decode_ms": {
+      "count": 1794,
+      "min": 0.0059,
+      "median": 0.0118,
+      "p95": 0.02583564999999999,
+      "p99": 0.09739399999999974,
+      "max": 59.714795,
+      "mean": 0.067094867335563
+    },
+    "scoring_ms": {
+      "count": 1794,
+      "min": 6.124923,
+      "median": 122.9295525,
+      "p95": 287.01706,
+      "p99": 326.53312360999985,
+      "max": 493.101512,
+      "mean": 139.72665575529544
+    },
+    "processing_ms": {
+      "count": 1794,
+      "min": 7.085427,
+      "median": 207.8051465,
+      "p95": 327.31782769999995,
+      "p99": 401.8159184799998,
+      "max": 502.583448,
+      "mean": 196.768884303233
+    },
+    "processing_other_ms": {
+      "count": 1794,
+      "min": 0.6898019999999985,
+      "median": 44.0411125,
+      "p95": 127.88757144999995,
+      "p99": 179.01301706999993,
+      "max": 267.332425,
+      "mean": 56.975133680602006
+    },
+    "http_outside_processing_ms": {
+      "count": 1794,
+      "min": 52.064259,
+      "median": 115.457898,
+      "p95": 263.74044659999987,
+      "p99": 368.3153544899999,
+      "max": 527.9435100000001,
+      "mean": 137.19051402675586
+    },
+    "json_share_percent": {
+      "count": 1794,
+      "min": 0.0013928035290171354,
+      "median": 0.0066969038231164,
+      "p95": 0.0778247799244328,
+      "p99": 0.23357236605345308,
+      "max": 65.40012963978769,
+      "mean": 0.06297411085245896
+    },
+    "processing_share_of_http_percent": {
+      "count": 1794,
+      "min": 1.8778920345479293,
+      "median": 61.42172172972286,
+      "p95": 79.1387752481271,
+      "p99": 82.22225510843357,
+      "max": 86.63176578984793,
+      "mean": 56.54971949896769
+    },
+    "scoring_share_of_processing_percent": {
+      "count": 1794,
+      "min": 7.616660170246592,
+      "median": 72.78099477747918,
+      "p95": 95.28536921961984,
+      "p99": 97.7551201041847,
+      "max": 99.38582281168104,
+      "mean": 70.27282984521082
+    }
+  },
+  "slowest_5_percent": {
+    "count": 90,
+    "processing_median_ms": 354.8832555,
+    "scoring_median_ms": 271.3812475,
+    "json_decode_median_ms": 0.00875,
+    "http_outside_processing_median_ms": 178.125523
+  },
+  "failed_thresholds": {
+    "predict_latency_ms": [
+      "p(95)<200"
+    ]
+  },
+  "summary": {
+    "kind": "warm-single-prediction",
+    "target": "https://ca-itcs355-u6688124-lab3.kindgrass-9f6d03ba.malaysiawest.azurecontainerapps.io/predict",
+    "started_utc": "2026-09-23T13:08:13Z",
+    "git_sha": "c86613a72d9816b586d32512112396cd131e0c4e",
+    "git_dirty": "true",
+    "script_sha256": "0ec2465a18892281498f4a7ccecfe08125e2d25997669aed5c2e8455b4dd2c1d",
+    "k6_image": "grafana/k6@sha256:9bd01d6941fca969cb61bb57d2da5ee9b385fe2aa8881df3798c196564d6ace6",
+    "model_version": "1",
+    "vus": 10,
+    "configured_duration": "60s",
+    "elapsed_seconds": 60.325110578,
+    "attempts": 1794,
+    "completed_responses": 1794,
+    "unfinished_requests": 0,
+    "error_count": 0,
+    "timeout_count": 0,
+    "error_rate": 0,
+    "requests_per_second": 29.738859702219177,
+    "p50_ms": 326.297345,
+    "p95_ms": 487.4525186999999,
+    "p99_ms": 587.25940401,
+    "meets_target": false,
+    "timing_evidence": {
+      "complete": true,
+      "valid_samples": 1794,
+      "invalid_samples": 0,
+      "server_ms": {
+        "json_decode_ms": {
+          "max": 59.714795,
+          "count": 1794,
+          "min": 0.0059,
+          "med": 0.0118,
+          "p(95)": 0.02583564999999999,
+          "p(99)": 0.09739399999999974
+        },
+        "scoring_ms": {
+          "p(99)": 326.53312360999985,
+          "max": 493.101512,
+          "count": 1794,
+          "min": 6.124923,
+          "med": 122.9295525,
+          "p(95)": 287.01706
+        },
+        "processing_ms": {
+          "max": 502.583448,
+          "count": 1794,
+          "min": 7.085427,
+          "med": 207.8051465,
+          "p(95)": 327.31782769999995,
+          "p(99)": 401.8159184799998
+        }
+      },
+      "paired_records": "console.log: kind=warm-request-timing",
+      "definition": "Processing starts after body receipt and includes JSON decoding and scoring; not CPU time. HTTP minus processing is not network-only time. Do not subtract separate percentiles."
+    }
+  },
+  "runtime_warnings": [
+    "time=\"2026-09-23T13:08:13Z\" level=warning msg=\"There were unknown fields in the options exported in the script\" error=\"json: unknown field \\\"gracefulStop\\\"\""
+  ],
+  "native_metrics_match_records": true,
+  "native_file_sha256": {
+    "summary.json": "38579b3e9d46615f86a3d937b5c1b082c715cdba4ffbeebcfe1002ce512162a1",
+    "console.log": "3cd3a0b3fe6531729299091589c59476f99fdb154eec411fd0ae8cde25462e2a",
+    "exit-code.txt": "7e332bcee418f7d700927c946d36341f0651d6d90997b58d3d5441dec96b2e74"
+  },
+  "limitations": [
+    "One instrumented diagnostic round, not a repeatability or before/after performance claim.",
+    "All components are elapsed time, not CPU time; scoring includes data preparation and model prediction.",
+    "processing_other_ms is computed per request; it does not isolate thread-pool queueing.",
+    "http_outside_processing_ms is computed per request; it does not isolate network latency.",
+    "Runtime ignored the top-level gracefulStop option and used 30s; this round had zero unfinished requests and completed in 60.325s. No runner settings were changed."
+  ]
+}

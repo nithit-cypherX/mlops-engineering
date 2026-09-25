@@ -31,6 +31,12 @@ help:
 	@echo "  batch-compare-check  Check batch comparison offline in Docker"
 	@echo "  payload-compare    Four sizes, 20 measured requests each; set TARGET (requires timing headers)"
 	@echo "  payload-compare-check  Check payload comparison offline in Docker"
+	@echo "  canary-help        Show the guarded Task 4 command (no cloud calls)"
+	@echo "  canary-check       Run Task 4 unit tests with fake cloud/HTTP responses"
+	@echo "  teardown           Preview reviewed cleanup; CONFIRM=ca-itcs355-u6688124-lab3 enables deletion"
+	@echo "  teardown-check     Test the cleanup guards offline (no Azure calls)"
+	@echo "  cost-report        Read billing and write reports/lab3-cost.md; COST_END defaults to 2026-09-24"
+	@echo "  cost-report-check  Test billing/report handling offline"
 	@echo "  test               Run service and adapter tests offline"
 	@echo "  portability-audit  Check for provider details outside cloudlayer/"
 
@@ -74,8 +80,32 @@ payload-compare-check:
 	bash scripts/loadtest.sh payload-check
 
 # Unit tests use offline registry/model stubs, not training or live cloud access.
+.PHONY: canary-help canary-check
+canary-help:
+	$(PYTHON) -m scripts.canary --help
+
+canary-check:
+	$(PYTHON) -m pytest -q tests/test_canary.py cloudlayer/tests/test_azure_canary.py
+
 test:
 	$(PYTHON) -m pytest -q tests/ cloudlayer/tests/
 
 portability-audit:
 	$(PYTHON) scripts/portability_audit.py
+
+# No wildcard/tag-based deletion; no confirmation means a read-only preview.
+.PHONY: teardown teardown-check
+export CONFIRM
+teardown:
+	$(PYTHON) -m cloudlayer.teardown_lab3 --confirm "$$CONFIRM"
+
+teardown-check:
+	$(PYTHON) -m pytest -q cloudlayer/tests/test_teardown_lab3.py
+
+.PHONY: cost-report cost-report-check
+export COST_END
+cost-report:
+	$(PYTHON) -m scripts.cost_report --end "$$COST_END"
+
+cost-report-check:
+	$(PYTHON) -m pytest -q cloudlayer/tests/test_cost_report.py
