@@ -1,3 +1,3 @@
 # CI workflows
 
-No student workflows are enabled yet. Add lab-specific workflows here when implementing the assignments. Instructor examples are in materials/upstream/.github/workflows/.
+`lab4-ci.yml` defines checks through integration testing. Image push and staging deployment are not implemented yet. Instructor examples are in materials/upstream/.github/workflows/.

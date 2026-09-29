@@ -1,0 +1,179 @@
+# Lab 4 Task 2: CI through integration testing.
+# Image push and staging deployment are the next part, not implemented here.
+# Adapted from the instructor's CI at 2e29faeb1fdaa6360947808e32b0e3c1444113f2.
+name: Lab 4 CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+    working-directory: lab/lab4
+
+env:
+  PYTHON: python
+
+jobs:
+  checks:
+    name: Secret scan, lint, unit and data tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Scan full Git history before installing dependencies
+        run: make scan-secrets PYTHON=python3
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.11.16"
+          cache: pip
+          cache-dependency-path: lab/lab4/requirements.txt
+
+      - name: Install locked dependencies
+        run: make setup
+
+      - name: Lint and portability audit
+        run: make lint portability-audit
+
+      - name: Unit tests
+        run: make test-unit
+
+      - name: Restore the pinned dataset
+        run: make data-pull
+
+      - name: Data contract and leakage tests
+        run: make test-data
+
+      # A skipped cloud job must not make an untested fork look fully green.
+      - name: Stop when protected Azure tests cannot run
+        if: >-
+          github.event_name == 'pull_request' &&
+          (github.event.pull_request.head.repo.full_name != github.repository ||
+           github.actor == 'dependabot[bot]')
+        run: |
+          echo "::error::Offline checks passed, but this PR cannot use Azure credentials. Full Lab 4 CI has not passed. An owner must review and rerun the changes from a trusted branch."
+          exit 1
+
+  registry-main:
+    name: Model, image and integration tests (main)
+    needs: checks
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    # No environment: Azure trust expects the main branch OIDC subject.
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      CLOUD_PROVIDER: azure
+      MLFLOW_TRACKING_URI: ${{ vars.LAB4_MLFLOW_TRACKING_URI }}
+      MODEL_REGISTRY_NAME: ${{ vars.LAB4_MODEL_REGISTRY_NAME }}
+      MODEL_VERSION: ${{ vars.LAB4_MODEL_VERSION }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.LAB4_AZURE_SUBSCRIPTION_ID }}
+      AZURE_TOKEN_CREDENTIALS: AzureCliCredential
+      AZURE_CORE_OUTPUT: none
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.11.16"
+          cache: pip
+          cache-dependency-path: lab/lab4/requirements.txt
+
+      - name: Install locked dependencies and restore data
+        run: make setup data-pull
+
+      - name: Log in with the model-reader identity (OIDC)
+        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3
+        with:
+          client-id: ${{ secrets.LAB4_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.LAB4_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.LAB4_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Registered model behaviour tests
+        timeout-minutes: 5
+        run: make test-model
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+
+      - name: Build the serving image for the checked-out commit
+        run: make serve-image IMAGE=itcs355-lab4 TAG="$GITHUB_SHA" PLATFORM=linux/amd64
+
+      - name: Test the exact built image
+        timeout-minutes: 5
+        # The test requests a fresh short-lived token and passes it through stdin.
+        run: make test-integration IMAGE=itcs355-lab4 TAG="$GITHUB_SHA"
+
+  registry-pr:
+    name: Model, image and integration tests (reviewed PR)
+    needs: checks
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    # Required owner review + refs/pull/*/merge restriction are configured in GitHub.
+    environment: lab4-ci-pr
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      CLOUD_PROVIDER: azure
+      MLFLOW_TRACKING_URI: ${{ vars.LAB4_MLFLOW_TRACKING_URI }}
+      MODEL_REGISTRY_NAME: ${{ vars.LAB4_MODEL_REGISTRY_NAME }}
+      MODEL_VERSION: ${{ vars.LAB4_MODEL_VERSION }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.LAB4_AZURE_SUBSCRIPTION_ID }}
+      AZURE_TOKEN_CREDENTIALS: AzureCliCredential
+      AZURE_CORE_OUTPUT: none
+    # Keep these test steps identical to registry-main; only the trust gate differs.
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.11.16"
+          cache: pip
+          cache-dependency-path: lab/lab4/requirements.txt
+
+      - name: Install locked dependencies and restore data
+        run: make setup data-pull
+
+      - name: Log in with the model-reader identity (OIDC)
+        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3
+        with:
+          client-id: ${{ secrets.LAB4_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.LAB4_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.LAB4_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Registered model behaviour tests
+        timeout-minutes: 5
+        run: make test-model
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+
+      - name: Build the serving image for the checked-out commit
+        run: make serve-image IMAGE=itcs355-lab4 TAG="$GITHUB_SHA" PLATFORM=linux/amd64
+
+      - name: Test the exact built image
+        timeout-minutes: 5
+        run: make test-integration IMAGE=itcs355-lab4 TAG="$GITHUB_SHA"
