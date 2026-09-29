@@ -1,5 +1,5 @@
-# Lab 4 Task 2: CI through integration testing.
-# Image push and staging deployment are the next part, not implemented here.
+# Lab 4 Task 2: test, then push the tested image on main only.
+# Staging deployment is not implemented yet.
 # Adapted from the instructor's CI at 2e29faeb1fdaa6360947808e32b0e3c1444113f2.
 name: Lab 4 CI
 
@@ -69,7 +69,7 @@ jobs:
           exit 1
 
   registry-main:
-    name: Model, image and integration tests (main)
+    name: Model, image and integration tests, then push (main)
     needs: checks
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
@@ -80,6 +80,7 @@ jobs:
       id-token: write
     env:
       CLOUD_PROVIDER: azure
+      CONTAINER_REGISTRY: ${{ vars.LAB4_CONTAINER_REGISTRY }}
       MLFLOW_TRACKING_URI: ${{ vars.LAB4_MLFLOW_TRACKING_URI }}
       MODEL_REGISTRY_NAME: ${{ vars.LAB4_MODEL_REGISTRY_NAME }}
       MODEL_VERSION: ${{ vars.LAB4_MODEL_VERSION }}
@@ -121,6 +122,24 @@ jobs:
         # The test requests a fresh short-lived token and passes it through stdin.
         run: make test-integration IMAGE=itcs355-lab4 TAG="$GITHUB_SHA"
 
+      - name: Log in with the image-publisher identity (OIDC)
+        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3
+        env:
+          AZURE_LOGIN_PRE_CLEANUP: true
+        with:
+          client-id: ${{ secrets.LAB4_AZURE_PUSH_CLIENT_ID }}
+          tenant-id: ${{ secrets.LAB4_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.LAB4_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Push the tested image and print its repository digest
+        id: push-image
+        timeout-minutes: 10
+        run: make image-push IMAGE=itcs355-lab4 TAG="$GITHUB_SHA"
+
+      - name: Clear the runner's registry login
+        if: always() && env.CONTAINER_REGISTRY != ''
+        run: docker logout "${CONTAINER_REGISTRY%%/*}"
+
   registry-pr:
     name: Model, image and integration tests (reviewed PR)
     needs: checks
@@ -143,7 +162,7 @@ jobs:
       AZURE_SUBSCRIPTION_ID: ${{ secrets.LAB4_AZURE_SUBSCRIPTION_ID }}
       AZURE_TOKEN_CREDENTIALS: AzureCliCredential
       AZURE_CORE_OUTPUT: none
-    # Keep these test steps identical to registry-main; only the trust gate differs.
+    # Keep the test steps identical to registry-main; PRs never publish images.
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:

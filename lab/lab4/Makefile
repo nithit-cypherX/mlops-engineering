@@ -17,7 +17,7 @@ IMAGE ?= itcs355-lab4
 TAG ?= $(shell git rev-parse HEAD)
 PLATFORM ?= linux/amd64
 
-.PHONY: help setup data-pull scan-secrets lint test test-unit test-data test-model test-integration serve-image portability-audit
+.PHONY: help setup data-pull scan-secrets lint test test-unit test-data test-model test-integration serve-image image-push portability-audit
 
 help:
 	@echo "Lab 4: offline, registry-backed and local container tests are separate."
@@ -31,6 +31,7 @@ help:
 	@echo "  test-model         Test the configured registry model; requires config and cloud login"
 	@echo "  test-integration   Test IMAGE:TAG locally; build first, set serving config and log in on host"
 	@echo "  serve-image        Build the serving image for linux/amd64"
+	@echo "  image-push         Push the existing IMAGE:TAG to CONTAINER_REGISTRY; no rebuild"
 	@echo "  portability-audit  Check provider-neutral code boundaries"
 
 setup:
@@ -62,6 +63,9 @@ test-integration:
 
 serve-image:
 	docker buildx build --platform $(PLATFORM) -f service/Dockerfile.serve -t $(IMAGE):$(TAG) --load .
+
+image-push:
+	$(PYTHON) -c 'import sys; from src.config import load; from cloudlayer.factory import get_adapter; print(get_adapter(load(strict=False)).push_image(sys.argv[1]))' '$(IMAGE):$(TAG)'
 
 portability-audit:
 	$(PYTHON) scripts/portability_audit.py

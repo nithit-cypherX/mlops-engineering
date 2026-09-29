@@ -1,3 +1,3 @@
 # CI workflows
 
-`lab4-ci.yml` defines checks through integration testing. Image push and staging deployment are not implemented yet. Instructor examples are in materials/upstream/.github/workflows/.
+`lab4-ci.yml` runs the tests and pushes the tested image on main. Staging deployment is not implemented yet. Instructor examples are in materials/upstream/.github/workflows/.
