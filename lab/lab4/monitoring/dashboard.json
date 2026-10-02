@@ -1,0 +1,224 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "name": "overview",
+      "content": {
+        "json": "# Lab 4 — Prediction service (staging)\nSelect the existing Log Analytics workspace. Request rate, errors and latency use `/predict` and `/predict/batch`, excluding probes, and show complete 1-minute bins. Latency is measured inside the service, not at the client.\n\nThe feature mean uses valid incoming rows, including requests whose scoring failed. Its trailing 5-minute window is `[point - 5m, point)`, sampled every minute. Batch rows have equal weight to single inputs. Model version ignores the historical time picker and uses only ready/successful signals from the last 5 minutes. Gaps mean no observed data, not a confirmed healthy service. Logs can arrive late."
+      }
+    },
+    {
+      "type": 9,
+      "name": "parameters",
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "style": "pills",
+        "parameters": [
+          {
+            "id": "b6e5b93f-484b-4a1b-95bb-aabf40239963",
+            "version": "KqlParameterItem/1.0",
+            "name": "Workspace",
+            "type": 5,
+            "isRequired": true,
+            "multiSelect": false,
+            "value": [],
+            "description": "Choose the existing workspace that receives Lab 4 staging logs.",
+            "query": "resources\n| where type =~ 'microsoft.operationalinsights/workspaces'\n| project id",
+            "crossComponentResources": [
+              "value::selected"
+            ],
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources",
+            "typeSettings": {
+              "resourceTypeFilter": {
+                "microsoft.operationalinsights/workspaces": true
+              },
+              "additionalResourceOptions": [],
+              "showDefault": false
+            }
+          },
+          {
+            "id": "dfec5e84-ac41-4c32-815b-32385cbb4751",
+            "version": "KqlParameterItem/1.0",
+            "name": "TimeRange",
+            "type": 4,
+            "isRequired": true,
+            "value": {
+              "durationMs": 86400000
+            },
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 900000
+                },
+                {
+                  "durationMs": 3600000
+                },
+                {
+                  "durationMs": 21600000
+                },
+                {
+                  "durationMs": 86400000
+                }
+              ],
+              "allowCustom": true
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": 3,
+      "name": "request_rate",
+      "customWidth": "50",
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "let Start = {TimeRange:start};\nlet End = {TimeRange:end};\nContainerAppConsoleLogs_CL\n| where ContainerAppName_s == \"itcs355-lab4-staging\"\n| extend Event = parse_json(Log_s)\n| where tostring(Event.message) == \"request completed\"\n| where TimeGenerated >= Start and TimeGenerated < End\n| where tostring(Event.path) in (\"/predict\", \"/predict/batch\")\n| summarize Requests = count() by Time = bin(TimeGenerated, 1m)\n| where Time >= Start and Time + 1m <= End\n| project Time, RequestsPerSecond = Requests / 60.0\n| order by Time asc",
+        "size": 0,
+        "title": "Prediction request rate — requests/second, complete 1-minute bins",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "timechart",
+        "timeContextFromParameter": "TimeRange",
+        "chartSettings": {
+          "xAxis": "Time",
+          "yAxis": [
+            "RequestsPerSecond"
+          ],
+          "showLegend": true,
+          "showMetrics": false,
+          "ySettings": {
+            "min": 0
+          }
+        },
+        "noDataMessage": "No prediction logs in complete 1-minute bins. This does not prove zero traffic or a healthy service."
+      }
+    },
+    {
+      "type": 3,
+      "name": "error_rate",
+      "customWidth": "50",
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "let Start = {TimeRange:start};\nlet End = {TimeRange:end};\nContainerAppConsoleLogs_CL\n| where ContainerAppName_s == \"itcs355-lab4-staging\"\n| extend Event = parse_json(Log_s)\n| where tostring(Event.message) == \"request completed\"\n| where TimeGenerated >= Start and TimeGenerated < End\n| where tostring(Event.path) in (\"/predict\", \"/predict/batch\")\n| summarize Requests = count(),\n    Errors4xx = countif(toint(Event.status) between (400 .. 499)),\n    Errors5xx = countif(toint(Event.status) between (500 .. 599))\n    by Time = bin(TimeGenerated, 1m)\n| where Time >= Start and Time + 1m <= End\n| project Time, Error4xxPct = 100.0 * Errors4xx / Requests,\n    Error5xxPct = 100.0 * Errors5xx / Requests\n| order by Time asc",
+        "size": 0,
+        "title": "Prediction errors — 4xx and 5xx (% of requests)",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "timechart",
+        "timeContextFromParameter": "TimeRange",
+        "chartSettings": {
+          "xAxis": "Time",
+          "yAxis": [
+            "Error4xxPct",
+            "Error5xxPct"
+          ],
+          "showLegend": true,
+          "showMetrics": false,
+          "ySettings": {
+            "min": 0,
+            "max": 100
+          }
+        },
+        "noDataMessage": "No prediction logs in complete 1-minute bins. This does not prove zero traffic or a healthy service."
+      }
+    },
+    {
+      "type": 3,
+      "name": "latency",
+      "customWidth": "50",
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "let Start = {TimeRange:start};\nlet End = {TimeRange:end};\nContainerAppConsoleLogs_CL\n| where ContainerAppName_s == \"itcs355-lab4-staging\"\n| extend Event = parse_json(Log_s)\n| where tostring(Event.message) == \"request completed\"\n| where TimeGenerated >= Start and TimeGenerated < End\n| where tostring(Event.path) in (\"/predict\", \"/predict/batch\")\n| extend LatencyMs = todouble(Event.latency_ms)\n| where isnotnull(LatencyMs) and LatencyMs >= 0\n| summarize P50Ms = percentile(LatencyMs, 50),\n    P95Ms = percentile(LatencyMs, 95), P99Ms = percentile(LatencyMs, 99)\n    by Time = bin(TimeGenerated, 1m)\n| where Time >= Start and Time + 1m <= End\n| order by Time asc",
+        "size": 0,
+        "title": "Server request latency — p50 / p95 / p99 (ms)",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "timechart",
+        "timeContextFromParameter": "TimeRange",
+        "chartSettings": {
+          "xAxis": "Time",
+          "yAxis": [
+            "P50Ms",
+            "P95Ms",
+            "P99Ms"
+          ],
+          "showLegend": true,
+          "showMetrics": false,
+          "ySettings": {
+            "min": 0
+          }
+        },
+        "noDataMessage": "No prediction logs in complete 1-minute bins. This does not prove zero traffic or a healthy service."
+      }
+    },
+    {
+      "type": 3,
+      "name": "feature_load",
+      "customWidth": "50",
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "let Start = {TimeRange:start};\nlet End = {TimeRange:end};\nContainerAppConsoleLogs_CL\n| where ContainerAppName_s == \"itcs355-lab4-staging\"\n| extend Event = parse_json(Log_s)\n| where tostring(Event.message) == \"request completed\"\n| where TimeGenerated >= Start - 5m and TimeGenerated < End\n| where tostring(Event.path) in (\"/predict\", \"/predict/batch\")\n| mv-expand LoadPct = Event.load_pct_values\n| extend LoadPct = todouble(LoadPct)\n| where isnotnull(LoadPct) and LoadPct between (0.0 .. 100.0)\n// One point per minute: each window is [Time - 5m, Time).\n// Expand rows before averaging so a batch contributes one sample per input row.\n| extend WindowEnds = range(bin(TimeGenerated, 1m) + 1m, bin(TimeGenerated, 1m) + 5m, 1m)\n| mv-expand Time = WindowEnds to typeof(datetime)\n| where Time >= Start and Time <= End\n| summarize MeanLoadPct = avg(LoadPct), SampleCount = count() by Time\n| order by Time asc",
+        "size": 0,
+        "title": "load_pct — trailing 5-minute mean per valid input row",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "timechart",
+        "chartSettings": {
+          "xAxis": "Time",
+          "yAxis": [
+            "MeanLoadPct"
+          ],
+          "showLegend": true,
+          "showMetrics": false,
+          "ySettings": {
+            "min": 0,
+            "max": 100
+          }
+        },
+        "noDataMessage": "No validated feature samples in these windows. This panel requires load_pct_values telemetry; missing data does not mean no drift."
+      }
+    },
+    {
+      "type": 3,
+      "name": "model_version",
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "ContainerAppConsoleLogs_CL\n| where ContainerAppName_s == \"itcs355-lab4-staging\"\n| extend Event = parse_json(Log_s)\n| where tostring(Event.message) == \"request completed\"\n| where TimeGenerated >= ago(5m) and TimeGenerated <= now()\n| where toint(Event.status) == 200\n| where tostring(Event.path) in (\"/predict\", \"/predict/batch\", \"/ready\")\n| extend ModelVersion = tostring(Event.model_version)\n| where isnotempty(ModelVersion) and ModelVersion != \"unknown\"\n| summarize LastSeen = max(TimeGenerated) by ModelVersion\n| order by LastSeen desc",
+        "size": 0,
+        "title": "Model version in staging — observed within the last 5 minutes",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "table",
+        "timeContext": {
+          "durationMs": 300000
+        },
+        "noDataMessage": "No ready or successful prediction signal in the last 5 minutes. Current model version is unconfirmed."
+      }
+    },
+    {
+      "type": 1,
+      "name": "source-note",
+      "content": {
+        "json": "Adapted from the instructor's `monitoring/dashboard.json` for Azure Monitor Workbooks. No workspace or subscription identifier is embedded. Source format: [Microsoft workbook schema](https://github.com/microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json). This dashboard is for staging, not a claim of production deployment."
+      }
+    }
+  ],
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}

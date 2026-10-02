@@ -26,7 +26,7 @@ help:
 	@echo "  scan-secrets       Scan all local Git history; refuses shallow clones"
 	@echo "  lint               Check Lab 4 Python code with the instructor's Ruff rules"
 	@echo "  test               Run the current offline unit, deployment and data tests"
-	@echo "  test-unit          Run offline feature, downloader, deployment and smoke tests"
+	@echo "  test-unit          Run offline feature/logging, downloader, deployment and smoke tests"
 	@echo "  test-data          Run data-contract and split tests; missing data fails"
 	@echo "  test-model         Test the configured registry model; requires config and cloud login"
 	@echo "  test-integration   Test IMAGE:TAG locally; build first, set serving config and log in on host"
@@ -51,10 +51,10 @@ lint:
 	$(PYTHON) -m ruff check src/ service/ cloudlayer/ scripts/ tests/
 
 test:
-	$(PYTHON) -m pytest -q tests/test_features.py tests/test_pull_data.py tests/test_serving_commands.py tests/test_workflow.py cloudlayer/tests/test_deployment.py tests/test_data.py
+	$(PYTHON) -m pytest -q tests/test_features.py tests/test_feature_logging.py tests/test_dashboard.py tests/test_pull_data.py tests/test_serving_commands.py tests/test_workflow.py cloudlayer/tests/test_deployment.py tests/test_data.py
 
 test-unit:
-	$(PYTHON) -m pytest -q tests/test_features.py tests/test_pull_data.py tests/test_serving_commands.py tests/test_workflow.py cloudlayer/tests/test_deployment.py
+	$(PYTHON) -m pytest -q tests/test_features.py tests/test_feature_logging.py tests/test_dashboard.py tests/test_pull_data.py tests/test_serving_commands.py tests/test_workflow.py cloudlayer/tests/test_deployment.py
 
 test-data:
 	$(PYTHON) -m pytest -q tests/test_data.py

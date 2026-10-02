@@ -39,3 +39,41 @@ The latency limit reuses Lab 3’s target as a loose model-only check. It measur
 The local container does not share my host’s cloud login. I passed a short-lived token through stdin without putting it in the image or Git. This setup is for the local test; it does not establish CI authentication.
 
 The test removed its container afterwards. The registered model and original training run stayed unchanged.
+
+## Task 2 — CI pipeline
+
+I added a GitHub Actions workflow for pull requests and pushes to main. It scans the full Git history, runs lint and tests, builds the image, then tests that image before publishing it.
+
+Only a successful run on main can push the image to ACR and deploy to staging. The image uses the commit SHA as its tag and is deployed by digest. Azure login uses OIDC instead of a saved cloud password.
+
+### Checks
+
+[CI run for commit `bb38fe7`](https://github.com/nithit-cypherX/mlops-engineering/actions/runs/36961138955) passed:
+
+- Secret scan, lint and portability audit passed.
+- 166 unit/data tests, 3 model behaviour tests and 1 integration test passed.
+- Staging used the digest pushed by this run. All three smoke payloads passed with model version `"1"`.
+- Cleanup removed the runner’s temporary IP rule. I checked Azure again and confirmed that only my configured IP remained allowed.
+
+### Problems and fixes
+
+The readiness check depended on `latestReadyRevisionName`, which Azure did not return. I changed it to check the revision directly, including its image digest and model version, and gave CI permission to read revisions.
+
+CI also hit a GET timeout. The code now retries readiness GETs within the same 600-second limit without deploying again. The cause of the earlier slow GET is still unknown.
+
+Cleanup had another problem: Azure accepted the PATCH but returned an empty response, which caused a JSON error. I handled the empty response and kept the GET check that confirms the runner’s IP rule was removed.
+
+## Task 3 — Prove a bad commit is blocked
+
+I opened [PR #1](https://github.com/nithit-cypherX/mlops-engineering/pull/1) with one deliberate change: the data loader returned `load_pct=250`, above the allowed maximum of `100`. I kept the original CSV and tests unchanged.
+
+### Checks
+
+[CI run for commit `7896619`](https://github.com/nithit-cypherX/mlops-engineering/actions/runs/36964236442) failed as expected:
+
+- `tests/test_data.py::test_features_within_plausible_ranges` caught the bad value.
+- Error: `AssertionError: load_pct above plausible ceiling: 250.0`.
+- Data tests: **1 failed, 17 passed**. Unit tests: **148 passed**.
+- The PR's model, image and integration job was skipped. No image was pushed and no deployment ran.
+
+I closed the PR without merging. The bad change did not enter `main`.

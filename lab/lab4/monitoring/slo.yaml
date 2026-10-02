@@ -1,0 +1,64 @@
+# Adapted from the instructor's monitoring/slo.yaml for Lab 4 staging.
+# These are goals and manual responses, not measured passes or automatic gates.
+# Request windows roll backwards from the evaluation time in UTC.
+# Report request counts and actual coverage; short history is only partial evidence.
+# No requests, missing telemetry or an unknown training time means the affected
+# objective is unconfirmed, not passed.
+# Application logs miss failures before the service or before a log is written;
+# this is not an end-to-end uptime guarantee.
+
+service: itcs355-lab4-staging
+
+objectives:
+  - name: availability
+    # Starting goal for this teaching service: allow 5 failures per 1,000 eligible
+    # requests, rather than promise 100%; this is not a proven production target.
+    target: 0.995
+    window: 30d
+    measurement: >-
+      Count HTTP 200 responses divided by all logged responses excluding 4xx for
+      /predict and /predict/batch in this service, with each batch counted as one
+      HTTP request and health/readiness probes excluded.
+    # Budget: 0.005 * eligible request count; every non-200 eligible response,
+    # including 500 and 503, consumes one unit (do not round the allowance up).
+    # Reaching or exceeding that allowance triggers the response below.
+    # The dashboard's 5xx percentage includes 4xx in its denominator, so it is
+    # not the same calculation as this SLO.
+    on_budget_exhausted: >-
+      Pause feature deploys, allow reliability and security fixes, check the logs
+      and roll back only if a release caused the problem and a compatible
+      known-good version is verified, then resume feature deploys after the cause
+      is fixed, smoke checks pass and the rolling error rate is below 0.5%.
+
+  - name: latency
+    # Keep Lab 3's numeric target; its failed load-test result stays unchanged.
+    # This measures service time, not k6's client-side time or mean model inference.
+    target_p95_ms: 200
+    window: 7d
+    measurement: >-
+      Require p95 of latency_ms to be below 200 ms across raw HTTP 200 /predict
+      request logs in this service over the window, excluding batch requests,
+      errors and probes and never averaging the per-minute dashboard percentiles.
+    # A p95 at or above 200 ms breaches this objective; a fast error does not
+    # count as a successful low-latency prediction (availability counts errors).
+    on_budget_exhausted: >-
+      Pause feature deploys, inspect startup, scoring and resource contention,
+      keep reliability and security fixes allowed, roll back only a confirmed
+      release regression and resume when the cause is fixed and the rolling p95
+      is below 200 ms, without raising the target just to pass.
+
+  - name: freshness
+    # Use the instructor's 30-day limit as a review deadline, not proof of quality;
+    # keep the later Lab 5 retraining policy consistent with this limit.
+    target_max_model_age_days: 30
+    window: continuous
+    measurement: >-
+      Require the age of each currently served model to be at most 30 elapsed
+      days since its actual training run completed, using training metadata
+      rather than registration or deployment time.
+    # The age limit, rather than a percentage of requests, is the allowed margin.
+    on_budget_exhausted: >-
+      If any served model is older than 30 days, review data quality, drift and
+      model quality before deciding to retrain, only replace it with a validated
+      candidate and keep the known-good model with the freshness miss recorded
+      if no candidate passes, rather than retraining on possibly broken data.

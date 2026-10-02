@@ -135,6 +135,9 @@ async def add_request_context(request: Request, call_next):
     response.headers["x-model-version"] = str(STATE["version"])
     fields.update(status=response.status_code, latency_ms=latency_ms,
                   model_version=str(STATE["version"]))
+    load_pct_values = getattr(request.state, "load_pct_values", None)
+    if load_pct_values is not None:
+        fields["load_pct_values"] = load_pct_values
     log.log(
         logging.ERROR if response.status_code >= 500 else logging.INFO,
         "request completed", extra={"fields": fields},
@@ -227,6 +230,8 @@ prediction_router = APIRouter(route_class=PredictionTimingRoute)
 
 @prediction_router.post("/predict", response_model=PredictResponse)
 def predict(payload: PredictRequest, request: Request) -> PredictResponse:
+    # Only validated feature values; keep raw bodies out of request logs.
+    request.state.load_pct_values = [payload.load_pct]
     started = time.perf_counter_ns()
     score = _score([payload.model_dump()])[0]
     request.state.prediction_timings["scoring_ms"] = (
@@ -239,6 +244,7 @@ app.include_router(prediction_router)
 
 
 @app.post("/predict/batch", response_model=BatchResponse)
-def predict_batch(payload: BatchRequest) -> BatchResponse:
+def predict_batch(payload: BatchRequest, request: Request) -> BatchResponse:
+    request.state.load_pct_values = [row.load_pct for row in payload.rows]
     scores = _score([row.model_dump() for row in payload.rows])
     return BatchResponse(probabilities=scores, model_version=str(STATE["version"]))
