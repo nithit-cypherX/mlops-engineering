@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import ipaddress
 import json
+import logging
 import os
 import re
 import subprocess
@@ -173,21 +174,27 @@ class AzureAdapter(CloudAdapter):
         return mlflow.sklearn.load_model(f"models:/{name}/{version}")
 
     @staticmethod
-    def _az_json(arguments: list[str]):
+    def _az_json(arguments: list[str], *, allow_empty: bool = False, timeout: float = 90):
         """Use the existing CLI login; no extension install, shell or credential export."""
         result = subprocess.run(
             ["az", *arguments, "--only-show-errors", "--output", "json"],
-            check=True, capture_output=True, text=True, timeout=90,
+            check=True, capture_output=True, text=True, timeout=timeout,
             env={**os.environ, "AZURE_EXTENSION_USE_DYNAMIC_INSTALL": "no"},
         )
+        if allow_empty and not result.stdout.strip():
+            return {}
         return json.loads(result.stdout)
 
-    def _rest(self, method: str, url: str, body: dict | None = None):
+    def _rest(self, method: str, url: str, body: dict | None = None, *, deadline: float | None = None):
         args = ["rest", "--method", method, "--url", url]
         if body is not None:
             args += ["--headers", "Content-Type=application/json",
                      "--body", json.dumps(body, allow_nan=False)]
-        return self._az_json(args)
+        timeout = 90 if deadline is None else min(90, deadline - time.monotonic())
+        if timeout <= 0:
+            raise TimeoutError("Readiness deadline reached; resource may still exist (no auto-delete)")
+        # A successful PATCH can return no body; cleanup still confirms it with GET.
+        return self._az_json(args, allow_empty=method == "patch", timeout=timeout)
 
     def _scope(self) -> str:
         UUID(self.cfg.azure_subscription_id)
@@ -400,18 +407,48 @@ class AzureAdapter(CloudAdapter):
         }
         result = self._rest("put", app_url, body)
         deadline = time.monotonic() + self._DEPLOY_TIMEOUT
-        while True:
-            state = result.get("properties", {})
-            if state.get("provisioningState") in {"Failed", "Canceled"}:
-                raise RuntimeError(f"Deployment failed for {endpoint}; inspect its Azure status/logs before retrying")
-            latest = state.get("latestRevisionName")
-            if (state.get("provisioningState") == "Succeeded" and latest
-                    and state.get("latestReadyRevisionName") == latest):
-                return self._https_endpoint("https://" + state["configuration"]["ingress"]["fqdn"])
-            if time.monotonic() >= deadline:
-                raise TimeoutError(f"Deployment of {endpoint} not ready in 600s; resource may still exist (no auto-delete)")
-            time.sleep(5)
-            result = self._rest("get", app_url)
+        last_timeout = None
+        while time.monotonic() < deadline:
+            try:
+                if result is None:
+                    result = self._rest("get", app_url, deadline=deadline)
+                state = result.get("properties", {})
+                result = None  # Always refresh the app after an incomplete readiness check.
+                if state.get("provisioningState") in {"Failed", "Canceled"}:
+                    raise RuntimeError(f"Deployment failed for {endpoint}; inspect its Azure status/logs before retrying")
+                latest = state.get("latestRevisionName")
+                if state.get("provisioningState") == "Succeeded" and latest:
+                    if not re.fullmatch(re.escape(endpoint) + r"--[a-z0-9][a-z0-9-]*", latest):
+                        raise ValueError("Unexpected latest revision name")
+                    root, query = app_url.split("?", 1)
+                    revision = self._rest("get", f"{root}/revisions/{latest}?{query}", deadline=deadline)
+                    props = revision.get("properties", {})
+                    if props.get("provisioningState") == "Failed" or props.get("runningState") == "Failed":
+                        raise RuntimeError(f"Revision {latest} failed; inspect its Azure status/logs before retrying")
+                    containers = props.get("template", {}).get("containers", [])
+                    api = next((c for c in containers if c.get("name") == "api"), {})
+                    actual_env = {entry["name"]: entry.get("value") for entry in api.get("env", [])}
+                    healthy = (props.get("healthState") == "Healthy"
+                               and props.get("runningState") in {"Running", "Processing"})
+                    # minReplicas=0 is intentional; the next smoke call wakes an idle revision.
+                    idle = (props.get("runningState") == "ScaledToZero" and props.get("replicas") == 0
+                            and props.get("healthState") in {None, "None"})
+                    if (revision.get("name") == latest and props.get("active") is True
+                            and props.get("provisioningState") == "Provisioned"
+                            and props.get("trafficWeight") == 100 and (healthy or idle)
+                            and api.get("image") == self.cfg.serving_image
+                            and actual_env.get("MODEL_REGISTRY_NAME") == model[1]
+                            and actual_env.get("MODEL_VERSION") == model[2]
+                            and time.monotonic() < deadline):
+                        return self._https_endpoint("https://" + state["configuration"]["ingress"]["fqdn"])
+            except subprocess.TimeoutExpired as exc:
+                # Only readiness GETs are repeated, never PUT or authorization failures.
+                last_timeout = exc
+                logging.getLogger(__name__).warning("Readiness GET timed out; polling within the original 600s deadline")
+            time.sleep(min(5, max(0, deadline - time.monotonic())))
+        raise TimeoutError(
+            f"Deployment of {endpoint} not ready in 600s; resource may still exist (no auto-delete)"
+        ) from last_timeout
 
     def invoke(self, endpoint: str, payload: dict) -> dict:
         """Accept an app name (resolve with CLI) or the HTTPS URL returned by deploy()."""

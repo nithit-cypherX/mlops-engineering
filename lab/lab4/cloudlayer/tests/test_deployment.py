@@ -54,6 +54,7 @@ def cfg():
 def arm(cfg, monkeypatch):
     state = SimpleNamespace(
         calls=[], bodies=[], patches=[], existing=None, polls=[], cleanup_polls=[], lookup_error=None,
+        patch_stdout=None, revision_polls=[],
         environment={"location": "malaysiawest", "tags": cfg.tags(4), "properties": {
             "provisioningState": "Succeeded",
             "workloadProfiles": [{"name": "Consumption", "workloadProfileType": "Consumption"}],
@@ -64,6 +65,14 @@ def arm(cfg, monkeypatch):
             "latestRevisionName": "lab4-api--new", "latestReadyRevisionName": "lab4-api--new",
             "configuration": {"activeRevisionsMode": "Single", "ingress": {"fqdn": URL.removeprefix("https://")}},
         }},
+        revision={"name": "lab4-api--new", "properties": {
+            "active": True, "provisioningState": "Provisioned", "healthState": "Healthy",
+            "runningState": "Running", "trafficWeight": 100, "replicas": 1,
+            "template": {"containers": [{"name": "api", "image": cfg.serving_image, "env": [
+                {"name": "MODEL_REGISTRY_NAME", "value": cfg.model_registry_name},
+                {"name": "MODEL_VERSION", "value": cfg.model_version},
+            ]}]},
+        }},
     )
     state.put_result = copy.deepcopy(state.ready)
 
@@ -72,16 +81,21 @@ def arm(cfg, monkeypatch):
         assert command[0] == "az"
         assert kwargs["check"] and kwargs["capture_output"] and kwargs["text"]
         assert kwargs["env"]["AZURE_EXTENSION_USE_DYNAMIC_INSTALL"] == "no"
-        assert kwargs["timeout"] == 90
+        assert 0 < kwargs["timeout"] <= 90
         assert "--only-show-errors" in command and command[-2:] == ["--output", "json"]
         assert command[1] == "rest"
         method = command[command.index("--method") + 1]
         url = command[command.index("--url") + 1]
+        if method != "get" or not state.bodies:
+            assert kwargs["timeout"] == 90  # Only readiness GETs use the remaining budget.
         assert url.startswith(f"https://management.azure.com{SCOPE}/providers/")
         if method == "get" and "/managedEnvironments/" in url:
             result = state.environment
         elif method == "get" and "/userAssignedIdentities/" in url:
             result = state.identity
+        elif method == "get" and "/containerApps/lab4-api/revisions/" in url:
+            assert url.endswith("/revisions/lab4-api--new?api-version=2025-07-01")
+            result = state.revision_polls.pop(0) if state.revision_polls else state.revision
         elif method == "put" and "/containerApps/lab4-api?" in url:
             state.bodies.append(json.loads(command[command.index("--body") + 1]))
             result = state.put_result
@@ -93,19 +107,23 @@ def arm(cfg, monkeypatch):
                 body["properties"]["configuration"]["ingress"]["ipSecurityRestrictions"]
             )
             state.existing = result
+            if state.patch_stdout is not None:
+                return SimpleNamespace(stdout=state.patch_stdout)
         elif method == "get" and "/containerApps/lab4-api?" in url:
             if not state.bodies and state.lookup_error:
                 raise state.lookup_error
             if state.patches:
                 result = state.cleanup_polls.pop(0) if state.cleanup_polls else state.existing
             else:
-                result = state.polls.pop(0) if state.bodies else state.existing
+                result = (state.polls.pop(0) if state.polls else state.ready) if state.bodies else state.existing
             if result is None:
                 raise subprocess.CalledProcessError(
                     1, command, stderr='ERROR: Not Found({"error":{"code":"ResourceNotFound"}})',
                 )
         else:
             raise AssertionError(f"Unexpected Azure operation: {method} {url}")
+        if isinstance(result, Exception):
+            raise result
         return SimpleNamespace(stdout=json.dumps(result))
 
     monkeypatch.setattr(azure.subprocess, "run", run)
@@ -148,6 +166,10 @@ def test_deploy_builds_scoped_digest_pinned_identity_config(cfg, arm, location):
     # The exact boundary sequence excludes grants, image builds and environment creation.
     assert [call[0][1:3] for call in arm.calls] == [
         ["rest", "--method"], ["rest", "--method"], ["rest", "--method"], ["rest", "--method"],
+        ["rest", "--method"],
+    ]
+    assert [command[command.index("--method") + 1] for command, _ in arm.calls] == [
+        "get", "get", "get", "put", "get",
     ]
 
 
@@ -221,11 +243,162 @@ def test_existing_lab4_app_can_be_updated_without_removing_other_tags(cfg, arm):
 
 def test_poll_waits_for_new_revision_not_previous_ready_revision(cfg, arm, monkeypatch):
     arm.put_result["properties"]["latestReadyRevisionName"] = "lab4-api--old"
+    pending = copy.deepcopy(arm.revision)
+    pending["properties"].update(provisioningState="Provisioning", healthState="None", trafficWeight=0)
+    arm.revision_polls = [pending]
     arm.polls = [arm.ready]
     sleep = Mock()
     monkeypatch.setattr(azure.time, "sleep", sleep)
     assert AzureAdapter(cfg).deploy(MODEL, cfg.endpoint_name, cfg.serving_instance) == URL
     sleep.assert_called_once_with(5)
+
+
+def test_deploy_checks_revision_when_latest_ready_field_is_absent(cfg, arm):
+    del arm.put_result["properties"]["latestReadyRevisionName"]
+    assert AzureAdapter(cfg).deploy(MODEL, cfg.endpoint_name, cfg.serving_instance) == URL
+    assert "/revisions/lab4-api--new?" in arm.calls[-1][0][5]
+
+
+def test_deploy_accepts_provisioned_scaled_to_zero_revision(cfg, arm):
+    del arm.put_result["properties"]["latestReadyRevisionName"]
+    arm.revision["properties"].update(healthState="None", runningState="ScaledToZero", replicas=0)
+    assert AzureAdapter(cfg).deploy(MODEL, cfg.endpoint_name, cfg.serving_instance) == URL
+    assert len(arm.bodies) == 1
+
+
+@pytest.mark.parametrize("mismatch", ["image", "model", "name", "inactive", "unhealthy", "traffic", "stopped"])
+def test_ready_app_does_not_hide_wrong_or_unready_revision(cfg, arm, monkeypatch, mismatch):
+    revision = arm.revision["properties"]
+    if mismatch == "image":
+        revision["template"]["containers"][0]["image"] = "example.azurecr.io/lab4@sha256:" + "b" * 64
+    elif mismatch == "model":
+        revision["template"]["containers"][0]["env"][1]["value"] = "2"
+    elif mismatch == "name":
+        arm.revision["name"] = "lab4-api--old"
+    elif mismatch == "inactive":
+        revision["active"] = False
+    elif mismatch == "unhealthy":
+        revision["healthState"] = "Unhealthy"
+    elif mismatch == "traffic":
+        revision["trafficWeight"] = 0
+    else:
+        revision["runningState"] = "Stopped"
+    elapsed = [0]
+    monkeypatch.setattr(azure.time, "monotonic", lambda: elapsed[0])
+    monkeypatch.setattr(azure.time, "sleep", lambda _: elapsed.__setitem__(0, 600))
+    with pytest.raises(TimeoutError, match="no auto-delete"):
+        AzureAdapter(cfg).deploy(MODEL, cfg.endpoint_name, cfg.serving_instance)
+    assert len(arm.bodies) == 1
+
+
+@pytest.mark.parametrize("field", ["provisioningState", "runningState"])
+def test_failed_revision_stops_without_redeploy(cfg, arm, field):
+    arm.revision["properties"][field] = "Failed"
+    with pytest.raises(RuntimeError, match="Revision.*failed"):
+        AzureAdapter(cfg).deploy(MODEL, cfg.endpoint_name, cfg.serving_instance)
+    assert len(arm.bodies) == 1
+
+
+@pytest.mark.parametrize("target", ["app", "revision"])
+def test_readiness_get_timeout_is_rechecked_without_redeploy(cfg, arm, monkeypatch, caplog, target):
+    failure = subprocess.TimeoutExpired(["az", "rest"], 90)
+    if target == "app":
+        arm.put_result["properties"]["provisioningState"] = "InProgress"
+        arm.polls = [failure, arm.ready]
+    else:
+        arm.revision_polls = [failure, arm.revision]
+    sleep = Mock()
+    monkeypatch.setattr(azure.time, "sleep", sleep)
+    assert AzureAdapter(cfg).deploy(MODEL, cfg.endpoint_name, cfg.serving_instance) == URL
+    assert len(arm.bodies) == 1
+    assert "Readiness GET timed out" in caplog.text
+    assert sleep.call_count == (2 if target == "app" else 1)
+
+
+@pytest.mark.parametrize("target", ["app", "revision"])
+def test_readiness_authorization_error_is_not_retried(cfg, arm, monkeypatch, target):
+    failure = subprocess.CalledProcessError(1, ["az", "rest"], stderr="AuthorizationFailed")
+    if target == "app":
+        arm.put_result["properties"]["provisioningState"] = "InProgress"
+        arm.polls = [failure]
+    else:
+        arm.revision_polls = [failure]
+    sleep = Mock()
+    monkeypatch.setattr(azure.time, "sleep", sleep)
+    with pytest.raises(subprocess.CalledProcessError) as raised:
+        AzureAdapter(cfg).deploy(MODEL, cfg.endpoint_name, cfg.serving_instance)
+    assert raised.value is failure
+    assert len(arm.bodies) == 1
+    assert sleep.call_count == (1 if target == "app" else 0)
+
+
+@pytest.mark.parametrize("target,last_budget", [("app", 25), ("revision", 30)])
+def test_repeated_readiness_timeouts_stop_at_original_deadline(cfg, arm, monkeypatch, target, last_budget):
+    elapsed = [0.0]
+    timeouts = []
+    original_run = azure.subprocess.run
+    monkeypatch.setattr(azure.time, "monotonic", lambda: elapsed[0])
+    monkeypatch.setattr(azure.time, "sleep", lambda seconds: elapsed.__setitem__(0, elapsed[0] + seconds))
+    if target == "app":
+        arm.put_result["properties"]["provisioningState"] = "InProgress"
+
+    def run(command, **kwargs):
+        url = command[command.index("--url") + 1]
+        selected = "/containerApps/lab4-api?" in url if target == "app" else "/revisions/" in url
+        if arm.bodies and command[3] == "get" and selected:
+            timeouts.append(kwargs["timeout"])
+            elapsed[0] += kwargs["timeout"]
+            raise subprocess.TimeoutExpired(command, kwargs["timeout"])
+        return original_run(command, **kwargs)
+
+    monkeypatch.setattr(azure.subprocess, "run", run)
+    with pytest.raises(TimeoutError, match="not ready in 600s") as raised:
+        AzureAdapter(cfg).deploy(MODEL, cfg.endpoint_name, cfg.serving_instance)
+    assert isinstance(raised.value.__cause__, subprocess.TimeoutExpired)
+    assert elapsed[0] == 600
+    assert timeouts == [90] * 6 + [last_budget]
+    assert len(arm.bodies) == 1 and not arm.patches
+
+
+def test_put_timeout_is_not_retried(cfg, arm):
+    failure = subprocess.TimeoutExpired(["az", "rest", "--method", "put"], 90)
+    arm.put_result = failure
+    with pytest.raises(subprocess.TimeoutExpired) as raised:
+        AzureAdapter(cfg).deploy(MODEL, cfg.endpoint_name, cfg.serving_instance)
+    assert raised.value is failure
+    assert len(arm.bodies) == 1 and len(arm.calls) == 4
+
+
+def test_expired_readiness_budget_makes_no_cli_call(cfg, monkeypatch):
+    monkeypatch.setattr(azure.time, "monotonic", lambda: 600)
+    adapter = AzureAdapter(cfg)
+    with pytest.raises(TimeoutError, match="Readiness deadline reached"):
+        adapter._rest("get", adapter._app_url(cfg.endpoint_name), deadline=600)
+
+
+def test_unexpected_revision_name_is_rejected_before_revision_lookup(cfg, arm):
+    arm.put_result["properties"]["latestRevisionName"] = "../another-app"
+    with pytest.raises(ValueError, match="Unexpected latest revision name"):
+        AzureAdapter(cfg).deploy(MODEL, cfg.endpoint_name, cfg.serving_instance)
+    assert len(arm.calls) == 4
+
+
+def test_late_ready_response_is_not_reported_as_success(cfg, arm, monkeypatch):
+    elapsed = [0.0]
+    original_run = azure.subprocess.run
+    monkeypatch.setattr(azure.time, "monotonic", lambda: elapsed[0])
+    monkeypatch.setattr(azure.time, "sleep", Mock())
+
+    def run(command, **kwargs):
+        result = original_run(command, **kwargs)
+        if "/revisions/" in command[5]:
+            elapsed[0] = 600
+        return result
+
+    monkeypatch.setattr(azure.subprocess, "run", run)
+    with pytest.raises(TimeoutError, match="not ready in 600s"):
+        AzureAdapter(cfg).deploy(MODEL, cfg.endpoint_name, cfg.serving_instance)
+    assert len(arm.bodies) == 1
 
 
 @pytest.mark.parametrize("status", ["Failed", "Canceled"])
@@ -372,7 +545,9 @@ def test_same_client_and_runner_does_not_duplicate_allow_rule(cfg, arm):
     assert len(arm.bodies[0]["properties"]["configuration"]["ingress"]["ipSecurityRestrictions"]) == 1
 
 
-def test_restore_patches_only_client_allowlist_and_confirms_readback(cfg, arm):
+@pytest.mark.parametrize("patch_stdout", [None, "", " \n"])
+def test_restore_patches_only_client_allowlist_and_confirms_readback(cfg, arm, patch_stdout):
+    arm.patch_stdout = patch_stdout
     arm.existing = copy.deepcopy(arm.ready)
     arm.existing["properties"]["configuration"]["ingress"]["ipSecurityRestrictions"] = [
         {"name": "lab4-client", "action": "Allow", "ipAddressRange": "8.8.8.8/32"},
@@ -420,7 +595,9 @@ def test_restore_does_not_hide_authorization_failure(cfg, arm):
     assert not arm.patches
 
 
-def test_restore_waits_for_confirmed_rules(cfg, arm, monkeypatch):
+@pytest.mark.parametrize("patch_stdout", [None, ""])
+def test_restore_waits_for_confirmed_rules(cfg, arm, monkeypatch, patch_stdout):
+    arm.patch_stdout = patch_stdout
     arm.existing = copy.deepcopy(arm.ready)
     arm.cleanup_polls = [copy.deepcopy(arm.ready)]  # Succeeded, but rules not changed yet.
     sleep = Mock()
@@ -431,7 +608,9 @@ def test_restore_waits_for_confirmed_rules(cfg, arm, monkeypatch):
 
 
 @pytest.mark.parametrize("status", ["Failed", "Canceled", "InProgress"])
-def test_restore_failure_or_timeout_does_not_claim_success(cfg, arm, monkeypatch, status):
+@pytest.mark.parametrize("patch_stdout", [None, ""])
+def test_restore_failure_or_timeout_does_not_claim_success(cfg, arm, monkeypatch, status, patch_stdout):
+    arm.patch_stdout = patch_stdout
     arm.existing = copy.deepcopy(arm.ready)
     pending = copy.deepcopy(arm.ready)
     pending["properties"]["provisioningState"] = status
@@ -440,3 +619,45 @@ def test_restore_failure_or_timeout_does_not_claim_success(cfg, arm, monkeypatch
     with pytest.raises(TimeoutError if status == "InProgress" else RuntimeError, match="temporary runner access may remain"):
         AzureAdapter(cfg).restore_serving_access(cfg.endpoint_name)
     assert len(arm.patches) == 1 and not arm.bodies
+
+
+def test_restore_empty_patch_does_not_accept_remaining_runner_rule(cfg, arm, monkeypatch):
+    arm.patch_stdout = ""
+    arm.existing = copy.deepcopy(arm.ready)
+    arm.existing["properties"]["configuration"]["ingress"]["ipSecurityRestrictions"] = [
+        {"name": "lab4-client", "action": "Allow", "ipAddressRange": "8.8.8.8/32"},
+        {"name": "lab4-runner", "action": "Allow", "ipAddressRange": "1.1.1.1/32"},
+    ]
+    arm.cleanup_polls = [copy.deepcopy(arm.existing)]
+    monkeypatch.setattr(azure.time, "monotonic", Mock(side_effect=[0, 121]))
+    with pytest.raises(TimeoutError, match="temporary runner access may remain"):
+        AzureAdapter(cfg).restore_serving_access(cfg.endpoint_name)
+    assert len(arm.patches) == 1 and not arm.bodies
+    assert [command[command.index("--method") + 1] for command, _ in arm.calls] == ["get", "patch", "get"]
+
+
+def test_restore_does_not_hide_failed_patch_with_empty_stdout(cfg, arm, monkeypatch):
+    failure = subprocess.CalledProcessError(1, ["az", "rest"], output="", stderr="AuthorizationFailed")
+    run = Mock(side_effect=[SimpleNamespace(stdout=json.dumps(arm.ready)), failure])
+    monkeypatch.setattr(azure.subprocess, "run", run)
+    with pytest.raises(subprocess.CalledProcessError) as raised:
+        AzureAdapter(cfg).restore_serving_access(cfg.endpoint_name)
+    assert raised.value is failure
+    assert run.call_count == 2
+    assert run.call_args.args[0][3] == "patch"
+
+
+def test_restore_does_not_hide_malformed_patch_response(cfg, arm):
+    arm.existing = copy.deepcopy(arm.ready)
+    arm.patch_stdout = "not-json"
+    with pytest.raises(json.JSONDecodeError):
+        AzureAdapter(cfg).restore_serving_access(cfg.endpoint_name)
+    assert len(arm.calls) == 2 and len(arm.patches) == 1
+
+
+@pytest.mark.parametrize("method", ["get", "put"])
+def test_empty_response_is_not_accepted_for_other_methods(cfg, monkeypatch, method):
+    monkeypatch.setattr(azure.subprocess, "run", Mock(return_value=SimpleNamespace(stdout="")))
+    adapter = AzureAdapter(cfg)
+    with pytest.raises(json.JSONDecodeError):
+        adapter._rest(method, adapter._app_url(cfg.endpoint_name))
