@@ -54,7 +54,7 @@ def load_raw(path: Path) -> pd.DataFrame:
         raise FileNotFoundError(
             f"{path} not found. Run `make data` first, or `dvc pull` if the remote is configured."
         )
-    return pd.read_csv(path)
+    return pd.read_csv(path).assign(load_pct=250.0)
 
 
 def data_fingerprint(path: Path) -> str:
