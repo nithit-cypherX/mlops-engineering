@@ -1,5 +1,5 @@
-# Lab 4 Task 2: test, then push the tested image on main only.
-# Staging deployment is not implemented yet.
+# Lab 4 Task 2: tests -> push the tested digest -> staging smoke, main only.
+# Requires a main-only lab4-staging environment and its separate OIDC trust.
 # Adapted from the instructor's CI at 2e29faeb1fdaa6360947808e32b0e3c1444113f2.
 name: Lab 4 CI
 
@@ -13,7 +13,8 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  # Let main finish deployment and IP cleanup; only superseded PR tests are cancelled.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 defaults:
   run:
@@ -69,6 +70,8 @@ jobs:
           exit 1
 
   registry-main:
+    outputs:
+      image: ${{ steps.push-image.outputs.image }}
     name: Model, image and integration tests, then push (main)
     needs: checks
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -134,7 +137,13 @@ jobs:
       - name: Push the tested image and print its repository digest
         id: push-image
         timeout-minutes: 10
-        run: make image-push IMAGE=itcs355-lab4 TAG="$GITHUB_SHA"
+        run: |
+          make --no-print-directory --silent image-push IMAGE=itcs355-lab4 TAG="$GITHUB_SHA" | tee "$RUNNER_TEMP/lab4-push.log"
+          image="$(tail -n 1 "$RUNNER_TEMP/lab4-push.log")"
+          [[ "$image" == "$CONTAINER_REGISTRY"@sha256:* ]]
+          digest="${image##*@sha256:}"
+          [[ "$digest" =~ ^[0-9a-f]{64}$ ]]
+          printf 'image=%s\n' "$image" >> "$GITHUB_OUTPUT"
 
       - name: Clear the runner's registry login
         if: always() && env.CONTAINER_REGISTRY != ''
@@ -196,3 +205,97 @@ jobs:
       - name: Test the exact built image
         timeout-minutes: 5
         run: make test-integration IMAGE=itcs355-lab4 TAG="$GITHUB_SHA"
+
+  deploy-staging:
+    name: Deploy tested digest and smoke-test staging
+    needs: registry-main
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      needs.registry-main.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    environment: lab4-staging
+    concurrency:
+      group: lab4-staging
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      CLOUD_PROVIDER: azure
+      PROJECT_ID: ${{ vars.LAB4_PROJECT_ID }}
+      REGION: ${{ vars.LAB4_REGION }}
+      CONTAINER_REGISTRY: ${{ vars.LAB4_CONTAINER_REGISTRY }}
+      MLFLOW_TRACKING_URI: ${{ vars.LAB4_MLFLOW_TRACKING_URI }}
+      MODEL_REGISTRY_NAME: ${{ vars.LAB4_MODEL_REGISTRY_NAME }}
+      MODEL_VERSION: ${{ vars.LAB4_MODEL_VERSION }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.LAB4_AZURE_SUBSCRIPTION_ID }}
+      AZURE_ML_WORKSPACE: ${{ vars.LAB4_AZURE_ML_WORKSPACE }}
+      IDENTITY_REF: ${{ vars.LAB4_RUNTIME_PRINCIPAL_ID }}
+      AZURE_MANAGED_IDENTITY_ID: ${{ vars.LAB4_RUNTIME_IDENTITY_ID }}
+      AZURE_CONTAINERAPPS_ENVIRONMENT: ${{ vars.LAB4_CONTAINERAPPS_ENVIRONMENT }}
+      ENDPOINT_NAME: ${{ vars.LAB4_STAGING_ENDPOINT }}
+      SERVING_IMAGE: ${{ needs.registry-main.outputs.image }}
+      SERVING_ALLOWED_IP: ${{ secrets.LAB4_SERVING_ALLOWED_IP }}
+      SERVING_INSTANCE: 0.5cpu-1Gi
+      AZURE_CORE_OUTPUT: none
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.11.16"
+          cache: pip
+          cache-dependency-path: lab/lab4/requirements.txt
+
+      - name: Install locked dependencies
+        timeout-minutes: 5
+        run: make setup
+
+      - name: Validate deployment settings and discover runner IPv4
+        timeout-minutes: 1
+        run: |
+          python -c 'from src.config import load_deployment; load_deployment()'
+          runner_ip="$(curl --ipv4 --fail --silent --show-error --connect-timeout 10 --max-time 20 https://api.ipify.org)"
+          RUNNER_IP="$runner_ip" python - <<'PY'
+          import ipaddress
+          import os
+
+          address = ipaddress.ip_address(os.environ["RUNNER_IP"])
+          if address.version != 4 or not address.is_global:
+              raise ValueError("Runner must have a public IPv4 address")
+          print(f"::add-mask::{address}")
+          with open(os.environ["GITHUB_ENV"], "a") as output:
+              output.write(f"SERVING_RUNNER_IP={address}/32\n")
+          PY
+
+      - name: Log in with the staging-deployer identity (OIDC)
+        id: azure-login
+        timeout-minutes: 2
+        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3
+        with:
+          client-id: ${{ vars.LAB4_AZURE_DEPLOY_CLIENT_ID }}
+          tenant-id: ${{ secrets.LAB4_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.LAB4_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy the tested digest with temporary runner access
+        id: deploy
+        timeout-minutes: 12
+        run: make deploy
+
+      - name: Smoke-test three fixed payloads
+        timeout-minutes: 5
+        run: make smoke
+
+      # Best effort on cancellation; a lost/force-cancelled runner needs manual restore-access.
+      - name: Restore client-only access and confirm it
+        if: >-
+          always() && steps.azure-login.outcome == 'success' &&
+          (steps.deploy.outcome == 'success' || steps.deploy.outcome == 'failure' ||
+           steps.deploy.outcome == 'cancelled')
+        timeout-minutes: 5
+        run: make restore-access

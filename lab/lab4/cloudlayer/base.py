@@ -57,6 +57,10 @@ class CloudAdapter(ABC):
         raise NotImplementedError("Lab 3")
 
     # --- Lab 4 ---------------------------------------------------------------
+    def restore_serving_access(self, endpoint: str) -> bool:
+        """Restore the configured client allowlist after temporary CI access."""
+        raise NotImplementedError("Lab 4: temporary serving access cleanup")
+
     def emit_metric(self, name: str, value: float, unit: str = "None") -> None:
         raise NotImplementedError("Lab 4")
 

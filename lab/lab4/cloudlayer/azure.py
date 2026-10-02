@@ -1,16 +1,22 @@
 """Lab 4 baseline: reuse Lab 3 Blob, image-push and registry-loading operations.
 
 Source: lab/lab3/cloudlayer/azure.py at 72e081d1e723d3b855b7df57937519234badaaa3.
-Deployment, monitoring and cleanup are not implemented for Lab 4 yet.
+Task 2.4 reuses Lab 3 deploy/invoke for a separately tagged Lab 4 staging app.
+Monitoring and resource teardown are not implemented for Lab 4 yet.
 """
 from __future__ import annotations
 
+import ipaddress
 import json
+import os
 import re
 import subprocess
 import time
 from pathlib import Path
 from tempfile import NamedTemporaryFile
+from uuid import UUID
+
+import requests
 
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobClient
@@ -19,6 +25,9 @@ from cloudlayer.base import CloudAdapter
 
 
 class AzureAdapter(CloudAdapter):
+    _APP_API = "2025-07-01"
+    _DEPLOY_TIMEOUT = 600
+
     def integration_environment(self) -> dict[str, str]:
         """Prepare short-lived host-login auth for a bounded local container test.
 
@@ -162,3 +171,260 @@ class AzureAdapter(CloudAdapter):
         mlflow.set_tracking_uri(self.cfg.mlflow_tracking_uri)
         mlflow.set_registry_uri(self.cfg.mlflow_tracking_uri)
         return mlflow.sklearn.load_model(f"models:/{name}/{version}")
+
+    @staticmethod
+    def _az_json(arguments: list[str]):
+        """Use the existing CLI login; no extension install, shell or credential export."""
+        result = subprocess.run(
+            ["az", *arguments, "--only-show-errors", "--output", "json"],
+            check=True, capture_output=True, text=True, timeout=90,
+            env={**os.environ, "AZURE_EXTENSION_USE_DYNAMIC_INSTALL": "no"},
+        )
+        return json.loads(result.stdout)
+
+    def _rest(self, method: str, url: str, body: dict | None = None):
+        args = ["rest", "--method", method, "--url", url]
+        if body is not None:
+            args += ["--headers", "Content-Type=application/json",
+                     "--body", json.dumps(body, allow_nan=False)]
+        return self._az_json(args)
+
+    def _scope(self) -> str:
+        UUID(self.cfg.azure_subscription_id)
+        if not re.fullmatch(r"[A-Za-z0-9_()-][A-Za-z0-9_.()-]{0,88}[A-Za-z0-9_()-]",
+                            self.cfg.project_id):
+            raise ValueError("PROJECT_ID must be the resource-group name")
+        return (f"/subscriptions/{self.cfg.azure_subscription_id}"
+                f"/resourceGroups/{self.cfg.project_id}")
+
+    def _app_url(self, endpoint: str) -> str:
+        if not re.fullmatch(r"[a-z][a-z0-9-]{0,30}[a-z0-9]", endpoint) or "--" in endpoint:
+            raise ValueError("endpoint must be a Container App name (2-32 characters)")
+        return (f"https://management.azure.com{self._scope()}"
+                f"/providers/Microsoft.App/containerApps/{endpoint}?api-version={self._APP_API}")
+
+    def _require_lab4(self, resource: dict) -> None:
+        tags = resource.get("tags") or {}
+        if any(tags.get(key) != value for key, value in self.cfg.tags(4).items()):
+            raise ValueError("Resource is not tagged for this student's Lab 4; refusing to use/update it")
+
+    @staticmethod
+    def _https_endpoint(endpoint: str) -> str:
+        if not re.fullmatch(r"https://[a-z0-9][a-z0-9.-]*\.azurecontainerapps\.io/?", endpoint):
+            raise ValueError("Expected a credential-free HTTPS Container Apps URL, without a path/query")
+        return endpoint.rstrip("/")
+
+    def _find_app(self, endpoint: str) -> dict | None:
+        """Only ResourceNotFound is an absent app; authorization errors still fail."""
+        app_url = self._app_url(endpoint)
+        # Query only this app. Permission/auth failures must never mean "not found".
+        try:
+            return self._rest("get", app_url)
+        except subprocess.CalledProcessError as exc:
+            # az rest reports HTTP errors as "ERROR: Reason(<response body>)".
+            missing = re.search(r"^ERROR: Not Found\((\{.*\})\)\s*$",
+                                exc.stderr or "", flags=re.DOTALL | re.MULTILINE)
+            if not missing:
+                raise
+            try:
+                error = json.loads(missing[1]).get("error")
+            except json.JSONDecodeError:
+                raise exc from None
+            if not isinstance(error, dict) or error.get("code") != "ResourceNotFound":
+                raise
+            return None
+
+    def _ingress_rules(self, include_runner: bool = True) -> list[dict]:
+        slots = [("SERVING_ALLOWED_IP", "lab4-client", self.cfg.serving_allowed_ip)]
+        if include_runner and self.cfg.serving_runner_ip:
+            slots.append(("SERVING_RUNNER_IP", "lab4-runner", self.cfg.serving_runner_ip))
+        rules = []
+        for setting, name, value in slots:
+            try:
+                network = ipaddress.ip_network(value, strict=True)
+            except ValueError:
+                raise ValueError(f"{setting} must be one public IPv4 address with /32") from None
+            if network.version != 4 or network.prefixlen != 32 or not network.network_address.is_global:
+                raise ValueError(f"{setting} must be one public IPv4 address with /32")
+            if not any(rule["ipAddressRange"] == str(network) for rule in rules):
+                rules.append({"name": name, "action": "Allow", "ipAddressRange": str(network)})
+        return rules
+
+    def restore_serving_access(self, endpoint: str) -> bool:
+        """Remove temporary runner access, keeping the student's one-IP allowlist.
+
+        Also usable manually after a runner is lost. Never clear all IP rules,
+        redeploy the image, or grant permissions. False means no app was created.
+        """
+        rules = self._ingress_rules(include_runner=False)
+        app = self._find_app(endpoint)
+        if app is None:
+            return False
+        self._require_lab4(app)
+        props = app["properties"]
+        environment = props.get("environmentId") or props.get("managedEnvironmentId", "")
+        expected = (f"{self._scope()}/providers/Microsoft.App/managedEnvironments/"
+                    f"{self.cfg.azure_containerapps_environment}")
+        if (environment.lower() != expected.lower()
+                or props.get("configuration", {}).get("activeRevisionsMode") != "Single"):
+            raise ValueError("Refusing to change access for another environment or multi-revision app")
+        body = {"location": app["location"], "properties": {"configuration": {
+            "ingress": {"ipSecurityRestrictions": rules},
+        }}}
+        self._rest("patch", self._app_url(endpoint), body)
+        deadline = time.monotonic() + 120
+        while True:
+            current = self._rest("get", self._app_url(endpoint))
+            self._require_lab4(current)
+            state = current["properties"]
+            actual = state.get("configuration", {}).get("ingress", {}).get("ipSecurityRestrictions", [])
+            actual = [{key: rule.get(key) for key in ("name", "action", "ipAddressRange")}
+                      for rule in actual]
+            if state.get("provisioningState") in {"Failed", "Canceled"}:
+                raise RuntimeError("Access cleanup failed; temporary runner access may remain")
+            if state.get("provisioningState") == "Succeeded" and actual == rules:
+                return True
+            if time.monotonic() >= deadline:
+                raise TimeoutError("Access cleanup not confirmed; temporary runner access may remain")
+            time.sleep(5)
+
+    def deploy(self, model_ref: str, endpoint: str, instance: str) -> str:
+        """Deploy one Lab 4 app; environment and tagged identity must already exist.
+
+        model_ref is models:/name/version, endpoint is the app name, and instance is
+        the approved Task 2 baseline. Image comes from SERVING_IMAGE, not model_ref.
+        No builds, role assignments, environment creation or automatic deletion.
+        """
+        app_url = self._app_url(endpoint)
+        if instance != "0.5cpu-1Gi":
+            raise ValueError("Task 2 baseline requires instance=0.5cpu-1Gi")
+        model = re.fullmatch(r"models:/([A-Za-z0-9][A-Za-z0-9_-]{0,254})/([1-9][0-9]*)", model_ref)
+        if not model or model.groups() != (self.cfg.model_registry_name, self.cfg.model_version):
+            raise ValueError("model_ref must match the configured numbered model version")
+        registry = self.cfg.container_registry.rstrip("/")
+        if not re.fullmatch(r"[a-z0-9]+\.azurecr\.io/[a-z0-9]+(?:[._/-][a-z0-9]+)*", registry):
+            raise ValueError("CONTAINER_REGISTRY must be an ACR hostname/repository")
+        if not re.fullmatch(re.escape(registry) + r"@sha256:[0-9a-f]{64}", self.cfg.serving_image):
+            raise ValueError("SERVING_IMAGE must be digest-pinned in CONTAINER_REGISTRY")
+        if not re.fullmatch(r"[a-z][a-z0-9]+", self.cfg.region):
+            raise ValueError("REGION must be an Azure region name")
+        tracking_path = (f"/mlflow/v1.0{self._scope()}"
+                         f"/providers/Microsoft.MachineLearningServices/workspaces/{self.cfg.azure_ml_workspace}")
+        if not self.cfg.azure_ml_workspace or not re.fullmatch(
+            r"azureml://[a-z0-9.-]+\.api\.azureml\.ms" + re.escape(tracking_path),
+            self.cfg.mlflow_tracking_uri, flags=re.IGNORECASE,
+        ):
+            raise ValueError("MLFLOW_TRACKING_URI must match the configured subscription/RG/workspace")
+        ip_rules = self._ingress_rules()
+        env_name = self.cfg.azure_containerapps_environment
+        if not re.fullmatch(r"[a-z][a-z0-9-]{0,58}[a-z0-9]", env_name):
+            raise ValueError("AZURE_CONTAINERAPPS_ENVIRONMENT must be the prepared environment name")
+        environment_id = f"{self._scope()}/providers/Microsoft.App/managedEnvironments/{env_name}"
+        identity_id = self.cfg.azure_managed_identity_id
+        if not re.fullmatch(
+            re.escape(self._scope()) + r"/providers/Microsoft.ManagedIdentity/userAssignedIdentities/[\w-]+",
+            identity_id, flags=re.IGNORECASE,
+        ):
+            raise ValueError("AZURE_MANAGED_IDENTITY_ID must be a resource ID in this subscription/RG")
+        UUID(self.cfg.identity_ref)
+
+        # Only read pre-existing prerequisites. Failure never widens permissions.
+        environment = self._rest("get", f"https://management.azure.com{environment_id}?api-version={self._APP_API}")
+        self._require_lab4(environment)
+        # ARM may return the display name ("Malaysia West") rather than the slug.
+        if (environment.get("location", "").lower().replace(" ", "") != self.cfg.region
+                or environment.get("properties", {}).get("provisioningState") != "Succeeded"):
+            raise ValueError("The Lab 4 environment must be ready in the configured region")
+        profiles = environment["properties"].get("workloadProfiles", [])
+        if not any(p.get("name") == "Consumption" and p.get("workloadProfileType") == "Consumption"
+                   for p in profiles):
+            raise ValueError("The environment must provide the Consumption workload profile")
+        identity = self._rest("get", f"https://management.azure.com{identity_id}?api-version=2023-01-31")
+        self._require_lab4(identity)
+        props = identity["properties"]
+        if props.get("principalId", "").lower() != self.cfg.identity_ref.lower():
+            raise ValueError("IDENTITY_REF does not match the managed identity principal ID")
+        client_id = str(UUID(props["clientId"]))
+
+        current = self._find_app(endpoint)
+        tags = self.cfg.tags(4)
+        if current is not None:
+            self._require_lab4(current)
+            previous = current["properties"]
+            previous_environment = previous.get("environmentId") or previous.get("managedEnvironmentId", "")
+            if (previous_environment.lower() != environment_id.lower()
+                    or previous.get("configuration", {}).get("activeRevisionsMode") != "Single"):
+                raise ValueError("Refusing to overwrite another environment or a multi-revision deployment")
+            tags = {**current["tags"], **tags}
+
+        env = {
+            "CLOUD_PROVIDER": "azure", "MLFLOW_TRACKING_URI": self.cfg.mlflow_tracking_uri,
+            "MODEL_REGISTRY_NAME": model[1], "MODEL_VERSION": model[2], "AZURE_CLIENT_ID": client_id,
+        }
+        body = {
+            "location": self.cfg.region, "tags": tags,
+            "identity": {"type": "UserAssigned", "userAssignedIdentities": {identity_id: {}}},
+            "properties": {
+                "environmentId": environment_id, "workloadProfileName": "Consumption",
+                "configuration": {
+                    "activeRevisionsMode": "Single",
+                    "registries": [{"server": registry.split("/", 1)[0], "identity": identity_id}],
+                    "ingress": {
+                        "external": True, "targetPort": 8080, "transport": "auto", "allowInsecure": False,
+                        "traffic": [{"latestRevision": True, "weight": 100}],
+                        "ipSecurityRestrictions": ip_rules,
+                    },
+                },
+                "template": {
+                    "containers": [{
+                        "name": "api", "image": self.cfg.serving_image,
+                        "resources": {"cpu": 0.5, "memory": "1Gi"},
+                        # One process means one loaded model and one readiness state.
+                        "command": ["uvicorn"],
+                        "args": ["service.app:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "1"],
+                        "env": [{"name": key, "value": value} for key, value in env.items()],
+                        "probes": [
+                            {"type": "Startup", "httpGet": {"path": "/ready", "port": 8080},
+                             "initialDelaySeconds": 1, "periodSeconds": 30, "timeoutSeconds": 5,
+                             "failureThreshold": 10},
+                            {"type": "Liveness", "httpGet": {"path": "/health", "port": 8080},
+                             "periodSeconds": 10, "timeoutSeconds": 5, "failureThreshold": 3},
+                            {"type": "Readiness", "httpGet": {"path": "/ready", "port": 8080},
+                             "periodSeconds": 5, "timeoutSeconds": 5, "failureThreshold": 3},
+                        ],
+                    }],
+                    "scale": {"minReplicas": 0, "maxReplicas": 1,
+                              "rules": [{"name": "http", "http": {"metadata": {"concurrentRequests": "10"}}}]},
+                },
+            },
+        }
+        result = self._rest("put", app_url, body)
+        deadline = time.monotonic() + self._DEPLOY_TIMEOUT
+        while True:
+            state = result.get("properties", {})
+            if state.get("provisioningState") in {"Failed", "Canceled"}:
+                raise RuntimeError(f"Deployment failed for {endpoint}; inspect its Azure status/logs before retrying")
+            latest = state.get("latestRevisionName")
+            if (state.get("provisioningState") == "Succeeded" and latest
+                    and state.get("latestReadyRevisionName") == latest):
+                return self._https_endpoint("https://" + state["configuration"]["ingress"]["fqdn"])
+            if time.monotonic() >= deadline:
+                raise TimeoutError(f"Deployment of {endpoint} not ready in 600s; resource may still exist (no auto-delete)")
+            time.sleep(5)
+            result = self._rest("get", app_url)
+
+    def invoke(self, endpoint: str, payload: dict) -> dict:
+        """Accept an app name (resolve with CLI) or the HTTPS URL returned by deploy()."""
+        if "://" not in endpoint:
+            app = self._rest("get", self._app_url(endpoint))
+            self._require_lab4(app)
+            endpoint = "https://" + app["properties"]["configuration"]["ingress"]["fqdn"]
+        url = self._https_endpoint(endpoint)
+        # A cold start can take longer than a warm prediction. No hidden retries.
+        response = requests.post(url + "/predict", json=payload, timeout=(10, 240), allow_redirects=False)
+        if response.status_code != 200:
+            raise RuntimeError(f"Prediction failed with HTTP {response.status_code}")
+        result = response.json()
+        if not isinstance(result, dict):
+            raise ValueError("Prediction response must be a JSON object")
+        return result

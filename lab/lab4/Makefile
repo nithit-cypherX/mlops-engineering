@@ -1,7 +1,7 @@
-# Lab 4 Task 1.1: serving baseline only, not a completed test suite or deployment.
+# Lab 4: tests, image publishing and staging commands; cloud setup is required.
 # Source: lab/lab3 at 72e081d1e723d3b855b7df57937519234badaaa3.
 # service/, src/, base/factory, dependency inputs/locks, .dockerignore and audit
-# are reused unchanged. azure.py keeps only Blob, push-image and model-loading methods.
+# are reused. Task 2.4 also adapts Lab 3 deploy/invoke and three-payload smoke.
 # No cloud.env, local environment, model or previous evidence is copied.
 # data/raw.dvc and tests/test_data.py come from lab/lab2 at the same commit.
 # Missing data now fails the tests instead of skipping them.
@@ -17,7 +17,7 @@ IMAGE ?= itcs355-lab4
 TAG ?= $(shell git rev-parse HEAD)
 PLATFORM ?= linux/amd64
 
-.PHONY: help setup data-pull scan-secrets lint test test-unit test-data test-model test-integration serve-image image-push portability-audit
+.PHONY: help setup data-pull scan-secrets lint test test-unit test-data test-model test-integration serve-image image-push deploy smoke restore-access test-deploy portability-audit
 
 help:
 	@echo "Lab 4: offline, registry-backed and local container tests are separate."
@@ -25,13 +25,17 @@ help:
 	@echo "  data-pull          Download the pinned public CSV and check SHA-256; no cloud login"
 	@echo "  scan-secrets       Scan all local Git history; refuses shallow clones"
 	@echo "  lint               Check Lab 4 Python code with the instructor's Ruff rules"
-	@echo "  test               Run the current offline unit and data tests"
-	@echo "  test-unit          Run offline feature-preparation unit tests"
+	@echo "  test               Run the current offline unit, deployment and data tests"
+	@echo "  test-unit          Run offline feature, downloader, deployment and smoke tests"
 	@echo "  test-data          Run data-contract and split tests; missing data fails"
 	@echo "  test-model         Test the configured registry model; requires config and cloud login"
 	@echo "  test-integration   Test IMAGE:TAG locally; build first, set serving config and log in on host"
 	@echo "  serve-image        Build the serving image for linux/amd64"
 	@echo "  image-push         Push the existing IMAGE:TAG to CONTAINER_REGISTRY; no rebuild"
+	@echo "  deploy             Deploy the pinned image; needs prepared Lab 4 resources, config and login"
+	@echo "  smoke              Invoke the configured endpoint with three fixed payloads"
+	@echo "  restore-access     Remove temporary runner access; keep the configured client IP"
+	@echo "  test-deploy        Check deployment guards and smoke handling offline; no cloud calls"
 	@echo "  portability-audit  Check provider-neutral code boundaries"
 
 setup:
@@ -47,10 +51,10 @@ lint:
 	$(PYTHON) -m ruff check src/ service/ cloudlayer/ scripts/ tests/
 
 test:
-	$(PYTHON) -m pytest -q tests/test_features.py tests/test_pull_data.py tests/test_data.py
+	$(PYTHON) -m pytest -q tests/test_features.py tests/test_pull_data.py tests/test_serving_commands.py tests/test_workflow.py cloudlayer/tests/test_deployment.py tests/test_data.py
 
 test-unit:
-	$(PYTHON) -m pytest -q tests/test_features.py tests/test_pull_data.py
+	$(PYTHON) -m pytest -q tests/test_features.py tests/test_pull_data.py tests/test_serving_commands.py tests/test_workflow.py cloudlayer/tests/test_deployment.py
 
 test-data:
 	$(PYTHON) -m pytest -q tests/test_data.py
@@ -66,6 +70,18 @@ serve-image:
 
 image-push:
 	$(PYTHON) -c 'import sys; from src.config import load; from cloudlayer.factory import get_adapter; print(get_adapter(load(strict=False)).push_image(sys.argv[1]))' '$(IMAGE):$(TAG)'
+
+deploy:
+	$(PYTHON) -m scripts.serving deploy
+
+smoke:
+	$(PYTHON) -m scripts.serving smoke
+
+restore-access:
+	$(PYTHON) -m scripts.serving restore-access
+
+test-deploy:
+	$(PYTHON) -m pytest -q tests/test_serving_commands.py tests/test_workflow.py cloudlayer/tests/test_deployment.py
 
 portability-audit:
 	$(PYTHON) scripts/portability_audit.py

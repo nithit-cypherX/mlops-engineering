@@ -77,6 +77,7 @@ class Config:
     azure_containerapps_environment: str = ""
     azure_managed_identity_id: str = ""
     serving_allowed_ip: str = ""
+    serving_runner_ip: str = ""
 
     @property
     def raw_path(self) -> Path:
@@ -120,6 +121,7 @@ def load(strict: bool = True) -> Config:
         azure_containerapps_environment=get("AZURE_CONTAINERAPPS_ENVIRONMENT", ""),
         azure_managed_identity_id=get("AZURE_MANAGED_IDENTITY_ID", ""),
         serving_allowed_ip=get("SERVING_ALLOWED_IP", ""),
+        serving_runner_ip=get("SERVING_RUNNER_IP", ""),
     )
 
 
