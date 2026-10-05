@@ -78,6 +78,9 @@ class Config:
     azure_managed_identity_id: str = ""
     serving_allowed_ip: str = ""
     serving_runner_ip: str = ""
+    log_workspace_id: str = ""
+    monitoring_client_id: str = ""
+    applicationinsights_connection_string: str = field(default="", repr=False)
 
     @property
     def raw_path(self) -> Path:
@@ -122,6 +125,9 @@ def load(strict: bool = True) -> Config:
         azure_managed_identity_id=get("AZURE_MANAGED_IDENTITY_ID", ""),
         serving_allowed_ip=get("SERVING_ALLOWED_IP", ""),
         serving_runner_ip=get("SERVING_RUNNER_IP", ""),
+        log_workspace_id=get("LOG_WORKSPACE_ID", ""),
+        monitoring_client_id=get("MONITORING_CLIENT_ID", ""),
+        applicationinsights_connection_string=get("APPLICATIONINSIGHTS_CONNECTION_STRING", ""),
     )
 
 
@@ -143,3 +149,15 @@ def load_deployment() -> Config:
     if missing:
         raise RuntimeError("Missing deployment configuration: " + ", ".join(missing))
     return cfg
+
+
+def load_monitoring() -> Config:
+    """Drift-job settings only; do not add requirements to the serving process."""
+    required = (
+        "CLOUD_PROVIDER", "ENDPOINT_NAME", "MODEL_VERSION", "LOG_WORKSPACE_ID",
+        "MONITORING_CLIENT_ID", "APPLICATIONINSIGHTS_CONNECTION_STRING",
+    )
+    missing = [key for key in required if not os.environ.get(key, "").strip()]
+    if missing:
+        raise RuntimeError("Missing monitoring configuration: " + ", ".join(missing))
+    return load(strict=False)

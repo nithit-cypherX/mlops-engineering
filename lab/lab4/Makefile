@@ -18,6 +18,7 @@ TAG ?= $(shell git rev-parse HEAD)
 PLATFORM ?= linux/amd64
 
 .PHONY: help setup data-pull scan-secrets lint test test-unit test-data test-model test-integration serve-image image-push deploy smoke restore-access test-deploy portability-audit
+.PHONY: teardown teardown-check cost-report cost-report-check
 
 help:
 	@echo "Lab 4: offline, registry-backed and local container tests are separate."
@@ -25,8 +26,8 @@ help:
 	@echo "  data-pull          Download the pinned public CSV and check SHA-256; no cloud login"
 	@echo "  scan-secrets       Scan all local Git history; refuses shallow clones"
 	@echo "  lint               Check Lab 4 Python code with the instructor's Ruff rules"
-	@echo "  test               Run the current offline unit, deployment and data tests"
-	@echo "  test-unit          Run offline feature/logging, downloader, deployment and smoke tests"
+	@echo "  test               Run the current offline unit, drift, deployment and data tests"
+	@echo "  test-unit          Run offline feature/logging, drift, downloader, deployment and smoke tests"
 	@echo "  test-data          Run data-contract and split tests; missing data fails"
 	@echo "  test-model         Test the configured registry model; requires config and cloud login"
 	@echo "  test-integration   Test IMAGE:TAG locally; build first, set serving config and log in on host"
@@ -37,6 +38,12 @@ help:
 	@echo "  restore-access     Remove temporary runner access; keep the configured client IP"
 	@echo "  test-deploy        Check deployment guards and smoke handling offline; no cloud calls"
 	@echo "  portability-audit  Check provider-neutral code boundaries"
+	@echo "  teardown           Preview by default; CONFIRM=itcs355-lab4-staging enables exact-scope deletion"
+	@echo "                     Requires Lab 4 CI disabled, no unfinished runs and idle reviewed resources."
+	@echo "  teardown-check     Test teardown guards offline; never deletes cloud resources"
+	@echo "  cost-report        Read USD billing since 2026-09-29; COST_END defaults to today UTC"
+	@echo "  cost-report-check  Test cost-query and report handling offline"
+	@echo "  Preview/billing require Azure scope in cloud.env or exported environment variables."
 
 setup:
 	$(PYTHON) -m pip install --require-hashes -r requirements.txt
@@ -48,13 +55,13 @@ scan-secrets:
 	$(PYTHON) scripts/scan_secrets.py
 
 lint:
-	$(PYTHON) -m ruff check src/ service/ cloudlayer/ scripts/ tests/
+	$(PYTHON) -m ruff check src/ service/ cloudlayer/ monitoring/ scripts/ tests/
 
 test:
-	$(PYTHON) -m pytest -q tests/test_features.py tests/test_feature_logging.py tests/test_dashboard.py tests/test_pull_data.py tests/test_serving_commands.py tests/test_workflow.py cloudlayer/tests/test_deployment.py tests/test_data.py
+	$(PYTHON) -m pytest -q tests/test_features.py tests/test_feature_logging.py tests/test_dashboard.py tests/test_drift.py tests/test_drift_job.py tests/test_drift_snapshot.py tests/test_pull_data.py tests/test_serving_commands.py tests/test_workflow.py cloudlayer/tests/test_deployment.py cloudlayer/tests/test_monitoring.py cloudlayer/tests/test_teardown_lab4.py cloudlayer/tests/test_cost_report.py tests/test_data.py
 
 test-unit:
-	$(PYTHON) -m pytest -q tests/test_features.py tests/test_feature_logging.py tests/test_dashboard.py tests/test_pull_data.py tests/test_serving_commands.py tests/test_workflow.py cloudlayer/tests/test_deployment.py
+	$(PYTHON) -m pytest -q tests/test_features.py tests/test_feature_logging.py tests/test_dashboard.py tests/test_drift.py tests/test_drift_job.py tests/test_drift_snapshot.py tests/test_pull_data.py tests/test_serving_commands.py tests/test_workflow.py cloudlayer/tests/test_deployment.py cloudlayer/tests/test_monitoring.py cloudlayer/tests/test_teardown_lab4.py cloudlayer/tests/test_cost_report.py
 
 test-data:
 	$(PYTHON) -m pytest -q tests/test_data.py
@@ -85,3 +92,17 @@ test-deploy:
 
 portability-audit:
 	$(PYTHON) scripts/portability_audit.py
+
+teardown: export CONFIRM ?=
+teardown:
+	$(PYTHON) -m cloudlayer.teardown_lab4 --confirm "$$CONFIRM"
+
+teardown-check:
+	$(PYTHON) -m pytest -q cloudlayer/tests/test_teardown_lab4.py
+
+cost-report: export COST_END ?=
+cost-report:
+	$(PYTHON) -m scripts.cost_report --end "$$COST_END"
+
+cost-report-check:
+	$(PYTHON) -m pytest -q cloudlayer/tests/test_cost_report.py

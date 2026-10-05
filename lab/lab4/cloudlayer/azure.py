@@ -2,24 +2,26 @@
 
 Source: lab/lab3/cloudlayer/azure.py at 72e081d1e723d3b855b7df57937519234badaaa3.
 Task 2.4 reuses Lab 3 deploy/invoke for a separately tagged Lab 4 staging app.
-Monitoring and resource teardown are not implemented for Lab 4 yet.
+Task 5.3 adds log reading and one-shot metrics; scheduling/teardown are separate.
 """
 from __future__ import annotations
 
 import ipaddress
 import json
 import logging
+import math
 import os
 import re
 import subprocess
 import time
+from datetime import timezone
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from uuid import UUID
 
 import requests
 
-from azure.identity import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential, ManagedIdentityCredential
 from azure.storage.blob import BlobClient
 
 from cloudlayer.base import CloudAdapter
@@ -28,6 +30,159 @@ from cloudlayer.base import CloudAdapter
 class AzureAdapter(CloudAdapter):
     _APP_API = "2025-07-01"
     _DEPLOY_TIMEOUT = 600
+
+    def read_prediction_logs(self, *, start, end, model_version: str) -> list[dict]:
+        """Read one bounded window; reject partial results and malformed records."""
+        __tracebackhide__ = True
+        old_logging = logging.root.manager.disable
+        try:
+            # Credential errors may include response details. Emit only the safe error below.
+            logging.disable(logging.CRITICAL)
+            workspace = str(UUID(self.cfg.log_workspace_id))
+            client_id = str(UUID(self.cfg.monitoring_client_id))
+            endpoint = self.cfg.endpoint_name
+            if not re.fullmatch(r"[a-z][a-z0-9-]{0,30}[a-z0-9]", endpoint):
+                raise ValueError("Invalid endpoint")
+            if not re.fullmatch(r"[1-9][0-9]*", model_version):
+                raise ValueError("Invalid model version")
+            if start.tzinfo is None or end.tzinfo is None or start >= end:
+                raise ValueError("Invalid window")
+            start, end = start.astimezone(timezone.utc), end.astimezone(timezone.utc)
+            # Keep missing/unknown lineage so the detector fails on coverage gaps.
+            # Preserve JSON types: toint(status) would hide malformed telemetry.
+            query = (
+                "ContainerAppConsoleLogs_CL\n"
+                f"| where ContainerAppName_s == {json.dumps(endpoint)}\n"
+                f"| where TimeGenerated >= datetime({start.isoformat()}) "
+                f"and TimeGenerated < datetime({end.isoformat()})\n"
+                "| extend Event = parse_json(Log_s)\n"
+                '| where tostring(Event.message) == "request completed"\n'
+                '| where tostring(Event.path) in ("/predict", "/predict/batch")\n'
+                f"| where tostring(Event.model_version) in ({json.dumps(model_version)}, "
+                '"", "unknown")\n'
+                "| project timestamp=TimeGenerated, record=Log_s\n"
+                "| take 10001"
+            )
+            # One extra row detects overflow rather than silently sampling traffic.
+            # No CLI or developer-login fallback inside the scheduled job.
+            with ManagedIdentityCredential(client_id=client_id) as credential:
+                token = credential.get_token("https://api.loganalytics.io/.default").token
+                with requests.post(
+                    f"https://api.loganalytics.azure.com/v1/workspaces/{workspace}/query",
+                    headers={"Authorization": f"Bearer {token}", "Prefer": "wait=30"},
+                    json={"query": query, "timespan": f"{start.isoformat()}/{end.isoformat()}"},
+                    timeout=(10, 40), allow_redirects=False,
+                ) as response:
+                    if response.status_code != 200:
+                        raise ValueError("Log query failed")
+                    payload = response.json()
+            if not isinstance(payload, dict) or "error" in payload:
+                raise ValueError("Partial or failed query")
+            tables = payload.get("tables")
+            if not isinstance(tables, list) or len(tables) != 1:
+                raise ValueError("Unexpected query tables")
+            table = tables[0]
+            expected = [{"name": "timestamp", "type": "datetime"},
+                        {"name": "record", "type": "string"}]
+            if table.get("name") != "PrimaryResult" or table.get("columns") != expected:
+                raise ValueError("Unexpected log schema")
+            rows = table.get("rows")
+            if not isinstance(rows, list) or len(rows) > 10000:
+                raise ValueError("Incomplete query: too many records")
+            records = []
+            for row in rows:
+                if not isinstance(row, list) or len(row) != 2:
+                    raise ValueError("Invalid query row")
+                event = json.loads(row[1])
+                if not isinstance(event, dict) or event.get("message") != "request completed":
+                    raise ValueError("Invalid completed request")
+                records.append({
+                    "timestamp": row[0], "path": event.get("path"),
+                    "status": event.get("status"), "model_version": event.get("model_version"),
+                    "load_pct_values": event.get("load_pct_values"),
+                })
+            return records
+        except Exception:
+            raise RuntimeError(
+                "Prediction-log query failed or was incomplete; no drift score was published."
+            ) from None
+        finally:
+            logging.disable(old_logging)
+
+    def emit_metric(self, name: str, value: float, unit: str = "None") -> None:
+        """Synchronously export one gauge; acceptance is not dashboard read-back."""
+        __tracebackhide__ = True
+        if (not re.fullmatch(r"[A-Za-z][A-Za-z0-9_.-]{0,127}", name)
+                or type(value) not in (int, float) or not math.isfinite(value)
+                or unit not in ("None", "1")):
+            raise ValueError("Metric needs a valid name, finite value and dimensionless unit.")
+        if not self.cfg.applicationinsights_connection_string:
+            raise ValueError("Missing metric destination configuration.")
+        # This runs only in the one-shot detector, not the serving process.
+        # Disable unrelated SDK workers and retry files: export must finish here.
+        settings = {
+            "APPLICATIONINSIGHTS_STATSBEAT_DISABLED_ALL": "true",
+            "APPLICATIONINSIGHTS_SDKSTATS_DISABLED": "true",
+            "APPLICATIONINSIGHTS_CONTROLPLANE_DISABLED": "true",
+        }
+        previous = {key: os.environ.get(key) for key in settings}
+        old_logging = logging.root.manager.disable
+        exporter = None
+        try:
+            os.environ.update(settings)
+            # SDK failure logs can include response bodies. Return a safe error below.
+            logging.disable(logging.CRITICAL)
+            # Lazy imports keep the serving/Lab 4 test runtime unchanged.
+            from azure.monitor.opentelemetry.exporter import AzureMonitorMetricExporter
+            from opentelemetry.sdk.metrics.export import (
+                Gauge, Metric, MetricExportResult, MetricsData, NumberDataPoint,
+                ResourceMetrics, ScopeMetrics,
+            )
+            from opentelemetry.sdk.resources import Resource
+            from opentelemetry.sdk.util.instrumentation import InstrumentationScope
+
+            client_id = str(UUID(self.cfg.monitoring_client_id))
+            now = time.time_ns()
+            point = NumberDataPoint(
+                attributes={"endpoint": self.cfg.endpoint_name,
+                            "model_version": self.cfg.model_version},
+                start_time_unix_nano=now, time_unix_nano=now, value=float(value),
+            )
+            metric = Metric(name=name, description="Lab 4 drift score", unit="1",
+                            data=Gauge(data_points=[point]))
+            batch = MetricsData(resource_metrics=[ResourceMetrics(
+                resource=Resource({"service.name": "lab4-drift"}),
+                scope_metrics=[ScopeMetrics(
+                    scope=InstrumentationScope("lab4.drift"), metrics=[metric], schema_url="",
+                )], schema_url="",
+            )])
+            with ManagedIdentityCredential(client_id=client_id) as credential:
+                exporter = AzureMonitorMetricExporter(
+                    connection_string=self.cfg.applicationinsights_connection_string,
+                    credential=credential, disable_offline_storage=True,
+                    timeout=10, read_timeout=30, retry_total=0,
+                )
+                # force_flush() alone always returns True in the pinned exporter.
+                # Inspect export()'s result instead of treating a flush as delivery.
+                if exporter.export(batch) != MetricExportResult.SUCCESS:
+                    raise RuntimeError("Metric export was not accepted")
+        except Exception:
+            raise RuntimeError(
+                "Metric export failed; check the job runtime, destination and identity permissions."
+            ) from None
+        finally:
+            try:
+                if exporter is not None:
+                    exporter.shutdown()
+            except Exception:
+                raise RuntimeError("Metric exporter cleanup failed; delivery is unconfirmed.") from None
+            finally:
+                logging.disable(old_logging)
+                for key, value_before in previous.items():
+                    if value_before is None:
+                        os.environ.pop(key, None)
+                    else:
+                        os.environ[key] = value_before
 
     def integration_environment(self) -> dict[str, str]:
         """Prepare short-lived host-login auth for a bounded local container test.

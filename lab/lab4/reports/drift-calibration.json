@@ -1,0 +1,186 @@
+{
+  "scope": "offline synthetic windows, not a live alert or production false-alert guarantee",
+  "reference_sha256": "422cccb9136e814061b83e4f041cff21ba7372c6f7fb0feb2c321555c6a6341f",
+  "model_version": "1",
+  "split_seed": 20260101,
+  "reference_rows": 3600,
+  "reference_machines": 144,
+  "bins": 10,
+  "smoothing": "add one per bin",
+  "sampling": "complete machine blocks with replacement; 25 readings per block",
+  "calibration_seed": 20261002,
+  "confirmation_seed": 20261003,
+  "windows_per_scenario": 500,
+  "selection_rule": "smallest tested N with clean <=1%, both shifts >=95%; threshold=ceil(q99*20)/20",
+  "confirmation_rule": "fixed policy: clean <=5%, both shifts >=95%",
+  "shift": "load_pct +/-20 percentage points, clipped to [0,100]",
+  "candidates": [
+    {
+      "samples": 100,
+      "machine_blocks": 4,
+      "threshold": 1.7,
+      "results": {
+        "clean": {
+          "breaches": 4,
+          "windows": 500,
+          "rate": 0.008,
+          "p50": 0.6570532087652398,
+          "p95": 1.4266596396722164,
+          "p99": 1.6792098712566093
+        },
+        "minus20": {
+          "breaches": 142,
+          "windows": 500,
+          "rate": 0.284,
+          "p50": 1.4179126827234352,
+          "p95": 2.4702842646318386,
+          "p99": 2.953718813493917
+        },
+        "plus20": {
+          "breaches": 122,
+          "windows": 500,
+          "rate": 0.244,
+          "p50": 1.2832508594155083,
+          "p95": 2.5051498693919787,
+          "p99": 3.309049580403067
+        }
+      },
+      "qualifies": false
+    },
+    {
+      "samples": 200,
+      "machine_blocks": 8,
+      "threshold": 1.4,
+      "results": {
+        "clean": {
+          "breaches": 5,
+          "windows": 500,
+          "rate": 0.01,
+          "p50": 0.3470294990586754,
+          "p95": 0.984889107758511,
+          "p99": 1.399289508209671
+        },
+        "minus20": {
+          "breaches": 257,
+          "windows": 500,
+          "rate": 0.514,
+          "p50": 1.40745364369233,
+          "p95": 2.3776791034433673,
+          "p99": 2.743254591098953
+        },
+        "plus20": {
+          "breaches": 177,
+          "windows": 500,
+          "rate": 0.354,
+          "p50": 1.2071309805295725,
+          "p95": 2.19395285651167,
+          "p99": 2.75802849809838
+        }
+      },
+      "qualifies": false
+    },
+    {
+      "samples": 500,
+      "machine_blocks": 20,
+      "threshold": 0.6,
+      "results": {
+        "clean": {
+          "breaches": 4,
+          "windows": 500,
+          "rate": 0.008,
+          "p50": 0.12287933840679133,
+          "p95": 0.34036134378539973,
+          "p99": 0.5873588810615751
+        },
+        "minus20": {
+          "breaches": 500,
+          "windows": 500,
+          "rate": 1.0,
+          "p50": 1.572637811127056,
+          "p95": 1.9897510221260004,
+          "p99": 2.2294208772555026
+        },
+        "plus20": {
+          "breaches": 499,
+          "windows": 500,
+          "rate": 0.998,
+          "p50": 1.202925738689413,
+          "p95": 1.8178573013779658,
+          "p99": 2.006500951867662
+        }
+      },
+      "qualifies": true
+    },
+    {
+      "samples": 1000,
+      "machine_blocks": 40,
+      "threshold": 0.3,
+      "results": {
+        "clean": {
+          "breaches": 5,
+          "windows": 500,
+          "rate": 0.01,
+          "p50": 0.06264744144603174,
+          "p95": 0.1705919611074689,
+          "p99": 0.27699091915959584
+        },
+        "minus20": {
+          "breaches": 500,
+          "windows": 500,
+          "rate": 1.0,
+          "p50": 1.7517486323116198,
+          "p95": 2.023648096433105,
+          "p99": 2.1773193506951016
+        },
+        "plus20": {
+          "breaches": 500,
+          "windows": 500,
+          "rate": 1.0,
+          "p50": 1.2218119646961336,
+          "p95": 1.641329868603895,
+          "p99": 1.8768088351686223
+        }
+      },
+      "qualifies": true
+    }
+  ],
+  "selected": {
+    "min_samples": 500,
+    "threshold": 0.6
+  },
+  "confirmation": {
+    "clean": {
+      "breaches": 2,
+      "windows": 500,
+      "rate": 0.004,
+      "p50": 0.12181763823817593,
+      "p95": 0.33494234980947957,
+      "p99": 0.49214958506118883
+    },
+    "minus20": {
+      "breaches": 500,
+      "windows": 500,
+      "rate": 1.0,
+      "p50": 1.589888433222259,
+      "p95": 1.9819814041543917,
+      "p99": 2.157049101901617
+    },
+    "plus20": {
+      "breaches": 500,
+      "windows": 500,
+      "rate": 1.0,
+      "p50": 1.197347303283213,
+      "p95": 1.8142618097650371,
+      "p99": 2.165094568654036
+    }
+  },
+  "confirmation_passed": true,
+  "policy_matches_detector": true,
+  "limitations": [
+    "Resampling the training population is not independent production validation.",
+    "500 rows may still come from fewer machines than simulated; logs do not include machine_id.",
+    "Only load_pct and large +/-20-point shifts are calibrated, not all drift or model accuracy.",
+    "A larger real dataset or different traffic mix requires recalibration.",
+    "15-minute windows and 2-minute offset need live scheduled-job verification."
+  ]
+}

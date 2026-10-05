@@ -64,6 +64,14 @@ class CloudAdapter(ABC):
     def emit_metric(self, name: str, value: float, unit: str = "None") -> None:
         raise NotImplementedError("Lab 4")
 
+    def read_prediction_logs(self, *, start, end, model_version: str) -> list[dict]:
+        """Completed requests for the configured endpoint in UTC [start, end).
+
+        Return timestamp, path, status, model_version and load_pct_values.
+        Incomplete query results must raise, not look like an empty window.
+        """
+        raise NotImplementedError("Lab 4: prediction logs")
+
     # --- Lab 5 ---------------------------------------------------------------
     def generate(self, prompt: str, params: dict[str, Any]) -> dict[str, Any]:
         """Call a managed LLM endpoint once. Returns at least:
