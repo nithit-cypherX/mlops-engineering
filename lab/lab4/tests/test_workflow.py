@@ -16,6 +16,16 @@ def workflow():
     return yaml.load(WORKFLOW.read_text(), Loader=yaml.BaseLoader)
 
 
+def test_pinned_reference_is_restored_before_drift_and_data_tests(workflow):
+    steps = workflow["jobs"]["checks"]["steps"]
+    commands = [step.get("run") for step in steps]
+    restore = commands.index("make data-pull")
+    # Drift/calibration/snapshot tests in test-unit use the pinned CSV too.
+    assert commands.index("make setup") < restore < commands.index("make test-unit")
+    assert restore < commands.index("make test-data")
+    assert "if" not in steps[restore] and "continue-on-error" not in steps[restore]
+
+
 def test_staging_is_gated_by_green_main_and_uses_pushed_digest(workflow):
     jobs = workflow["jobs"]
     publisher = jobs["registry-main"]

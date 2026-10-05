@@ -50,11 +50,12 @@ jobs:
       - name: Lint and portability audit
         run: make lint portability-audit
 
-      - name: Unit tests
-        run: make test-unit
-
+      # Drift/calibration/snapshot tests also need the pinned training reference.
       - name: Restore the pinned dataset
         run: make data-pull
+
+      - name: Unit tests
+        run: make test-unit
 
       - name: Data contract and leakage tests
         run: make test-data
