@@ -165,3 +165,25 @@ A status read timed out after the detector had completed. The cleanup step tempo
 This welcome email shows that the email address was added to the `lab4drift` Action Group. It is setup evidence, not proof that a drift alert was received. I cropped out the account information; the rest of the screenshot is unchanged.
 
 ![Azure Monitor Action Group welcome email, with account information cropped out](reports/evidence/action-group-welcome-20261005.png)
+
+## Teardown and cost
+
+On 5 October 2026, the [final CI run](https://github.com/nithit-cypherX/mlops-engineering/actions/runs/37298469276) passed. I then disabled the workflow and checked that no runs were still active before starting teardown.
+
+I ran `make teardown CONFIRM=itcs355-lab4-staging`. It removed the 13 planned items: the staging app and environment, drift compute and schedule, alert rule and email Action Group, five role assignments, and two runtime/drift identities. I checked Azure again and confirmed that all 13 were gone.
+
+I kept the shared services, CI identities, Workbook, models, images, data and job history. The staging endpoint is no longer available.
+
+### Cost
+
+I ran `make cost-report COST_END=2026-10-05` on 6 October. For 29 September–5 October, Azure reported:
+
+- **Lab 4 resources:** about **$0.0011**
+- **Shared services:** about **$1.3409**
+- **Combined:** about **$1.3420**
+
+The combined amount is not the cost of Lab 4 alone. Some Azure ML charges appear under the shared workspace. Twelve resources had no cost rows reported; I did not count these as $0.
+
+These are reported pre-tax costs, not a final bill. Billing data can arrive late, and the shared services kept after teardown can still cost money.
+
+Full breakdown: [cost report](reports/lab4-cost.md).
