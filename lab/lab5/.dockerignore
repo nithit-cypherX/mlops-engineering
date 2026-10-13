@@ -1,0 +1,26 @@
+# Based on Lab 4; credentials and run outputs are not image inputs.
+.git
+.venv
+.dvc/cache
+data/
+mlruns/
+mlartifacts/
+mlflow.db
+reports/
+notebooks/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+cloud.env
+.env
+.env.*
+cloud.env.*
+.azure/
+.aws/
+.ssh/
+**/__pycache__/
+**/*.pyc
+**/.env*
+**/cloud.env*
+tests/

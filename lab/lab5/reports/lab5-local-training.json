@@ -1,0 +1,65 @@
+{
+  "seed": 20260101,
+  "python_hash_seed": 20260101,
+  "params": {
+    "bootstrap": true,
+    "ccp_alpha": 0,
+    "class_weight": null,
+    "criterion": "gini",
+    "max_depth": 12,
+    "max_features": "sqrt",
+    "max_leaf_nodes": null,
+    "max_samples": null,
+    "min_impurity_decrease": 0,
+    "min_samples_leaf": 10,
+    "min_samples_split": 2,
+    "min_weight_fraction_leaf": 0,
+    "monotonic_cst": null,
+    "n_estimators": 100,
+    "n_jobs": -1,
+    "oob_score": false,
+    "random_state": 20260101,
+    "verbose": 0,
+    "warm_start": false
+  },
+  "features": [
+    "temp_c",
+    "vibration_mm_s",
+    "pressure_kpa",
+    "hours_since_service",
+    "load_pct",
+    "ambient_humidity"
+  ],
+  "data_fingerprint": "422cccb9136e814061b83e4f041cff21ba7372c6f7fb0feb2c321555c6a6341f",
+  "dvc_hash": "1c886b512c8a5c9bf723da1cd119fc80.dir",
+  "git_commit": "18f4ad4b20ea724831001dc4fb60835eca255dee-dirty",
+  "split_strategy": "group_by_machine_id",
+  "split_rows": {
+    "train": 3600,
+    "val": 1200,
+    "test": 1200
+  },
+  "package_versions": {
+    "scikit-learn": "1.8.0",
+    "numpy": "2.4.4",
+    "pandas": "2.3.3",
+    "cloudpickle": "3.1.2",
+    "mlflow": "2.22.5"
+  },
+  "val_roc_auc": 0.8444994217173845,
+  "val_pr_auc": 0.4044125077384774,
+  "test_roc_auc": 0.8466731943553135,
+  "test_pr_auc": 0.4598251404871057,
+  "verification": {
+    "date": "2026-10-12",
+    "execution": "local",
+    "azure_pipeline_run": false,
+    "network_connections_blocked": true,
+    "model_reload": "pass",
+    "metric_absolute_tolerance": 1e-12,
+    "no_machine_overlap": true,
+    "tests_passed": 165,
+    "dependency_deprecation_warnings": 9,
+    "ruff": "pass"
+  }
+}

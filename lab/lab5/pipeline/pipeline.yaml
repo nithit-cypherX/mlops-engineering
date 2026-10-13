@@ -1,0 +1,116 @@
+# Lab 5 Task 1: provider-neutral step order and file handoffs.
+# Step logic is in the image, not in this DAG. The compiler supplies image,
+# compute, identity and platform-specific bindings. Scheduling is Task 3.
+name: itcs355-lab5-training
+inputs:
+  raw_data: file
+  dvc_metadata: file
+  source_commit: string
+  gate_minimum: number
+outputs:
+  training: train.bundle
+  gate: evaluate.decision
+  registered_model: register.registered
+  deployment: deploy_staging.deployment
+steps:
+  - name: ingest
+    inputs:
+      raw: inputs.raw_data
+    outputs:
+      raw_data: folder
+    depends_on: []
+    command:
+      - python
+      - -m
+      - src.data_steps
+      - ingest
+      - --input
+      - "${inputs.raw}"
+      - --output
+      - "${outputs.raw_data}"
+  - name: validate
+    inputs:
+      raw: ingest.raw_data
+    outputs:
+      validated: folder
+    depends_on: [ingest]
+    command:
+      - python
+      - -m
+      - src.data_steps
+      - validate
+      - --input
+      - "${inputs.raw}/sensors.csv"
+      - --output
+      - "${outputs.validated}"
+  - name: train
+    inputs:
+      validated: validate.validated
+      dvc_metadata: inputs.dvc_metadata
+      source_commit: inputs.source_commit
+    outputs:
+      bundle: folder
+    depends_on: [validate]
+    command:
+      - python
+      - -m
+      - src.train
+      - --validated-dir
+      - "${inputs.validated}"
+      - --dvc-metadata-path
+      - "${inputs.dvc_metadata}"
+      - --git-commit
+      - "${inputs.source_commit}"
+      - --output-dir
+      - "${outputs.bundle}"
+  - name: evaluate
+    inputs:
+      training: train.bundle
+      minimum: inputs.gate_minimum
+    outputs:
+      decision: folder
+    depends_on: [train]
+    command:
+      - python
+      - -m
+      - scripts.evaluation_gate
+      - --metrics
+      - "${inputs.training}/metrics.json"
+      - --min-auc
+      - "${inputs.minimum}"
+      - --output-dir
+      - "${outputs.decision}"
+  - name: register
+    inputs:
+      training: train.bundle
+      gate: evaluate.decision
+    outputs:
+      registered: folder
+    depends_on: [train, evaluate]
+    # gate.json exists only on pass; register also verifies its score and hash.
+    command:
+      - python
+      - -m
+      - scripts.pipeline_step
+      - register
+      - --training-dir
+      - "${inputs.training}"
+      - --gate-report
+      - "${inputs.gate}/gate.json"
+      - --output-dir
+      - "${outputs.registered}"
+  - name: deploy_staging
+    inputs:
+      registered: register.registered
+    outputs:
+      deployment: folder
+    depends_on: [register]
+    command:
+      - python
+      - -m
+      - scripts.pipeline_step
+      - deploy_staging
+      - --registration
+      - "${inputs.registered}/registration.json"
+      - --output-dir
+      - "${outputs.deployment}"
