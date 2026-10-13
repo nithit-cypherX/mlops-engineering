@@ -233,29 +233,54 @@ digest-pinned pipeline image, a compute name, training/release identity client
 IDs, and complete staging settings. These must be reviewed before live use;
 the test values are not real deployment settings. Code must be inside the image,
 not uploaded from the working folder. A supplied SHA does not prove what is in
-that image. Image contents, compute/identity setup, permissions, live failure
-handling, and the staging HTTP check still need verification. Task 1 is not
-finished yet.
+that image. The local image checks are recorded below. Compute/identity setup,
+permissions, live failure handling, and the staging HTTP check still need
+verification. Task 1 is not finished yet.
 
-### Pipeline image preparation
+### Pipeline image and local checks
 
 I prepared a [Dockerfile](Dockerfile) for the Lab 5 step code, using the pinned
 Python 3.11 base and non-root setup from Lab 2 at `18f4ad4`. The
 [dependency input](requirements.in) keeps the same pins, and
 [requirements.txt](requirements.txt) is byte-for-byte identical to Lab 2's lock.
-No packages were added, upgraded, or installed. The inherited lock still includes
-some DVC and test tools that these pipeline steps do not need.
+No dependency pins changed, and nothing was installed into the host environment.
+The inherited lock still includes some DVC and test tools that these pipeline
+steps do not need.
 
 The recipe copies `src/`, `cloudlayer/`, and `scripts/`. The pipeline chooses
 which command to run; the image's default command only shows Python help.
 The [.dockerignore](.dockerignore) excludes local credentials and run outputs.
-A future build must supply a full Git SHA through `GIT_COMMIT`. This checks the
-SHA's format, not whether it matches the copied code; that still needs checking
-when we build.
+A build must supply a full Git SHA through `GIT_COMMIT`. The recipe checks its
+format; I also compared the 13 Python source files inside this image with the
+committed source. All file hashes matched.
 
 The 10 new [recipe tests](tests/test_image_recipe.py) checked the pinned base,
 lock hashes, copy scope, defaults, exclusions, and the small SHA-check snippet.
-All 414 offline tests and Ruff passed. These are file-level checks, not a Docker
-build or container test. Dependency installation, container imports, output-folder
-permissions, and managed-job compatibility remain unverified. No image was built
-or pushed, and no Azure job was run.
+All 414 offline tests and Ruff passed on the host before the source commit.
+
+I then built `itcs355-lab5:pipeline-9766879` for `linux/amd64` on 2026-10-13,
+using source commit `9766879e586090893b6b3ce1f4ffb427e868a180`. The image's
+revision label matches that commit. From `lab/lab5/` at that source revision:
+
+```bash
+docker buildx build --platform linux/amd64 \
+  --build-arg GIT_COMMIT=9766879e586090893b6b3ce1f4ffb427e868a180 \
+  --tag itcs355-lab5:pipeline-9766879 --load .
+```
+
+The local image ID is
+`sha256:f99c8ca6dd888167cbe8de057a01402f3062a811f771a534fe58eacf5d8ccf47`.
+This is not an ACR manifest digest. The build reused cached dependency layers,
+so it did not test a fresh download and installation of every package.
+
+**Container checks:** `pip check` passed. Imports and `--help` worked for all six
+step command modules, even from `/tmp`. The non-root `runner` user (UID 10001)
+could write to a temporary output mount prepared with matching ownership.
+The same 414 tests passed inside the image in 16.05 seconds, with 1,045 dependency
+warnings. The tests used the code baked into the image, not a source-code mount.
+Both container checks ran with networking disabled, a read-only root filesystem,
+and no credentials mounted. Azure calls in the test suite were mocked.
+
+This confirms the local image works for these checks. It does not prove Azure ML
+output-mount permissions, cloud authentication, registry access, or a live
+pipeline run. No Git or image push was made, and no Azure job was run.
