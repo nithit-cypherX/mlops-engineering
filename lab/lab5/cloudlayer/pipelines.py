@@ -15,6 +15,7 @@ import yaml
 
 from cloudlayer import lab5_scope as scope
 from cloudlayer.azure_staging import ACR_SERVER, validate_settings
+from cloudlayer.azure_storage import ARTIFACTS_DATASTORE, INPUTS_DATASTORE
 from scripts.evaluation_gate import MIN_ABSOLUTE, checked_auc
 from src.config import ENV_FILE, StagingConfig, load_staging
 
@@ -179,13 +180,17 @@ def compile_azure(
         }
 
     job = graph(
-        raw_data=Input(type="uri_file", path=str(raw_data.resolve()), mode="download"),
-        dvc_metadata=Input(type="uri_file", path=str(dvc_metadata.resolve()), mode="download"),
+        raw_data=Input(type="uri_file", path=str(raw_data.resolve()), mode="download",
+                       datastore=INPUTS_DATASTORE),
+        dvc_metadata=Input(type="uri_file", path=str(dvc_metadata.resolve()), mode="download",
+                           datastore=INPUTS_DATASTORE),
         source_commit=source_commit, gate_minimum=gate_minimum,
     )
     job.tags = dict(scope.TAGS)
     job.settings.continue_on_step_failure = False
     job.settings.force_rerun = True
+    # Job-only default for every step output; never change the workspace default.
+    job.settings.default_datastore = "azureml:" + ARTIFACTS_DATASTORE
     return job
 
 

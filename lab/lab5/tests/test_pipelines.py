@@ -19,6 +19,7 @@ import yaml
 from cloudlayer import pipelines
 from cloudlayer import lab5_scope as scope
 from cloudlayer.azure_registry import WORKSPACE
+from cloudlayer.azure_storage import ARTIFACTS_DATASTORE, INPUTS_DATASTORE
 from scripts import pipeline_step
 from src import config
 
@@ -77,12 +78,17 @@ def test_real_sdk_builds_and_serializes_six_steps_offline(options):
     assert set(doc["jobs"]) == set(pipelines.HANDOFFS), json.dumps(doc, indent=2)
     assert doc["settings"]["continue_on_step_failure"] is False
     assert doc["settings"]["force_rerun"] is True
+    assert doc["settings"]["default_datastore"] == "azureml:" + ARTIFACTS_DATASTORE
     assert doc["tags"] == scope.TAGS
     assert set(doc["outputs"]) == {"training", "gate", "registered_model", "deployment"}
     output = options["raw_data"].parent / "compiled.yaml"
     reloaded = azure.ai.ml.load_job(output)
     assert set(reloaded.jobs) == set(pipelines.HANDOFFS)
+    # YAML uses an asset reference; load_job normalizes it back to a name.
+    assert reloaded.settings.default_datastore == ARTIFACTS_DATASTORE
     for name in ("raw_data", "dvc_metadata"):
+        assert doc["inputs"][name]["datastore"] == INPUTS_DATASTORE
+        assert reloaded.inputs[name]._data.datastore == INPUTS_DATASTORE
         assert doc["inputs"][name]["path"] == str(options[name].resolve())
         assert Path(reloaded.inputs[name].path).resolve() == options[name].resolve()
         assert Path(reloaded.inputs[name].path).is_file()
@@ -114,6 +120,25 @@ def test_serialized_edges_keep_gate_and_version_on_the_only_deploy_path(options)
                "deploy_staging": ("deployment", "deployment")}
     for step, (output, published) in exports.items():
         assert doc["jobs"][step]["outputs"][output] == "${{parent.outputs." + published + "}}"
+
+
+def test_installed_sdk_routes_both_local_uploads_to_lab5_inputs(options, monkeypatch):
+    from types import SimpleNamespace
+    from azure.ai.ml.operations import _job_operations as sdk
+
+    document(options)
+    job = azure.ai.ml.load_job(options["raw_data"].parent / "compiled.yaml")
+    upload = Mock(return_value="azureml://datastores/lab5_inputs/paths/offline/input.csv")
+    monkeypatch.setattr(sdk, "_upload_and_generate_remote_uri", upload)
+    operations = SimpleNamespace(
+        _operation_scope=object(), _datastore_operations=object(), _show_progress=False,
+    )
+    for name in ("raw_data", "dvc_metadata"):
+        # The SDK unwraps PipelineInput._data before resolving local uploads.
+        sdk.JobOperations._resolve_job_input(operations, job.inputs[name]._data, str(options[name].parent))
+        assert upload.call_args.kwargs["datastore_name"] == INPUTS_DATASTORE
+        assert upload.call_args.args[2] == str(options[name].resolve())
+    assert upload.call_count == 2
 
 
 def test_components_use_image_code_and_explicit_runtime_settings(options):

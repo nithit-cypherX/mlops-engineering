@@ -15,6 +15,7 @@ import yaml
 from azure.core.exceptions import AzureError
 
 from cloudlayer import azure_registry as registry
+from cloudlayer.azure_storage import ARTIFACTS_DATASTORE
 from cloudlayer.azure_staging import read_registration
 from scripts import evaluation_gate as gate
 
@@ -77,6 +78,10 @@ def client():
         subscription_id=registry.SUBSCRIPTION, resource_group_name=registry.GROUP,
         workspace_name=registry.WORKSPACE,
         models=Mock(spec=["create_or_update", "get"]),
+        datastores=Mock(spec=["get"]),
+    )
+    fake.datastores.get.return_value = azure.ai.ml.load_datastore(
+        Path(__file__).resolve().parents[1] / "pipeline" / "datastore-artifacts.yaml",
     )
     fake.models.create_or_update.return_value = SimpleNamespace(
         name=registry.MODEL_NAME, version="7",
@@ -113,6 +118,8 @@ def test_pass_registers_once_with_lineage_without_promotion(candidate, client):
     sent = client.models.create_or_update.call_args.args[0]
     assert sent.name == registry.MODEL_NAME
     assert sent.version is None
+    assert sent.datastore == ARTIFACTS_DATASTORE
+    client.datastores.get.assert_called_once_with(name=ARTIFACTS_DATASTORE)
     assert sent.stage is None
     assert sent.type == "mlflow_model"
     assert sent.path == str((candidate / "model").resolve())
@@ -396,3 +403,74 @@ def test_stricter_gate_policy_is_logged_in_registry_tags(candidate, step, client
     step.gate.write_text(json.dumps(gate.decision((candidate / "metrics.json").read_bytes(), 0.82)))
     assert registry.main(step.args, client=client) == 0
     assert client.models.create_or_update.call_args.args[0].tags["gate_minimum"] == "0.82"
+
+
+def test_bad_candidate_stops_before_datastore_lookup(candidate, client):
+    (candidate / "model" / "model.pkl").write_bytes(b"changed")
+    with pytest.raises(ValueError, match="hashes"):
+        registry.register_training(candidate, client=client)
+    assert client.datastores.mock_calls == []
+    assert client.models.mock_calls == []
+
+
+def test_missing_or_inaccessible_datastore_stops_before_upload(candidate, client):
+    client.datastores.get.side_effect = AzureError("synthetic storage read failure")
+    with pytest.raises(RuntimeError, match="no registration was attempted"):
+        registry.register_training(candidate, client=client)
+    assert client.models.mock_calls == []
+
+
+@pytest.mark.parametrize("change", ["account", "container", "credentials", "tags"])
+def test_invalid_live_storage_metadata_stops_registration(candidate, client, change):
+    store = client.datastores.get.return_value
+    if change == "account":
+        store.account_name = "otheraccount"
+    elif change == "container":
+        store.container_name = "azureml"
+    elif change == "credentials":
+        from azure.ai.ml.entities import AccountKeyConfiguration
+
+        store.credentials = AccountKeyConfiguration(account_key="synthetic-not-a-secret")
+    else:
+        store.tags = {}
+    with pytest.raises(ValueError):
+        registry.register_training(candidate, client=client)
+    assert client.models.mock_calls == []
+
+
+def test_installed_sdk_auto_version_does_not_access_default_storage(candidate, client, monkeypatch):
+    # Keep SDK version allocation while checking its real control flow. Upload
+    # and service calls are fake; this is not proof of real Azure registration.
+    from azure.ai.ml.operations import _model_operations as sdk
+    from azure.ai.ml._scope_dependent_operations import OperationScope, OperationConfig
+
+    registry.register_training(candidate, client=client)
+    model = client.models.create_or_update.call_args.args[0]
+    assert model.version is None
+    service = Mock()
+    operations = sdk.ModelOperations(
+        OperationScope(registry.SUBSCRIPTION, registry.GROUP, registry.WORKSPACE),
+        OperationConfig(show_progress=False, enable_telemetry=False),
+        service, client.datastores,
+    )
+    monkeypatch.setattr(operations, "_get_model_properties", lambda _: {})
+    monkeypatch.setattr(sdk, "_get_next_version_from_container", lambda **_: "8")
+    default = Mock(side_effect=AssertionError("workspace default storage accessed"))
+    monkeypatch.setattr(sdk, "_get_default_datastore_info", default)
+
+    def upload(*, artifact, **_):
+        assert artifact.datastore == ARTIFACTS_DATASTORE
+        artifact.path = "azureml://datastores/lab5_artifacts/paths/offline/model"
+        return artifact, "offline-upload-indicator"
+
+    monkeypatch.setattr(sdk, "_check_and_upload_path", upload)
+
+    def create(*, body, version, **_):
+        body.id = f"{registry.MODEL_ROOT}/versions/{version}"
+        body.properties.flavors = {}
+        return body
+
+    service.model_versions.create_or_update.side_effect = create
+    assert operations.create_or_update(model).version == "8"
+    default.assert_not_called()
+    service.model_versions.create_or_update.assert_called_once()

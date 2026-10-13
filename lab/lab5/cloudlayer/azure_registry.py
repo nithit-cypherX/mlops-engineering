@@ -16,6 +16,7 @@ from pathlib import Path
 import yaml
 
 from cloudlayer.lab5_scope import GROUP, SUBSCRIPTION
+from cloudlayer.azure_storage import ARTIFACTS_DATASTORE, validate_datastore
 from scripts.evaluation_gate import METRIC, MIN_ABSOLUTE, checked_auc, evaluate, read_pass_report
 
 WORKSPACE = "mlw-itcs355-u6688124"
@@ -121,11 +122,18 @@ def register_training(
     from azure.ai.ml.entities import Model
     from azure.core.exceptions import AzureError
 
+    try:
+        datastore = client.datastores.get(name=ARTIFACTS_DATASTORE)
+    except AzureError as exc:
+        raise RuntimeError("Cannot verify Lab 5 model storage; no registration was attempted") from exc
+    validate_datastore(datastore, name=ARTIFACTS_DATASTORE)
+
     model = Model(
-        name=MODEL_NAME, path=str(model_dir.resolve()), type="mlflow_model",
+        name=MODEL_NAME, datastore=ARTIFACTS_DATASTORE,
+        path=str(model_dir.resolve()), type="mlflow_model",
         description="Lab 5 model accepted by the validation ROC-AUC gate.",
         tags=tags,
-    )  # No explicit version: create a new version; never select an old production version.
+    )  # Keep SDK-managed version allocation; never select an old production version.
     try:
         created = client.models.create_or_update(model)
     except AzureError as exc:

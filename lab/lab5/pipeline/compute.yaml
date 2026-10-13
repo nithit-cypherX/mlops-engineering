@@ -1,0 +1,27 @@
+# Used to create cpu-lab5 on 2026-10-13; loading this file alone changes nothing.
+# Target workspace: mlw-itcs355-u6688124 in resource group itcs355-u6688124.
+# Review the identity/storage limits in ../README.md before any cloud write.
+$schema: https://azuremlschemas.azureedge.net/latest/amlCompute.schema.json
+name: cpu-lab5
+type: amlcompute
+description: Lab 5 pipeline compute; local draft pending access review.
+location: malaysiawest
+size: Standard_F2s_v2
+tier: dedicated
+min_instances: 0
+max_instances: 1
+idle_time_before_scale_down: 120
+ssh_public_access_enabled: false
+# Existing public-network approach; no new VNet/NAT or private endpoints.
+enable_node_public_ip: true
+identity:
+  type: user_assigned
+  # Training is first for default image pull and data preparation.
+  # Both identities are attached; live job access still needs verification.
+  user_assigned_identities:
+    - resource_id: /subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-itcs355-u6688124-lab5-training
+    - resource_id: /subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-itcs355-u6688124-lab5-release
+tags:
+  course: itcs355
+  student: itcs355-u6688124
+  lab: "5"

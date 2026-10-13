@@ -1,0 +1,14 @@
+# Configuration only. The private container must exist before registration.
+# No credentials section: callers use their own identity and Blob permissions.
+$schema: https://azuremlschemas.azureedge.net/latest/azureBlob.schema.json
+name: lab5_inputs
+type: azure_blob
+description: Lab 5 input files; identity-based access without stored credentials.
+account_name: itcs355u6688124
+container_name: lab5-inputs
+protocol: https
+endpoint: core.windows.net
+tags:
+  course: itcs355
+  student: itcs355-u6688124
+  lab: '5'

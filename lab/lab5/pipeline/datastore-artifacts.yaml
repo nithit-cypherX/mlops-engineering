@@ -1,0 +1,14 @@
+# Configuration only. Does not change the workspace default datastore.
+# No credentials section: callers use their own identity and Blob permissions.
+$schema: https://azuremlschemas.azureedge.net/latest/azureBlob.schema.json
+name: lab5_artifacts
+type: azure_blob
+description: Lab 5 step outputs and registered models; identity-based access without stored credentials.
+account_name: itcs355u6688124
+container_name: lab5-artifacts
+protocol: https
+endpoint: core.windows.net
+tags:
+  course: itcs355
+  student: itcs355-u6688124
+  lab: '5'

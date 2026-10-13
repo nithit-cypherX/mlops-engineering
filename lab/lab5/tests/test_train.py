@@ -5,6 +5,7 @@ import hashlib
 import json
 import socket
 import subprocess
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock
 
@@ -148,6 +149,12 @@ def test_default_parameters_export_reloadable_model_and_real_metrics(local_job, 
     client = SimpleNamespace(
         subscription_id=registry.SUBSCRIPTION, resource_group_name=registry.GROUP,
         workspace_name=registry.WORKSPACE, models=Mock(spec=["create_or_update", "get"]),
+        datastores=Mock(spec=["get"]),
+    )
+    from azure.ai.ml import load_datastore
+
+    client.datastores.get.return_value = load_datastore(
+        Path(__file__).resolve().parents[1] / "pipeline" / "datastore-artifacts.yaml",
     )
     client.models.create_or_update.return_value = SimpleNamespace(
         name=registry.MODEL_NAME, version="1",
