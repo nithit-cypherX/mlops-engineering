@@ -297,13 +297,15 @@ def test_running_at_max_scale_requires_healthy(cfg, registration, arm, health_st
     assert len(arm.writes) == 1
 
 
-@pytest.mark.parametrize("running_state", ["Running", "RunningAtMaxScale"])
+@pytest.mark.parametrize("running_state", ["Running", "RunningAtMaxScale", "ScaledToZero"])
 @pytest.mark.parametrize("problem", [
     "image", "version", "tracking", "identity", "traffic", "ip_rules", "attachment", "registry", "ingress",
 ])
 def test_wrong_revision_or_access_times_out_without_redeploy(cfg, registration, arm, problem, running_state):
     props = arm.revision["properties"]
     props["runningState"] = running_state
+    if running_state == "ScaledToZero":
+        props["replicas"] = 0
     api = props["template"]["containers"][0]
     if problem == "image":
         api["image"] = cfg.serving_image.replace("a" * 64, "b" * 64)
@@ -334,11 +336,25 @@ def test_failed_deployment_is_not_success(cfg, registration, arm, target):
     assert len(arm.writes) == 1
 
 
-def test_scaled_to_zero_is_not_reported_as_http_ready(cfg, registration, arm):
-    arm.revision["properties"].update(runningState="ScaledToZero", healthState="None", replicas=0)
+@pytest.mark.parametrize("health_state", [None, "None", "Healthy"])
+def test_scaled_to_zero_is_not_reported_as_http_ready(cfg, registration, arm, health_state):
+    arm.revision["properties"].update(runningState="ScaledToZero", healthState=health_state, replicas=0)
     result = deploy(registration, cfg, arm)
+    assert result["status"] == "control_plane_verified"
     assert result["revision_state"] == "scaled_to_zero"
     assert result["http_smoke_tested"] is False
+    assert len(arm.writes) == 1
+    assert staging.time.monotonic() == 0
+
+
+@pytest.mark.parametrize("health_state, replicas", [
+    ("Healthy", 1), ("Healthy", None), ("Unhealthy", 0), ("Unknown", 0),
+])
+def test_scaled_to_zero_rejects_unexpected_health_or_replicas(cfg, registration, arm, health_state, replicas):
+    arm.revision["properties"].update(runningState="ScaledToZero", healthState=health_state, replicas=replicas)
+    with pytest.raises(TimeoutError, match="no automatic delete or redeploy"):
+        deploy(registration, cfg, arm)
+    assert len(arm.writes) == 1
 
 
 def test_readiness_timeout_can_recover_without_another_put(cfg, registration, arm):
@@ -377,15 +393,22 @@ def test_put_timeout_is_never_retried(cfg, registration, arm, monkeypatch):
     writes.assert_called_once()
 
 
-def test_cli_writes_verified_deployment_file_only(cfg, registration, arm, tmp_path, monkeypatch):
+@pytest.mark.parametrize("running_state", ["Running", "ScaledToZero"])
+def test_cli_writes_verified_deployment_file_only(cfg, registration, arm, tmp_path, monkeypatch, running_state):
     monkeypatch.setattr(staging, "load_staging", lambda _: cfg)
+    arm.revision["properties"]["runningState"] = running_state
+    if running_state == "ScaledToZero":
+        arm.revision["properties"]["replicas"] = 0
     output = tmp_path / "deploy"
     assert staging.main([
         "--registration", str(registration), "--output-dir", str(output),
     ], credential=arm.credential) == 0
     result = json.loads((output / "deployment.json").read_text())
+    assert result["status"] == "control_plane_verified"
     assert result["model"]["version"] == "7"
+    assert result["revision_state"] == ("scaled_to_zero" if running_state == "ScaledToZero" else "healthy")
     assert result["http_smoke_tested"] is False
+    assert len(arm.writes) == 1
     azure.identity.DefaultAzureCredential.assert_not_called()
 
 

@@ -191,7 +191,7 @@ def deploy_staging(registration_path: Path, cfg: StagingConfig, *, credential) -
                 healthy = (props.get("healthState") == "Healthy"
                            and props.get("runningState") in {"Running", "Processing", "RunningAtMaxScale"})
                 idle = (props.get("runningState") == "ScaledToZero" and props.get("replicas") == 0
-                        and props.get("healthState") in {None, "None"})
+                        and props.get("healthState") in {None, "None", "Healthy"})
                 ingress = state.get("configuration", {}).get("ingress", {})
                 actual_rules = [
                     {key: rule.get(key) for key in ("name", "action", "ipAddressRange")}
