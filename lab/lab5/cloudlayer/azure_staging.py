@@ -182,13 +182,14 @@ def deploy_staging(registration_path: Path, cfg: StagingConfig, *, credential) -
                     credential, "GET", f"{scope.APP}/revisions/{latest}", deadline=deadline,
                 )
                 props = revision.get("properties", {})
-                if props.get("provisioningState") == "Failed" or props.get("runningState") == "Failed":
+                if (props.get("provisioningState") == "Failed"
+                        or props.get("runningState") in {"Failed", "ActivationFailed"}):
                     raise RuntimeError("Staging revision failed; inspect Azure status/logs before retrying")
                 containers = props.get("template", {}).get("containers", [])
                 api = containers[0] if len(containers) == 1 else {}
                 actual_env = {entry["name"]: entry.get("value") for entry in api.get("env", [])}
                 healthy = (props.get("healthState") == "Healthy"
-                           and props.get("runningState") in {"Running", "Processing"})
+                           and props.get("runningState") in {"Running", "Processing", "RunningAtMaxScale"})
                 idle = (props.get("runningState") == "ScaledToZero" and props.get("replicas") == 0
                         and props.get("healthState") in {None, "None"})
                 ingress = state.get("configuration", {}).get("ingress", {})

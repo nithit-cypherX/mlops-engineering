@@ -153,7 +153,9 @@ def deploy(registration, cfg, arm):
     return staging.deploy_staging(registration, cfg, credential=arm.credential)
 
 
-def test_scoped_payload_and_exact_registered_version(cfg, registration, arm):
+@pytest.mark.parametrize("running_state", ["Running", "RunningAtMaxScale"])
+def test_scoped_payload_and_exact_registered_version(cfg, registration, arm, running_state):
+    arm.revision["properties"]["runningState"] = running_state
     before_env, before_id = copy.deepcopy(arm.environment), copy.deepcopy(arm.identity)
     result = deploy(registration, cfg, arm)
     assert result["status"] == "control_plane_verified"
@@ -287,11 +289,21 @@ def test_provisioning_success_waits_for_matching_revision(cfg, registration, arm
     assert len([url for _, url, _ in arm.calls if "/revisions/" in url]) == 2
 
 
+@pytest.mark.parametrize("health_state", [None, "None", "Unhealthy"])
+def test_running_at_max_scale_requires_healthy(cfg, registration, arm, health_state):
+    arm.revision["properties"].update(runningState="RunningAtMaxScale", healthState=health_state)
+    with pytest.raises(TimeoutError, match="no automatic delete or redeploy"):
+        deploy(registration, cfg, arm)
+    assert len(arm.writes) == 1
+
+
+@pytest.mark.parametrize("running_state", ["Running", "RunningAtMaxScale"])
 @pytest.mark.parametrize("problem", [
     "image", "version", "tracking", "identity", "traffic", "ip_rules", "attachment", "registry", "ingress",
 ])
-def test_wrong_revision_or_access_times_out_without_redeploy(cfg, registration, arm, problem):
+def test_wrong_revision_or_access_times_out_without_redeploy(cfg, registration, arm, problem, running_state):
     props = arm.revision["properties"]
+    props["runningState"] = running_state
     api = props["template"]["containers"][0]
     if problem == "image":
         api["image"] = cfg.serving_image.replace("a" * 64, "b" * 64)
@@ -399,14 +411,21 @@ def test_cli_preserves_existing_output_before_any_cloud_call(cfg, registration, 
     assert old.read_text() == "old result"
 
 
-def test_cli_failed_revision_never_writes_success(cfg, registration, arm, tmp_path, monkeypatch):
+@pytest.mark.parametrize("running_state", ["Failed", "ActivationFailed"])
+def test_cli_failed_revision_never_writes_success(cfg, registration, arm, tmp_path, monkeypatch, capsys, running_state):
     monkeypatch.setattr(staging, "load_staging", lambda _: cfg)
-    arm.revision["properties"]["runningState"] = "Failed"
+    arm.revision["properties"]["runningState"] = running_state
     output = tmp_path / "deploy"
     assert staging.main([
         "--registration", str(registration), "--output-dir", str(output),
     ], credential=arm.credential) == 1
     assert not (output / "deployment.json").exists()
+    assert staging.time.monotonic() == 0
+    assert len(arm.writes) == 1
+    assert len([url for _, url, _ in arm.calls if "/revisions/" in url]) == 1
+    captured = capsys.readouterr()
+    assert "Staging revision failed" in captured.err
+    assert not captured.out
 
 
 def test_cli_requires_registration():
