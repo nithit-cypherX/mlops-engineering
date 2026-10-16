@@ -154,7 +154,7 @@ def compile_azure(
             environment=Environment(image=image), code=None,
             inputs=declared,
             outputs={key: Output(type="uri_folder", mode="upload") for key in step["outputs"]},
-            compute="azureml:" + compute, instance_count=1,
+            compute=compute, instance_count=1,
             identity=ManagedIdentityConfiguration(client_id=client_id),
             environment_variables=env, is_deterministic=False,
         )
@@ -190,7 +190,7 @@ def compile_azure(
     job.settings.continue_on_step_failure = False
     job.settings.force_rerun = True
     # Job-only default for every step output; never change the workspace default.
-    job.settings.default_datastore = "azureml:" + ARTIFACTS_DATASTORE
+    job.settings.default_datastore = ARTIFACTS_DATASTORE
     return job
 
 

@@ -163,9 +163,11 @@ def test_job_factory_reuses_six_step_dag_and_cost_identity_guards(snippets, tmp_
     assert document["inputs"]["source_commit"] == "a" * 40
     assert job.settings.continue_on_step_failure is False
     assert job.settings.force_rerun is True
-    assert job.settings.default_datastore == "azureml:" + ARTIFACTS_DATASTORE
+    assert job.settings.default_datastore == ARTIFACTS_DATASTORE
+    assert document["settings"]["default_datastore"] == "azureml:" + ARTIFACTS_DATASTORE
     for name, node in job.jobs.items():
-        assert node.compute == "azureml:cpu-lab5"
+        assert node.compute == "cpu-lab5"
+        assert document["jobs"][name]["compute"] == "azureml:cpu-lab5"
         assert node.resources.instance_count == 1
         assert node.limits.timeout == 600
         assert document["jobs"][name]["limits"]["timeout"] == 600

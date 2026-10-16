@@ -8,6 +8,7 @@ import socket
 import subprocess
 from dataclasses import replace
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import Mock
 
 import azure.ai.ml
@@ -72,6 +73,49 @@ def document(options):
     return job, yaml.safe_load(output.read_text())
 
 
+@pytest.fixture(params=["direct", "yaml"])
+def sdk_job(options, request, tmp_path):
+    job = pipelines.compile_azure(pipelines.load_spec(), **options)
+    if request.param == "yaml":
+        output = tmp_path / "sdk-job.yaml"
+        pipelines.dump_azure(job, output)
+        job = azure.ai.ml.load_job(output)
+    return job
+
+
+def test_sdk_resolves_compute_by_name_for_every_step(sdk_job, options):
+    from azure.ai.ml.operations._job_operations import JobOperations
+
+    compute_id = (
+        f"{scope.SCOPE}/providers/Microsoft.MachineLearningServices/workspaces/{WORKSPACE}"
+        f"/computes/{options['compute']}"
+    )
+    lookup = Mock(return_value=SimpleNamespace(id=compute_id))
+    operations = SimpleNamespace(_compute_operations=SimpleNamespace(get=lookup))
+    for node in sdk_job.jobs.values():
+        assert JobOperations._try_get_compute_arm_id(operations, node.compute) == compute_id
+        lookup.assert_called_with(options["compute"])
+    assert lookup.call_count == len(sdk_job.jobs) == 6
+
+
+def test_sdk_resolves_default_datastore_without_a_prefix(sdk_job):
+    from azure.ai.ml.constants._common import AzureMLResourceType
+    from azure.ai.ml.operations._operation_orchestrator import OperationOrchestrator
+
+    operations = SimpleNamespace(_operation_scope=SimpleNamespace(
+        subscription_id="offline-subscription", resource_group_name="offline-group",
+        workspace_name="offline-workspace",
+    ))
+    resource_id = OperationOrchestrator.get_asset_arm_id(
+        operations, sdk_job.settings.default_datastore, azureml_type=AzureMLResourceType.DATASTORE,
+    )
+    assert resource_id == (
+        "/subscriptions/offline-subscription/resourceGroups/offline-group"
+        "/providers/Microsoft.MachineLearningServices/workspaces/offline-workspace"
+        f"/datastores/{ARTIFACTS_DATASTORE}"
+    )
+
+
 def test_real_sdk_builds_and_serializes_six_steps_offline(options):
     job, doc = document(options)
     assert isinstance(job, azure.ai.ml.entities.PipelineJob)
@@ -86,6 +130,7 @@ def test_real_sdk_builds_and_serializes_six_steps_offline(options):
     assert set(reloaded.jobs) == set(pipelines.HANDOFFS)
     # YAML uses an asset reference; load_job normalizes it back to a name.
     assert reloaded.settings.default_datastore == ARTIFACTS_DATASTORE
+    assert all(node.compute == options["compute"] for node in reloaded.jobs.values())
     for name in ("raw_data", "dvc_metadata"):
         assert doc["inputs"][name]["datastore"] == INPUTS_DATASTORE
         assert reloaded.inputs[name]._data.datastore == INPUTS_DATASTORE
