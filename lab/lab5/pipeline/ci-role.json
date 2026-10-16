@@ -1,0 +1,26 @@
+{
+  "Name": "ITCS355 Lab5 CI Submitter u6688124",
+  "IsCustom": true,
+  "Description": "DRAFT, not live-tested. Assign only at mlw-itcs355-u6688124, not at the resource group. Submit/read jobs and resolve their components, image environments, compute and datastores. Job submission can run code as the attached training/release identities; use trusted main only. AcrPush and input-blob access are separate assignments.",
+  "Actions": [
+    "Microsoft.MachineLearningServices/workspaces/read",
+    "Microsoft.MachineLearningServices/workspaces/computes/read",
+    "Microsoft.MachineLearningServices/workspaces/datastores/read",
+    "Microsoft.MachineLearningServices/workspaces/components/read",
+    "Microsoft.MachineLearningServices/workspaces/components/write",
+    "Microsoft.MachineLearningServices/workspaces/components/versions/read",
+    "Microsoft.MachineLearningServices/workspaces/components/versions/write",
+    "Microsoft.MachineLearningServices/workspaces/environments/read",
+    "Microsoft.MachineLearningServices/workspaces/environments/write",
+    "Microsoft.MachineLearningServices/workspaces/environments/versions/read",
+    "Microsoft.MachineLearningServices/workspaces/environments/versions/write",
+    "Microsoft.MachineLearningServices/workspaces/jobs/read",
+    "Microsoft.MachineLearningServices/workspaces/jobs/write"
+  ],
+  "NotActions": [],
+  "DataActions": [],
+  "NotDataActions": [],
+  "AssignableScopes": [
+    "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124"
+  ]
+}

@@ -1,0 +1,191 @@
+# DRAFT: no live OIDC/RBAC/runner test yet. No cloud action on push or PR.
+# Prepared: CI identity, main-only lab5-ci environment, OIDC trust, and client/tenant ID secrets.
+# Prepared: workspace, ACR, and lab5-inputs assignments; no live CI job test yet.
+# Prepared: LAB5_SERVING_ALLOWED_IP saved as a /32 secret; CI remains disabled.
+# OIDC subject: repo:nithit-cypherX@90242135/mlops-engineering@1360858721:environment:lab5-ci
+# Issuer: https://token.actions.githubusercontent.com; audience: api://AzureADTokenExchange
+# Environment secrets: LAB5_AZURE_CLIENT_ID, LAB5_AZURE_TENANT_ID, LAB5_SERVING_ALLOWED_IP.
+# Environment variable LAB5_CI_ENABLED must be true to run; keep false until approved.
+# Assignments (not created by this workflow):
+# - Created: ci-role.json at the exact mlw-itcs355-u6688124 workspace, not its parent RG.
+# - Created: AcrPush at itcs355u6688124 ACR (registry-wide in its current RBAC mode).
+# - Created: existing ITCS355 Lab5 Blob Read Write u6688124 at lab5-inputs container only.
+# AssignableScopes in the JSON makes the role available; it is NOT an assignment.
+# Action names: https://learn.microsoft.com/en-us/azure/role-based-access-control/permissions/ai-machine-learning#microsoftmachinelearningservices
+# CI has no direct App-write grant, but submitting code as release can deploy.
+# This is trusted-main automation, not RBAC isolation between pipeline steps.
+name: Lab 5 CI
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lab5-managed-pipeline
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+    working-directory: lab/lab5
+
+jobs:
+  pipeline:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    environment: lab5-ci
+    timeout-minutes: 90
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
+      PYTHONHASHSEED: "20260101"
+      ACR_SERVER: itcs355u6688124.azurecr.io
+      SERVING_IMAGE: itcs355u6688124.azurecr.io/itcs355-lab4@sha256:654ed915ca7c12f59b619979f3795c705b82eb2a9ee23620b520e185095c6bb8
+      MLFLOW_TRACKING_URI: azureml://malaysiawest.api.azureml.ms/mlflow/v1.0/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.MachineLearningServices/workspaces/mlw-itcs355-u6688124
+      SERVING_ALLOWED_IP: ${{ secrets.LAB5_SERVING_ALLOWED_IP }}
+      TRAINING_CLIENT_ID: 7e44580e-f307-411e-b25b-7dc7723710b4
+      RELEASE_CLIENT_ID: c1ee259d-4522-4a94-bce9-6eeac16adfcd
+      AZURE_EXTENSION_USE_DYNAMIC_INSTALL: "no"
+    steps:
+      # Step-level check: environment variables are available after the job starts.
+      - name: Require explicit enablement
+        working-directory: ${{ github.workspace }}
+        env:
+          ENABLED: ${{ vars.LAB5_CI_ENABLED }}
+          CLIENT_ID: ${{ secrets.LAB5_AZURE_CLIENT_ID }}
+          TENANT_ID: ${{ secrets.LAB5_AZURE_TENANT_ID }}
+        run: |
+          test "$ENABLED" = true || { echo 'Lab 5 CI is not enabled.'; exit 1; }
+          test -n "$CLIENT_ID" && test -n "$TENANT_ID" && test -n "$SERVING_ALLOWED_IP"
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7, same pin as Lab 4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.11.16"
+
+      - name: Install the existing lock and check configuration
+        run: |
+          python -m pip install --require-hashes -r requirements.txt
+          python -c 'from src.config import load_staging; from cloudlayer.azure_staging import validate_settings; from pathlib import Path; validate_settings(load_staging(Path("cloud.env.example")))'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -z "$(git status --porcelain --untracked-files=no)"
+
+      - name: Offline tests and lint
+        run: |
+          python -m ruff check --no-cache --config ../lab4/ruff.toml src cloudlayer scripts tests
+          python -m pytest -q -p no:cacheprovider tests
+
+      - name: Restore the existing hash-checked dataset
+        run: python ../lab4/scripts/pull_data.py
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+
+      - name: Build and test the exact pipeline image before login
+        id: build
+        run: |
+          image="$ACR_SERVER/itcs355-lab5:$GITHUB_SHA-ci-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          docker buildx build --platform linux/amd64 --load --build-arg GIT_COMMIT="$GITHUB_SHA" -t "$image" .
+          test "$(docker image inspect --format '{{.Os}}/{{.Architecture}}' "$image")" = linux/amd64
+          test "$(docker image inspect --format '{{.Config.User}}' "$image")" = runner
+          docker run --rm --network none "$image" python -m pip check
+          docker run --rm --network none \
+            -e PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 \
+            -v "$PWD/tests:/app/tests:ro" \
+            -v "$PWD/cloud.env.example:/app/cloud.env.example:ro" \
+            "$image" python -m pytest -q -p no:cacheprovider /app/tests/test_staging.py
+          printf 'image=%s\n' "$image" >> "$GITHUB_OUTPUT"
+
+      - name: Log in as the Lab 5 CI identity
+        id: login
+        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3
+        with:
+          client-id: ${{ secrets.LAB5_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.LAB5_AZURE_TENANT_ID }}
+          subscription-id: d9385e82-8bee-4612-8a76-967c241112c8
+
+      - name: Push the tested image and resolve its digest
+        id: push
+        env:
+          IMAGE_TAG: ${{ steps.build.outputs.image }}
+        run: |
+          az acr login --name itcs355u6688124 --only-show-errors --output none
+          docker push "$IMAGE_TAG"
+          image="$(docker image inspect --format '{{index .RepoDigests 0}}' "$IMAGE_TAG")"
+          [[ "$image" =~ ^itcs355u6688124\.azurecr\.io/itcs355-lab5@sha256:[0-9a-f]{64}$ ]]
+          printf 'image=%s\n' "$image" >> "$GITHUB_OUTPUT"
+
+      - name: Submit once and wait for the managed result
+        env:
+          PIPELINE_IMAGE: ${{ steps.push.outputs.image }}
+        run: |
+          python - <<'PY'
+          import os
+          import time
+          from pathlib import Path
+
+          from azure.ai.ml import MLClient
+          from azure.ai.ml.entities import CommandJobLimits
+          from azure.identity import AzureCliCredential
+
+          from cloudlayer import pipelines
+          from cloudlayer.azure_registry import WORKSPACE
+          from cloudlayer.azure_storage import validate_datastore
+          from cloudlayer.lab5_scope import GROUP, SUBSCRIPTION
+          from src.config import load_staging
+
+          def make_job():
+              job = pipelines.compile_azure(
+                  pipelines.load_spec(),
+                  raw_data=Path("../lab4/data/raw/sensors.csv"),
+                  dvc_metadata=Path("../lab4/data/raw.dvc"),
+                  source_commit=os.environ["GITHUB_SHA"],
+                  image=os.environ["PIPELINE_IMAGE"], compute="cpu-lab5",
+                  training_client_id=os.environ["TRAINING_CLIENT_ID"],
+                  release_client_id=os.environ["RELEASE_CLIENT_ID"],
+                  staging=load_staging(Path("cloud.env.example")), gate_minimum=0.80,
+              )
+              job.name = f"lab5-ci-{os.environ['GITHUB_RUN_ID']}-{os.environ['GITHUB_RUN_ATTEMPT']}"
+              for step in job.jobs.values():
+                  step.limits = CommandJobLimits(timeout=600)
+              return job
+
+          def submit_and_wait(client, job, *, clock=time.monotonic, sleep=time.sleep):
+              # Credentialless datastores avoid workspace/storage key retrieval.
+              for name in ("lab5_inputs", "lab5_artifacts"):
+                  validate_datastore(client.datastores.get(name), name=name)
+              submitted = client.jobs.create_or_update(job)
+              print(f"Submitted {submitted.name}. No automatic resubmission.")
+              deadline = clock() + 3600
+              while clock() < deadline:
+                  status = client.jobs.get(submitted.name).status
+                  if status == "Completed":
+                      print(f"Managed pipeline {submitted.name}: Completed")
+                      return
+                  if status in {"Failed", "Canceled", "NotResponding"}:
+                      raise RuntimeError(f"Managed pipeline {submitted.name}: {status}")
+                  sleep(30)
+              raise TimeoutError(
+                  f"Stopped waiting for {submitted.name}; it may still be running. "
+                  "Inspect Azure ML before any rerun. No automatic cancel or retry."
+              )
+
+          if __name__ == "__main__":
+              job = make_job()
+              client = MLClient(AzureCliCredential(), SUBSCRIPTION, GROUP, WORKSPACE,
+                                retry_total=0)
+              submit_and_wait(client, job)
+          PY
+
+      - name: Clear the runner registry login
+        if: always() && steps.login.outcome == 'success'
+        working-directory: ${{ github.workspace }}
+        run: docker logout "$ACR_SERVER"
