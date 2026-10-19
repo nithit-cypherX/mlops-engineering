@@ -6,6 +6,7 @@
     "Microsoft.MachineLearningServices/workspaces/read",
     "Microsoft.MachineLearningServices/workspaces/computes/read",
     "Microsoft.MachineLearningServices/workspaces/datastores/read",
+    "Microsoft.MachineLearningServices/workspaces/datasets/registered/read",
     "Microsoft.MachineLearningServices/workspaces/datasets/registered/write",
     "Microsoft.MachineLearningServices/workspaces/components/read",
     "Microsoft.MachineLearningServices/workspaces/components/write",

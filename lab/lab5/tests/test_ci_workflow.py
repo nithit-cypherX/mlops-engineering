@@ -124,10 +124,11 @@ def test_ci_role_has_only_explicit_ml_submission_actions():
     assert role["AssignableScopes"] == [SCOPE]
     assert "Assign only at mlw-itcs355-u6688124" in role["Description"]
     actions = role["Actions"]
-    assert len(actions) == len(set(actions)) == 23
+    assert len(actions) == len(set(actions)) == 24
     suffixes = {a.removeprefix("Microsoft.MachineLearningServices/workspaces/") for a in actions}
     assert suffixes == {
         "read", "computes/read", "datastores/read", "jobs/read", "jobs/write",
+        "datasets/registered/read",  # Azure named this in CI #9's ingest error.
         "datasets/registered/write",  # Azure named this in CI #8's JobSubmissionFailure.
         "components/read", "components/write", "components/versions/read", "components/versions/write",
         "modules/read",  # Azure required this during component registration in CI #3.
