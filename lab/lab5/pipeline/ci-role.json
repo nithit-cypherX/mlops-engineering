@@ -17,6 +17,7 @@
     "Microsoft.MachineLearningServices/workspaces/environments/versions/read",
     "Microsoft.MachineLearningServices/workspaces/environments/versions/write",
     "Microsoft.MachineLearningServices/workspaces/experiments/runs/read",
+    "Microsoft.MachineLearningServices/workspaces/experiments/runs/submit/action",
     "Microsoft.MachineLearningServices/workspaces/jobs/read",
     "Microsoft.MachineLearningServices/workspaces/jobs/write"
   ],
