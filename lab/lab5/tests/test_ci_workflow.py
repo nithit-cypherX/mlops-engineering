@@ -124,7 +124,7 @@ def test_ci_role_has_only_explicit_ml_submission_actions():
     assert role["AssignableScopes"] == [SCOPE]
     assert "Assign only at mlw-itcs355-u6688124" in role["Description"]
     actions = role["Actions"]
-    assert len(actions) == len(set(actions)) == 17
+    assert len(actions) == len(set(actions)) == 22
     suffixes = {a.removeprefix("Microsoft.MachineLearningServices/workspaces/") for a in actions}
     assert suffixes == {
         "read", "computes/read", "datastores/read", "jobs/read", "jobs/write",
@@ -133,6 +133,9 @@ def test_ci_role_has_only_explicit_ml_submission_actions():
         "modules/write",  # Azure required this during component registration in CI #2.
         "experiments/runs/read",  # Azure required this during job submission in CI #4.
         "experiments/runs/submit/action",  # Azure required this during job submission in CI #5.
+        # Reviewed draft additions; CI #7 did not identify the missing inner action.
+        "experiments/read", "experiments/write", "experiments/runs/write",
+        "metadata/artifacts/read", "metadata/artifacts/write",
         "environments/read", "environments/write", "environments/versions/read", "environments/versions/write",
     }
     assert all(a.startswith("Microsoft.MachineLearningServices/workspaces/") for a in actions)
