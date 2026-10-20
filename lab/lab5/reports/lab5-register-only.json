@@ -1,0 +1,116 @@
+{
+  "job_name": "lab5-register-only-4bec26f-20261014-01",
+  "studio_url": "https://ml.azure.com/runs/lab5-register-only-4bec26f-20261014-01?wsid=/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourcegroups/itcs355-u6688124/workspaces/mlw-itcs355-u6688124&tid=9bc585f9-a8b8-431c-9013-efa7b2b40cdf",
+  "status": "Failed",
+  "scope": "One registration-only command job using the latest completed training and gate outputs. No full pipeline or deployment.",
+  "submitted_at_utc": "2026-10-14T05:39:50.971330+00:00",
+  "accepted_at_utc": "2026-10-14T05:39:53.595696+00:00",
+  "terminal_observed_at_utc": "2026-10-14T05:45:58.909359+00:00",
+  "source_pipeline": "lab5-normal-4bec26f-20261013-02",
+  "source_commit": "4bec26f1a3e52886da8a74e3a1f34d1bff9e8277",
+  "pipeline_image": "itcs355u6688124.azurecr.io/itcs355-lab5@sha256:564040abcebe0fa9d0ff1702d1d5ec52e367657bc72ef78f762fcc72327e3e49",
+  "environment_reference": "azureml:/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.MachineLearningServices/workspaces/mlw-itcs355-u6688124/environments/CliV2AnonymousEnvironment/versions/f3d1a889960157fffcb8545ba3a1f5adf0d44a69401aff02228d145385037555",
+  "training_identity": "id-itcs355-u6688124-lab5-training",
+  "training_identity_client_id": "7e44580e-f307-411e-b25b-7dc7723710b4",
+  "input_paths": {
+    "training": "azureml://datastores/lab5_artifacts/paths/azureml/828e0fd2-ff18-4628-a86f-33d85c4c2f88/bundle/",
+    "gate": "azureml://datastores/lab5_artifacts/paths/azureml/68dc4572-3210-4ebd-9c0e-2c8d648e5cc4/decision/"
+  },
+  "gate": {
+    "stage": "evaluate",
+    "status": "pass",
+    "metric": "val_roc_auc",
+    "minimum": 0.8,
+    "score": 0.8444994217173845,
+    "training_record_sha256": "8b9318d8925da5ec6ff46b42e481bb8345d43008e2f965e15d7a8a76ac8adde1"
+  },
+  "preflight": {
+    "checked_at_utc": "2026-10-14T05:38:18.506966+00:00",
+    "model_versions": [],
+    "gate_matches_training_metrics": true,
+    "model_files_match_training_hashes": true
+  },
+  "failure": {
+    "source": "Azure Activity Log",
+    "event_at_utc": "2026-10-14T05:45:29.3511992Z",
+    "operation": "Microsoft.MachineLearningServices/workspaces/models/versions/write",
+    "status": "Failed",
+    "substatus": "Unauthorized",
+    "missing_action": "Microsoft.MachineLearningServices/workspaces/metadata/artifacts/read",
+    "correlation_id": "6d915b72-723d-4df3-a51d-c62c2d7ceba9",
+    "job_message": "REGISTER FAIL: Registration was not confirmed. Check the registry before retrying; the request may have created a version."
+  },
+  "registry_readback": {
+    "checked_at_utc": "2026-10-14T05:49:10.089977+00:00",
+    "versions": [
+      "1"
+    ],
+    "model_record": {
+      "name": "itcs355-u6688124-lab5",
+      "version": "1",
+      "type": "mlflow_model",
+      "model_uri": "azureml:itcs355-u6688124-lab5:1",
+      "path": "azureml://subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/workspaces/mlw-itcs355-u6688124/datastores/lab5_artifacts/paths/LocalUpload/2e989710172a0893e6b24a2b8a39ad1aaed7b0d8a20ebfb1f533a09b72786d85/model",
+      "tags": {
+        "course": "itcs355",
+        "student": "itcs355-u6688124",
+        "lab": "5",
+        "gate_metric": "val_roc_auc",
+        "gate_minimum": "0.8",
+        "seed": "20260101",
+        "training_record_sha256": "8b9318d8925da5ec6ff46b42e481bb8345d43008e2f965e15d7a8a76ac8adde1",
+        "model_sha256": "ebe4f91523f5b872a5290effb8484b59398756fecd97f8fe069e293e5d4def61",
+        "git_commit": "4bec26f1a3e52886da8a74e3a1f34d1bff9e8277",
+        "data_fingerprint": "422cccb9136e814061b83e4f041cff21ba7372c6f7fb0feb2c321555c6a6341f",
+        "dvc_hash": "1c886b512c8a5c9bf723da1cd119fc80.dir",
+        "val_roc_auc": "0.8444994217173845",
+        "val_pr_auc": "0.4044125077384774",
+        "test_roc_auc": "0.8466731943553135",
+        "test_pr_auc": "0.4598251404871057"
+      }
+    },
+    "model_files_match_source": true,
+    "model_files_sha256": {
+      "requirements.txt": "0a70832c98b7d903be2f7de381543e77f27137aa2f224291a01f0b482efb91b6",
+      "conda.yaml": "2a52a8363a850d7c89f9e67ddce59006422d1eb64c19a9f9337fb787ef9899db",
+      "model.pkl": "ebe4f91523f5b872a5290effb8484b59398756fecd97f8fe069e293e5d4def61",
+      "python_env.yaml": "78684e6b92addee523d4c6d4a10fed277333552a84c0c86ae85ffc06f230c46c",
+      "MLmodel": "66e6ff233d41521845948220e5877ecf8f9d938569460818e2a7fba70fdf96cf"
+    },
+    "interpretation": "Version 1 and matching files persisted, but the registration request failed. This is not a completed registration or proof of runtime model loading."
+  },
+  "registration_output": {
+    "path": "azureml://datastores/lab5_artifacts/paths/azureml/lab5-register-only-4bec26f-20261014-01/registered/",
+    "files": [],
+    "registration_json_exists": false
+  },
+  "final_compute": {
+    "checked_at_utc": "2026-10-14T05:50:43.008653+00:00",
+    "allocationState": "Steady",
+    "currentNodeCount": 0,
+    "targetNodeCount": 0
+  },
+  "staging_unchanged": true,
+  "staging": {
+    "latest_revision": "lab5-staging--sw3yomt",
+    "latest_ready_revision": "lab5-staging--sw3yomt",
+    "ingress_enabled": false,
+    "images": [
+      "mcr.microsoft.com/k8se/quickstart@sha256:3a4d93c34c6753f24765ab17a36f1754aee9b02082b7d9553d17697b9e8252c4"
+    ]
+  },
+  "submission_note": "The old temporary compiled YAML was gone, so the original component and environment were read from Azure. Two submission attempts failed on SDK reference formats before job creation. After normalizing environment and compute references, one command job was accepted and executed.",
+  "scope_checks": {
+    "full_pipeline_run": false,
+    "retrained": false,
+    "image_built_or_pushed": false,
+    "role_changes": false,
+    "deployed": false,
+    "git_commit_or_push": false
+  },
+  "next_step": "Review the missing artifact-read permission and how to handle the existing version 1 before any further registration attempt. Do not blindly rerun or fabricate registration.json.",
+  "screenshots": [
+    "screenshots/lab5-register-only-failed-2026-10-14.jpg",
+    "screenshots/lab5-model-version1-partial-registration-2026-10-14.jpg"
+  ]
+}

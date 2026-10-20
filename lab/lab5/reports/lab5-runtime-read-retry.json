@@ -1,0 +1,206 @@
+{
+  "checked_on": "2026-10-14",
+  "scope": "One approved runtime-role action, current-IP refresh, one deploy-only job, and one separately approved restart of the existing failed revision. No new revision, resource, training, registration, build, or Git publication.",
+  "source_commit": "4bec26f1a3e52886da8a74e3a1f34d1bff9e8277",
+  "role_change": {
+    "checked_at_utc": "2026-10-14T13:42:33.370491+00:00",
+    "role_writes": 1,
+    "role_id": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/providers/Microsoft.Authorization/roleDefinitions/e1c2d97d-16b0-5cbd-9b88-3599472cac81",
+    "role_name": "ITCS355 Lab5 Model Reader u6688124",
+    "added_action": "Microsoft.MachineLearningServices/workspaces/metadata/artifacts/read",
+    "before_actions": [
+      "Microsoft.MachineLearningServices/workspaces/read",
+      "Microsoft.MachineLearningServices/workspaces/models/read",
+      "Microsoft.MachineLearningServices/workspaces/models/versions/read"
+    ],
+    "after_actions": [
+      "Microsoft.MachineLearningServices/workspaces/read",
+      "Microsoft.MachineLearningServices/workspaces/models/read",
+      "Microsoft.MachineLearningServices/workspaces/models/versions/read",
+      "Microsoft.MachineLearningServices/workspaces/metadata/artifacts/read"
+    ],
+    "assignable_scopes": [
+      "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.MachineLearningServices/workspaces/mlw-itcs355-u6688124"
+    ],
+    "assignment_id": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.MachineLearningServices/workspaces/mlw-itcs355-u6688124/providers/Microsoft.Authorization/roleAssignments/5ebff1da-5ea0-5b07-9b5a-e7d965d1e975",
+    "assignment_unchanged": true,
+    "runtime_identity_only": true,
+    "description_updated_to_match": true,
+    "readback_matches": true,
+    "scope_limit": "Workspace-wide artifact metadata read, not restricted to model version 2. No artifact write, delete, secret-read, deployment, or RBAC action added."
+  },
+  "job": {
+    "name": "lab5-deploy-only-4bec26f-20261014-03",
+    "submission_attempts": 1,
+    "accepted_at_utc": "2026-10-14T13:44:25.000104+00:00",
+    "status": "Failed",
+    "failed_observed_at_utc": "2026-10-14T14:01:19.225365+00:00",
+    "error": "ReceivedTerminationSignal / MaxWallClockTimeExpired",
+    "timeout_seconds": 600,
+    "studio_duration_seconds": 666.278,
+    "duration_note": "Studio duration, not a billing calculation.",
+    "compute": "cpu-lab5",
+    "identity": "id-itcs355-u6688124-lab5-release",
+    "pipeline_image": "itcs355u6688124.azurecr.io/itcs355-lab5@sha256:564040abcebe0fa9d0ff1702d1d5ec52e367657bc72ef78f762fcc72327e3e49",
+    "serving_image": "itcs355u6688124.azurecr.io/itcs355-lab4@sha256:654ed915ca7c12f59b619979f3795c705b82eb2a9ee23620b520e185095c6bb8",
+    "registered_input": "azureml://datastores/lab5_artifacts/paths/azureml/lab5-register-only-4bec26f-20261014-02/registered/",
+    "deployment_output": "azureml://datastores/lab5_artifacts/paths/azureml/lab5-deploy-only-4bec26f-20261014-03/deployment/",
+    "registration_sha256": "737874896b1a1cb44242faed1a600a8d062a62ca01124de8d5a89391aebff860",
+    "model": "itcs355-u6688124-lab5:2",
+    "deployment_report_written": false
+  },
+  "local_ip_update": {
+    "field": "SERVING_ALLOWED_IP",
+    "file": "cloud.env",
+    "git_ignored_and_untracked": true,
+    "other_file_contents_unchanged": true,
+    "matched_current_public_ipv4_at_preflight": true,
+    "prefix_length": 32,
+    "ip_value_omitted": true
+  },
+  "operations": [
+    {
+      "time": "2026-10-14T13:51:20.9029651Z",
+      "operation": "Microsoft.App/containerApps/revisions/restart/action",
+      "status": "Succeeded",
+      "sub_status": "OK",
+      "correlation": "24456002-75c0-44b8-93ce-2a51dc2a6341"
+    },
+    {
+      "time": "2026-10-14T13:49:39.1156473Z",
+      "operation": "Microsoft.App/containerApps/write",
+      "status": "Succeeded",
+      "sub_status": "",
+      "correlation": "3cd76df0-9862-4421-bf5c-b5e1460e5ad8"
+    }
+  ],
+  "restart": {
+    "revision": "lab5-staging--0000001",
+    "attempts": 1,
+    "authority": "Separate explicit user approval for one restart only.",
+    "executed_by": "Logged-in operator; not the release identity or the deploy-only command.",
+    "activity_log_status": "Succeeded",
+    "succeeded_at_utc": "2026-10-14T13:51:20.9029651Z",
+    "correlation_id": "24456002-75c0-44b8-93ce-2a51dc2a6341",
+    "local_reporting_issue": "The response formatter raised AttributeError after the POST. No second POST was sent. A read-only Activity Log check confirmed the operation succeeded.",
+    "runtime_recovered": false
+  },
+  "http_checks": [
+    {
+      "at_utc": "2026-10-14T13:53:43.674426+00:00",
+      "path": "/health",
+      "status_code": 200,
+      "json_body": false,
+      "model_version_header": null,
+      "contract_passed": false
+    },
+    {
+      "at_utc": "2026-10-14T13:53:43.969829+00:00",
+      "path": "/ready",
+      "status_code": 404,
+      "json_body": false,
+      "model_version_header": null,
+      "contract_passed": false
+    }
+  ],
+  "http_limit": "The checks used the allowed current IP. These responses do not prove which backend handled them. No /predict request was sent.",
+  "post_restart_logs": {
+    "source": [
+      "ContainerAppConsoleLogs_CL",
+      "ContainerAppSystemLogs_CL"
+    ],
+    "revision": "lab5-staging--0000001",
+    "time_filter_start_utc": "2026-10-14T13:50:00Z",
+    "returned_rows": 0,
+    "limit": "No new rows were returned by the scoped query after job completion. This does not prove a new model load occurred or identify why the revision remained failed."
+  },
+  "final_readback": {
+    "checked_at_utc": "2026-10-14T14:03:12.242529+00:00",
+    "job_status": "Failed",
+    "deployment_output_files": [],
+    "role_actions": [
+      "Microsoft.MachineLearningServices/workspaces/read",
+      "Microsoft.MachineLearningServices/workspaces/models/read",
+      "Microsoft.MachineLearningServices/workspaces/models/versions/read",
+      "Microsoft.MachineLearningServices/workspaces/metadata/artifacts/read"
+    ],
+    "role_scope_matches": true,
+    "role_assignment_matches": true,
+    "app_provisioning_state": "Succeeded",
+    "latest_revision": "lab5-staging--0000001",
+    "latest_ready_revision": "lab5-staging--sw3yomt",
+    "revisions": [
+      {
+        "name": "lab5-staging--sw3yomt",
+        "createdTime": "2026-10-13T07:48:08+00:00",
+        "runningState": "RunningAtMaxScale",
+        "healthState": "Healthy",
+        "replicas": 1,
+        "trafficWeight": 0
+      },
+      {
+        "name": "lab5-staging--0000001",
+        "createdTime": "2026-10-14T13:23:06+00:00",
+        "runningState": "ActivationFailed",
+        "healthState": "None",
+        "replicas": 0,
+        "trafficWeight": 100
+      }
+    ],
+    "https_only": true,
+    "single_approved_ip_allow": true,
+    "compute": {
+      "currentNodeCount": 0,
+      "targetNodeCount": 0,
+      "allocationState": "Steady"
+    },
+    "model_versions": [
+      "2",
+      "1"
+    ],
+    "acr_admin_enabled": false
+  },
+  "scale_down_followup": {
+    "checked_at_utc": "2026-10-14T14:06:16.572625+00:00",
+    "compute_current": 0,
+    "compute_target": 0,
+    "revisions": [
+      {"name": "lab5-staging--sw3yomt", "replicas": 0, "running_state": "ScaledToZero"},
+      {"name": "lab5-staging--0000001", "replicas": 0, "running_state": "ActivationFailed"}
+    ],
+    "method": "Read-only ARM check; no HTTP request to the App was sent."
+  },
+  "interpretation": {
+    "confirmed": "The runtime role saved the missing read action. The App update and the one restart operation succeeded, but the existing revision stayed ActivationFailed and the job timed out without a deployment report.",
+    "not_proven": "The earlier permission error is not a new error from this retry. There is no fresh model-loading evidence establishing whether runtime access now works. Successful HTTP prediction, the end-to-end pipeline, and managed negative paths remain unverified.",
+    "automation_limit": "This attempt included an operator restart and is not proof of a fully automated pipeline.",
+    "cost_limit": "Compute returned to zero nodes. The placeholder had one replica at 14:03 UTC, then both App revisions had zero replicas at 14:06 UTC. Shared resources remain, so this is not zero total cloud cost.",
+    "next_step_not_applied": "Review a bounded recovery for the failed revision before another write. A fresh revision using the same image and model is a possible experiment, not a proven fix, and needs separate approval."
+  },
+  "screenshots": [
+    {
+      "path": "screenshots/lab5-runtime-model-reader-four-actions-2026-10-14.jpg",
+      "sha256": "cabb85cad7cbea8c0993b1fe5de4aa6a94c275755b04fe7560a66c89f424459b"
+    },
+    {
+      "path": "screenshots/lab5-deploy-only-runtime-retry-failed-2026-10-14.jpg",
+      "sha256": "c6b366117652274c09857c05cee01ed697606f70dbfda9cb2433b6266a1d0373"
+    }
+  ],
+  "changes_not_made": [
+    "Second restart",
+    "Additional job retry",
+    "New revision",
+    "New resource",
+    "New role assignment",
+    "Training/release role change",
+    "ACR admin enablement",
+    "New training",
+    "New model registration",
+    "Image build",
+    "Implementation change",
+    "Commit",
+    "Push"
+  ],
+  "tests": "Offline tests were not rerun because implementation did not change. Evidence validation and working-tree checks are separate from runtime readiness."
+}

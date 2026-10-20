@@ -17,7 +17,7 @@ from cloudlayer import lab5_scope as scope
 from cloudlayer.azure_staging import ACR_SERVER, validate_settings
 from cloudlayer.azure_storage import ARTIFACTS_DATASTORE, INPUTS_DATASTORE
 from scripts.evaluation_gate import MIN_ABSOLUTE, checked_auc
-from src.config import ENV_FILE, StagingConfig, load_staging
+from cloudlayer.azure_config import ENV_FILE, StagingConfig, load_staging
 
 SPEC = Path(__file__).resolve().parents[1] / "pipeline" / "pipeline.yaml"
 TYPES = {"file": "uri_file", "folder": "uri_folder", "string": "string", "number": "number"}

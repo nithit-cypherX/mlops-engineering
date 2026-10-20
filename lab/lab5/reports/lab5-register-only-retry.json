@@ -1,0 +1,116 @@
+{
+  "date": "2026-10-14",
+  "scope": "One register-only retry after the artifact-read permission fix. Reuse the latest completed training and gate outputs; leave version 1 unchanged.",
+  "job": {
+    "name": "lab5-register-only-4bec26f-20261014-02",
+    "type": "command",
+    "submission_attempts": 1,
+    "status": "Completed",
+    "submitted_at_utc": "2026-10-14T06:05:58.667610+00:00",
+    "accepted_at_utc": "2026-10-14T06:06:01.498469+00:00",
+    "completed_observed_at_utc": "2026-10-14T06:11:07.022145+00:00",
+    "studio_duration_seconds": 130.71,
+    "duration_note": "Studio job duration, not total elapsed time including compute startup or a billed-time calculation.",
+    "compute": "cpu-lab5",
+    "timeout_seconds": 600,
+    "image": "itcs355u6688124.azurecr.io/itcs355-lab5@sha256:564040abcebe0fa9d0ff1702d1d5ec52e367657bc72ef78f762fcc72327e3e49",
+    "environment_reference": "azureml:/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.MachineLearningServices/workspaces/mlw-itcs355-u6688124/environments/CliV2AnonymousEnvironment/versions/f3d1a889960157fffcb8545ba3a1f5adf0d44a69401aff02228d145385037555",
+    "training_identity_client_id": "7e44580e-f307-411e-b25b-7dc7723710b4",
+    "command": "python -m scripts.pipeline_step register --training-dir '${{inputs.training}}' --gate-report '${{inputs.gate}}/gate.json' --output-dir '${{outputs.registered}}'",
+    "source_commit": "4bec26f1a3e52886da8a74e3a1f34d1bff9e8277"
+  },
+  "source": {
+    "pipeline": "lab5-normal-4bec26f-20261013-02",
+    "pipeline_status": "Failed",
+    "note": "The original pipeline failed at registration; its training and gate child jobs completed.",
+    "input_paths": {
+      "training": "azureml://datastores/lab5_artifacts/paths/azureml/828e0fd2-ff18-4628-a86f-33d85c4c2f88/bundle/",
+      "gate": "azureml://datastores/lab5_artifacts/paths/azureml/68dc4572-3210-4ebd-9c0e-2c8d648e5cc4/decision/"
+    },
+    "gate": {
+      "stage": "evaluate",
+      "status": "pass",
+      "metric": "val_roc_auc",
+      "minimum": 0.8,
+      "score": 0.8444994217173845,
+      "training_record_sha256": "8b9318d8925da5ec6ff46b42e481bb8345d43008e2f965e15d7a8a76ac8adde1"
+    },
+    "files_sha256": {
+      "MLmodel": "66e6ff233d41521845948220e5877ecf8f9d938569460818e2a7fba70fdf96cf",
+      "conda.yaml": "2a52a8363a850d7c89f9e67ddce59006422d1eb64c19a9f9337fb787ef9899db",
+      "model.pkl": "ebe4f91523f5b872a5290effb8484b59398756fecd97f8fe069e293e5d4def61",
+      "python_env.yaml": "78684e6b92addee523d4c6d4a10fed277333552a84c0c86ae85ffc06f230c46c",
+      "requirements.txt": "0a70832c98b7d903be2f7de381543e77f27137aa2f224291a01f0b482efb91b6"
+    }
+  },
+  "result": {
+    "output_path": "azureml://datastores/lab5_artifacts/paths/azureml/lab5-register-only-4bec26f-20261014-02/registered/",
+    "output_files": [
+      "registration.json"
+    ],
+    "registration": {
+      "name": "itcs355-u6688124-lab5",
+      "version": "2",
+      "id": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.MachineLearningServices/workspaces/mlw-itcs355-u6688124/models/itcs355-u6688124-lab5/versions/2",
+      "model_uri": "azureml:itcs355-u6688124-lab5:2"
+    },
+    "checked_at_utc": "2026-10-14T06:12:48.296924+00:00",
+    "model_type": "mlflow_model",
+    "tags": {
+      "course": "itcs355",
+      "student": "itcs355-u6688124",
+      "lab": "5",
+      "gate_metric": "val_roc_auc",
+      "gate_minimum": "0.8",
+      "seed": "20260101",
+      "training_record_sha256": "8b9318d8925da5ec6ff46b42e481bb8345d43008e2f965e15d7a8a76ac8adde1",
+      "model_sha256": "ebe4f91523f5b872a5290effb8484b59398756fecd97f8fe069e293e5d4def61",
+      "git_commit": "4bec26f1a3e52886da8a74e3a1f34d1bff9e8277",
+      "data_fingerprint": "422cccb9136e814061b83e4f041cff21ba7372c6f7fb0feb2c321555c6a6341f",
+      "dvc_hash": "1c886b512c8a5c9bf723da1cd119fc80.dir",
+      "val_roc_auc": "0.8444994217173845",
+      "val_pr_auc": "0.4044125077384774",
+      "test_roc_auc": "0.8466731943553135",
+      "test_pr_auc": "0.4598251404871057"
+    },
+    "registry_readback_matches_registration": true,
+    "registered_files_match_source": true,
+    "version1_metadata_and_files_unchanged": true,
+    "model_versions": [
+      "2",
+      "1"
+    ],
+    "versions_1_and_2_reference_same_model_path": true,
+    "note": "Version 2 is a successful registration of the same trained model, not a new training run or a quality improvement."
+  },
+  "staging": {
+    "checked_at_utc": "2026-10-14T06:12:48.296924+00:00",
+    "unchanged": true,
+    "latest_revision": "lab5-staging--sw3yomt",
+    "latest_ready_revision": "lab5-staging--sw3yomt",
+    "ingress_enabled": false,
+    "images": [
+      "mcr.microsoft.com/k8se/quickstart@sha256:3a4d93c34c6753f24765ab17a36f1754aee9b02082b7d9553d17697b9e8252c4"
+    ]
+  },
+  "final_compute": {
+    "checked_at_utc": "2026-10-14T06:20:21.829192+00:00",
+    "allocationState": "Steady",
+    "currentNodeCount": 0,
+    "targetNodeCount": 0
+  },
+  "limits": {
+    "no_retraining": true,
+    "no_full_pipeline_retry": true,
+    "no_new_rbac_changes": true,
+    "no_build_or_image_push": true,
+    "no_deployment": true,
+    "no_commit_or_git_push": true,
+    "remaining": "Staging runtime model loading, the end-to-end managed pipeline, and negative-input/negative-gate managed runs still need verification.",
+    "cost_note": "Zero compute nodes does not remove storage, App, or other shared-resource costs."
+  },
+  "screenshots": [
+    "screenshots/lab5-register-only-completed-2026-10-14.jpg",
+    "screenshots/lab5-model-version2-registered-2026-10-14.jpg"
+  ]
+}

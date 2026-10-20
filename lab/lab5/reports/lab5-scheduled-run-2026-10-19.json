@@ -1,0 +1,122 @@
+{
+  "check": "lab5_task3_one_scheduled_pipeline_run",
+  "date": "2026-10-19",
+  "status": "completed_schedule_disabled",
+  "source": {
+    "job": "lab5-ci-39226985486-1",
+    "commit": "5c1483ed9000a18c7722cafecba9aa07d07d5048",
+    "pipeline_image_digest": "sha256:8fb066fcf9842230510d03c0b06f5eba1b6acd00c0804a2697b96b873c3e4e34",
+    "registered_component_versions_reused": 6,
+    "gate_minimum": 0.8,
+    "force_rerun": true,
+    "continue_on_step_failure": false,
+    "compute": "cpu-lab5",
+    "compute_min_instances": 0,
+    "compute_max_instances": 1
+  },
+  "schedule": {
+    "name": "lab5-weekly-retraining",
+    "created_at_utc": "2026-10-19T13:41:14.770341+00:00",
+    "frequency": "week",
+    "interval": 1,
+    "week_day": "monday",
+    "time_zone": "SE Asia Standard Time",
+    "start_time_local": "2026-10-19T20:54:00",
+    "due_time_local": "2026-10-19T20:56:00+07:00",
+    "due_time_utc": "2026-10-19T13:56:00+00:00",
+    "end_time_local": "2026-10-19T21:16:00",
+    "is_enabled_after_creation": true,
+    "is_enabled_after_first_job_observed": false,
+    "disabled_at_utc": "2026-10-19T13:56:49.984849+00:00",
+    "scheduled_occurrences_inside_window": 1,
+    "manual_trigger_used": false,
+    "job_probe_tag": "lab5-weekly-retraining-20261019"
+  },
+  "ip_configuration": {
+    "current_public_ipv4_used_as_single_32": true,
+    "injected_into_private_in_memory_copy_only": true,
+    "matched_app_allowlist_before_run": false,
+    "manual_app_update_performed": false,
+    "note": "The approved deploy step receives the current /32. No IP is stored in this report or the Git drafts."
+  },
+  "job": {
+    "name": "lab5-weekly-retraining-08584091887251460984817963235CU16",
+    "display_name": "lab5-weekly-retraining-20261019T135600Z",
+    "observed_at_utc": "2026-10-19T13:56:49.984998+00:00",
+    "status_at_first_observation": "Running",
+    "matching_job_count": 1,
+    "listed_in_schedule_jobs_history": true,
+    "final_status": "Completed",
+    "completed_status_observed_at_utc": "2026-10-19T14:07:41.690783+00:00",
+    "children":
+    [
+      {
+        "name": "74f84c00-663d-4a47-a0ad-984099f833d7",
+        "display_name": "ingest",
+        "status": "Completed"
+      },
+      {
+        "name": "a2160f54-c4dd-4d1d-9a2d-54bb1d4179c0",
+        "display_name": "validate",
+        "status": "Completed"
+      },
+      {
+        "name": "fd8543c7-db34-4c9b-866d-4e341b5beddc",
+        "display_name": "train",
+        "status": "Completed"
+      },
+      {
+        "name": "1bc9f2d6-7a88-4b00-bf77-5e4db56c3492",
+        "display_name": "evaluate",
+        "status": "Completed"
+      },
+      {
+        "name": "b4431077-5e12-4e90-b8b5-7f8394c22f78",
+        "display_name": "register",
+        "status": "Completed"
+      },
+      {
+        "name": "c975a7b1-3fef-4c49-8259-8c8f49c0ad70",
+        "display_name": "deploy_staging",
+        "status": "Completed"
+      }
+    ]
+  },
+  "app_before": {
+    "revision": "lab5-staging--0000003",
+    "model_version": "4"
+  },
+  "app_after": {
+    "checked_at_utc": "2026-10-19T14:07:52.590957+00:00",
+    "provisioning_state": "Succeeded",
+    "revision": "lab5-staging--0000004",
+    "model_version": "5",
+    "allow_rule_count": 1,
+    "approved_ip_matches": true
+  },
+  "final_readback": {
+    "checked_at_utc": "2026-10-19T14:09:47.090086+00:00",
+    "schedule_enabled": false,
+    "job_status": "Completed",
+    "compute_current_nodes": 1,
+    "compute_target_nodes": 0,
+    "compute_min_nodes": 0,
+    "compute_max_nodes": 1,
+    "compute_idle_time_before_scale_down": "PT2M"
+  },
+  "compute_scaled_down": {
+    "checked_at_utc": "2026-10-19T14:12:13.789488+00:00",
+    "current_nodes": 0,
+    "target_nodes": 0
+  },
+  "screenshots": [
+    "screenshots/lab5-schedule-enabled-2026-10-19.jpg",
+    "screenshots/lab5-schedule-disabled-2026-10-19.jpg",
+    "screenshots/lab5-scheduled-pipeline-completed-2026-10-19.jpg"
+  ],
+  "limitations": [
+    "The same 6000-row data is reused; this tests automation, not accuracy improvement.",
+    "The local draft dates remain examples; this approved test used an in-memory timing override.",
+    "The end time limits new triggers, not the lifetime of an already submitted job."
+  ]
+}

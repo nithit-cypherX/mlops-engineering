@@ -1,0 +1,87 @@
+{
+  "checked_at_utc": "2026-10-18 03:29:22 UTC",
+  "source_commit": "1fb7a9f28ef6067f9bfc335b8a78b7e78facede3",
+  "ci_run": {
+    "number": 3,
+    "id": 39093305091,
+    "attempt": 1,
+    "branch": "main",
+    "url": "https://github.com/nithit-cypherX/mlops-engineering/actions/runs/39093305091",
+    "job_id": 117574422654,
+    "conclusion": "failure",
+    "job_duration_seconds": 323,
+    "dispatches_in_this_attempt": 1
+  },
+  "checks": {
+    "passed": 491,
+    "warnings": 1637,
+    "pytest_seconds": 21.99,
+    "ruff": "passed",
+    "source": "CI #3 rendered log"
+  },
+  "completed_steps": [
+    "offline tests and lint",
+    "hash-checked dataset restore",
+    "linux/amd64 image build and offline image checks",
+    "OIDC login",
+    "ACR image push"
+  ],
+  "failed_step": "Submit once and wait for the managed result",
+  "error": {
+    "type": "ClientAuthenticationError",
+    "code": "UserError",
+    "operation": "Microsoft.MachineLearningServices/workspaces/modules/read",
+    "phase": "component registration before parent job creation",
+    "prior_modules_write_error_reported": false
+  },
+  "image": {
+    "tag": "itcs355u6688124.azurecr.io/itcs355-lab5:1fb7a9f28ef6067f9bfc335b8a78b7e78facede3-ci-39093305091-1",
+    "digest": "sha256:0d649e75dfbff149f9d398d088dec18ba96de3b90ced8775f68753cc6ec61181",
+    "build_seconds": 139,
+    "push_seconds": 54
+  },
+  "post_run_checks": {
+    "managed_job": {
+      "name": "lab5-ci-39093305091-1",
+      "lookup": "JobNotFound"
+    },
+    "compute": {
+      "current": 0,
+      "name": "cpu-lab5",
+      "state": "Succeeded",
+      "target": 0
+    },
+    "staging": {
+      "latest": "lab5-staging--0000002",
+      "name": "lab5-staging",
+      "ready": "lab5-staging--0000002",
+      "state": "Succeeded",
+      "traffic": [
+        {
+          "latestRevision": true,
+          "weight": 100
+        }
+      ]
+    },
+    "registered_model_versions": [
+      "3",
+      "2",
+      "1"
+    ],
+    "lab5_ci_enabled": "false",
+    "flag_restoration": "Restored after the enablement guard passed, before the run finished; verified false again after failure."
+  },
+  "boundaries": {
+    "no_retry": true,
+    "no_role_changes": true,
+    "no_fix_applied_after_failure": true,
+    "no_managed_training_or_deployment_from_this_run": true,
+    "preparatory_aml_assets_not_audited": true,
+    "no_commit_or_git_push": true,
+    "app_ip_allowlist_not_updated": true
+  },
+  "screenshots": [
+    "screenshots/lab5-ci-third-run-modules-read-failed-2026-10-18.jpg",
+    "screenshots/lab5-ci-disabled-during-third-run-2026-10-18.jpg"
+  ]
+}

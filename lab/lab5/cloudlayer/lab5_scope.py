@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from src.config import StagingConfig
+from cloudlayer.azure_config import StagingConfig
 
 SUBSCRIPTION = "d9385e82-8bee-4612-8a76-967c241112c8"
 GROUP = "itcs355-u6688124"

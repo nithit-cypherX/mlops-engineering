@@ -1,0 +1,374 @@
+{
+  "result": "expected_gate_rejection_verified",
+  "pipeline_status": "Failed",
+  "explanation": "The managed gate rejected validation ROC-AUC below 0.90. This expected failure is the successful outcome of this negative test, not a successful training-and-deployment pipeline.",
+  "submission": {
+    "job_name": "lab5-negative-gate-aa6a4cd-20261015-01",
+    "submission_attempts": 1,
+    "submitted_at_utc": "2026-10-15T06:32:49.507363+00:00",
+    "draft_sha256": "1fbdccba34aeaba52fd52987dd3fe7723eaebf8dec40a128f98cb459edd5d7d7",
+    "source_commit": "aa6a4cdea8da1529fa0f70de529b782ed80c0a46",
+    "pipeline_image": "itcs355u6688124.azurecr.io/itcs355-lab5@sha256:95e543c2a16d4325aa65e75b1a20624e8c09dec67ef2975d5a9acd20e8b70463",
+    "submission_working_directory": "/home/nirvana/ml-od",
+    "current_ip_matches_approved_draft": true,
+    "ip_value_omitted": true,
+    "model_versions_before": [
+      "1",
+      "2",
+      "3"
+    ],
+    "baseline_revision": "lab5-staging--0000002",
+    "baseline_model_version": "3",
+    "baseline_traffic_weight": 100,
+    "baseline_serving_image": "itcs355u6688124.azurecr.io/itcs355-lab4@sha256:654ed915ca7c12f59b619979f3795c705b82eb2a9ee23620b520e185095c6bb8",
+    "baseline_compute_current": 0,
+    "outcome": "accepted",
+    "accepted_at_utc": "2026-10-15T06:33:10.864836+00:00",
+    "status": "NotStarted",
+    "studio_url": "https://ml.azure.com/runs/lab5-negative-gate-aa6a4cd-20261015-01?wsid=/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourcegroups/itcs355-u6688124/workspaces/mlw-itcs355-u6688124&tid=9bc585f9-a8b8-431c-9013-efa7b2b40cdf"
+  },
+  "draft": {
+    "changed_from_normal_run": [
+      "name",
+      "inputs.gate_minimum"
+    ],
+    "sha256": "1fbdccba34aeaba52fd52987dd3fe7723eaebf8dec40a128f98cb459edd5d7d7",
+    "gate_minimum": 0.9,
+    "normal_gate_floor_unchanged": 0.8,
+    "six_steps_and_handoffs_unchanged": true,
+    "timeout_per_step_seconds": 600
+  },
+  "offline_check_before_submission": {
+    "status": "expected_rejection_verified",
+    "exit_code": 1,
+    "stderr": "GATE FAIL: val_roc_auc=0.8444994217173845 < minimum 0.9",
+    "gate_json_created": false,
+    "gate_output_directory_empty": true,
+    "metrics_sha256_unchanged_after_check": true,
+    "actual_cli_invocations": 1
+  },
+  "preflight": {
+    "started_at_utc": "2026-10-15T06:32:08.765981+00:00",
+    "scope": "Read-only draft, IP, compute/App, image and job-name checks.",
+    "checks": {
+      "local_draft": {
+        "passed": true,
+        "draft_sha256": "1fbdccba34aeaba52fd52987dd3fe7723eaebf8dec40a128f98cb459edd5d7d7",
+        "job": "lab5-negative-gate-aa6a4cd-20261015-01",
+        "source_commit": "aa6a4cdea8da1529fa0f70de529b782ed80c0a46",
+        "six_step_limits_seconds": 600,
+        "inputs_unchanged": true,
+        "private_modes_unchanged": true
+      },
+      "current_ip": {
+        "passed": true,
+        "matches_config_and_draft": true,
+        "prefix_length": 32
+      },
+      "compute": {
+        "passed": true,
+        "name": "cpu-lab5",
+        "provisioning_state": "Succeeded",
+        "min_instances": 0,
+        "max_instances": 1,
+        "current_nodes": 0,
+        "target_nodes": 0,
+        "allocation_state": "Steady",
+        "identities": {
+          "training": "attached; client ID matches draft",
+          "release": "attached; client ID matches draft"
+        }
+      },
+      "app": {
+        "passed": true,
+        "name": "lab5-staging",
+        "state": "Succeeded",
+        "revision": "lab5-staging--0000002",
+        "running_state": "ScaledToZero",
+        "health": "Healthy",
+        "replicas": 0,
+        "traffic_weight": 100,
+        "model_version": "3",
+        "serving_image_matches": true,
+        "https_only": true,
+        "approved_ip_matches": true,
+        "replica_bounds": [
+          0,
+          1
+        ],
+        "shared_environment_ready": true
+      },
+      "model_versions": {
+        "passed": true,
+        "versions": [
+          "1",
+          "2",
+          "3"
+        ]
+      },
+      "pipeline_image": {
+        "passed": true,
+        "image": "itcs355u6688124.azurecr.io/itcs355-lab5@sha256:95e543c2a16d4325aa65e75b1a20624e8c09dec67ef2975d5a9acd20e8b70463",
+        "digest_matches": true,
+        "platform": "linux/amd64",
+        "read_enabled": true
+      },
+      "serving_image": {
+        "passed": true,
+        "image": "itcs355u6688124.azurecr.io/itcs355-lab4@sha256:654ed915ca7c12f59b619979f3795c705b82eb2a9ee23620b520e185095c6bb8",
+        "digest_matches": true,
+        "platform": "linux/amd64",
+        "read_enabled": true
+      },
+      "existing_pipeline_environment": {
+        "passed": true,
+        "name": "CliV2AnonymousEnvironment",
+        "version": "4d420d5324bb262c6921ff9f9f11aad79bbbceb935a8fdcd514ec2ca3ef25229",
+        "image_matches_draft": true
+      },
+      "planned_job_name": {
+        "passed": true,
+        "name": "lab5-negative-gate-aa6a4cd-20261015-01",
+        "exists": false
+      }
+    },
+    "blockers": [],
+    "azure_configuration_writes": 0,
+    "pipeline_submissions": 0,
+    "app_http_requests": 0,
+    "ip_value_omitted": true,
+    "completed_at_utc": "2026-10-15T06:32:27.512791+00:00",
+    "preflight_passed": true,
+    "repository_and_configuration_unchanged": true,
+    "limitations": [
+      "Snapshot only: quota/capacity, actual identity access and pipeline execution are not proven by metadata reads.",
+      "The negative-gate run is expected to train then fail evaluation; register and deploy must not execute. This preflight does not submit it.",
+      "No new smoke test or load test; the App endpoint was not requested."
+    ]
+  },
+  "managed_gate_error": {
+    "file": "evaluate-logs/artifacts/user_logs/std_log.txt",
+    "sha256": "a33f566f40f2d20668a3c6a8d7c204c3f8e2369980df9146341d1be53434b5a5",
+    "gate_lines": [
+      "GATE FAIL: val_roc_auc=0.8444994217173845 < minimum 0.9"
+    ],
+    "exit_code": 1,
+    "exit_code_source": "Azure Studio evaluate job Status messages"
+  },
+  "small_outputs": {
+    "ingest": [
+      {
+        "blob_name": "azureml/46c2bf20-509a-4b7d-acfc-6e40a3427e41/raw_data/ingest.json",
+        "sha256": "d78249b8a49a1e1208ad04ed04e41c8f7cd2744340c2a27f89c09ffac5c1fc41",
+        "data": {
+          "stage": "ingest",
+          "source_file": "sensors.csv",
+          "sha256": "422cccb9136e814061b83e4f041cff21ba7372c6f7fb0feb2c321555c6a6341f",
+          "bytes": 321437
+        }
+      }
+    ],
+    "validate": [
+      {
+        "blob_name": "azureml/31ac4865-8678-496c-9bef-44b2d4bd90b1/validated/validation.json",
+        "sha256": "804be47b9b368f90547e3ac9f3c2cebb59f20192a3d00764efea7a82d79b1362",
+        "data": {
+          "stage": "validate",
+          "status": "pass",
+          "sha256": "422cccb9136e814061b83e4f041cff21ba7372c6f7fb0feb2c321555c6a6341f",
+          "bytes": 321437,
+          "rows": 6000
+        }
+      }
+    ],
+    "train": [
+      {
+        "blob_name": "azureml/c527ea03-d6da-4c1f-8e83-5496ac8ed02e/bundle/metrics.json",
+        "sha256": "0e70ef17e1e78338e11ec5948de1d4ec05b121a6223a7cb9b2d55a35c26bc850",
+        "data": {
+          "seed": 20260101,
+          "python_hash_seed": 20260101,
+          "params": {
+            "bootstrap": true,
+            "ccp_alpha": 0.0,
+            "class_weight": null,
+            "criterion": "gini",
+            "max_depth": 12,
+            "max_features": "sqrt",
+            "max_leaf_nodes": null,
+            "max_samples": null,
+            "min_impurity_decrease": 0.0,
+            "min_samples_leaf": 10,
+            "min_samples_split": 2,
+            "min_weight_fraction_leaf": 0.0,
+            "monotonic_cst": null,
+            "n_estimators": 100,
+            "n_jobs": -1,
+            "oob_score": false,
+            "random_state": 20260101,
+            "verbose": 0,
+            "warm_start": false
+          },
+          "features": [
+            "temp_c",
+            "vibration_mm_s",
+            "pressure_kpa",
+            "hours_since_service",
+            "load_pct",
+            "ambient_humidity"
+          ],
+          "data_fingerprint": "422cccb9136e814061b83e4f041cff21ba7372c6f7fb0feb2c321555c6a6341f",
+          "dvc_hash": "1c886b512c8a5c9bf723da1cd119fc80.dir",
+          "git_commit": "aa6a4cdea8da1529fa0f70de529b782ed80c0a46",
+          "git_commit_source": "supplied",
+          "split_strategy": "group_by_machine_id",
+          "split_rows": {
+            "train": 3600,
+            "val": 1200,
+            "test": 1200
+          },
+          "package_versions": {
+            "scikit-learn": "1.8.0",
+            "numpy": "2.4.4",
+            "pandas": "2.3.3",
+            "cloudpickle": "3.1.2",
+            "mlflow": "2.22.5"
+          },
+          "val_roc_auc": 0.8444994217173845,
+          "val_pr_auc": 0.4044125077384774,
+          "test_roc_auc": 0.8466731943553135,
+          "test_pr_auc": 0.4598251404871057,
+          "model_files_sha256": {
+            "MLmodel": "bf3ac15634965ddf46c3ede949e7547766498255589531834f7e3abe4134cfa0",
+            "conda.yaml": "2a52a8363a850d7c89f9e67ddce59006422d1eb64c19a9f9337fb787ef9899db",
+            "model.pkl": "ebe4f91523f5b872a5290effb8484b59398756fecd97f8fe069e293e5d4def61",
+            "python_env.yaml": "78684e6b92addee523d4c6d4a10fed277333552a84c0c86ae85ffc06f230c46c",
+            "requirements.txt": "0a70832c98b7d903be2f7de381543e77f27137aa2f224291a01f0b482efb91b6"
+          }
+        }
+      }
+    ],
+    "evaluate": []
+  },
+  "gate_json_created": false,
+  "register_and_deploy": {
+    "child_jobs_created": false,
+    "basis": "The completed parent lists only ingest, validate, train and evaluate; the six-step draft still includes dependent register/deploy steps."
+  },
+  "readback_after": {
+    "checked_at_utc": "2026-10-15T06:41:53.429646+00:00",
+    "job_name": "lab5-negative-gate-aa6a4cd-20261015-01",
+    "pipeline_status": "Failed",
+    "steps": [
+      {
+        "name": "46c2bf20-509a-4b7d-acfc-6e40a3427e41",
+        "step": "ingest",
+        "status": "Completed"
+      },
+      {
+        "name": "31ac4865-8678-496c-9bef-44b2d4bd90b1",
+        "step": "validate",
+        "status": "Completed"
+      },
+      {
+        "name": "c527ea03-d6da-4c1f-8e83-5496ac8ed02e",
+        "step": "train",
+        "status": "Completed"
+      },
+      {
+        "name": "174800a5-5f0d-42e0-bc93-f80665bce656",
+        "step": "evaluate",
+        "status": "Failed"
+      }
+    ],
+    "downstream_child_jobs_created": false,
+    "model_versions_before": [
+      "1",
+      "2",
+      "3"
+    ],
+    "model_versions_after": [
+      "1",
+      "2",
+      "3"
+    ],
+    "app": {
+      "name": "lab5-staging",
+      "state": "Succeeded",
+      "revision": "lab5-staging--0000002",
+      "model_version": "3",
+      "health": "Healthy",
+      "running_state": "ScaledToZero",
+      "replicas": 0,
+      "traffic_weight": 100
+    },
+    "checks": {
+      "model_versions_unchanged": true,
+      "revision_unchanged": true,
+      "model_version_unchanged": true,
+      "traffic_unchanged": true,
+      "serving_image_unchanged": true,
+      "healthy_active_revision": true,
+      "https_only": true,
+      "allowlist_unchanged": true,
+      "scale_zero_to_one": true
+    },
+    "compute": {
+      "allocationState": "Steady",
+      "currentNodeCount": 1,
+      "targetNodeCount": 1
+    },
+    "app_http_requests": 0,
+    "azure_configuration_writes": 0
+  },
+  "final_compute_observation": {
+    "observed_at_utc": "2026-10-15T06:46:09.667959+00:00",
+    "job_name": "lab5-negative-gate-aa6a4cd-20261015-01",
+    "status": "Failed",
+    "steps": [
+      {
+        "name": "46c2bf20-509a-4b7d-acfc-6e40a3427e41",
+        "step": "ingest",
+        "status": "Completed"
+      },
+      {
+        "name": "31ac4865-8678-496c-9bef-44b2d4bd90b1",
+        "step": "validate",
+        "status": "Completed"
+      },
+      {
+        "name": "c527ea03-d6da-4c1f-8e83-5496ac8ed02e",
+        "step": "train",
+        "status": "Completed"
+      },
+      {
+        "name": "174800a5-5f0d-42e0-bc93-f80665bce656",
+        "step": "evaluate",
+        "status": "Failed"
+      }
+    ],
+    "compute": {
+      "allocationState": "Steady",
+      "currentNodeCount": 0,
+      "targetNodeCount": 0
+    }
+  },
+  "screenshots": [
+    {
+      "path": "screenshots/lab5-negative-gate-aa6a4cd-2026-10-15.jpg",
+      "sha256": "42d5b93e7485c901b5d4f7cb7e06aa2b592670f5313e292439e4aa9e61176954"
+    },
+    {
+      "path": "screenshots/lab5-negative-gate-error-2026-10-15.jpg",
+      "sha256": "f4b542146d548fd4ce7bc5c70c167d94c17d1052cf3fed56a5213b1c162d0a49"
+    }
+  ],
+  "limits": [
+    "One managed submission, no retry, new build, role change, commit or Git push.",
+    "The full negative run trained once using the same data/settings; it was not an evaluate-only run.",
+    "No App HTTP request was sent in this test.",
+    "No model binary was downloaded for this evidence; named JSON outputs and evaluate logs were inspected.",
+    "Compute returned to zero nodes; storage and other shared resources remain, so this is not a zero-cost claim.",
+    "This proves the managed negative-gate path, not rejection of invalid input data."
+  ]
+}

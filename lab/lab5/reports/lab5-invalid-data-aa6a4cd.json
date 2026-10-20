@@ -1,0 +1,296 @@
+{
+  "result": "expected_data_contract_rejection_verified",
+  "pipeline_status": "Failed",
+  "explanation": "The copied CSV contains one load_pct value of 250.0. Ingest completed; validate rejected it because the allowed range is 0 to 100. This expected failure proves that this managed run stopped before training.",
+  "submission": {
+    "job_name": "lab5-invalid-data-aa6a4cd-20261015-01",
+    "submission_attempts": 1,
+    "submitted_at_utc": "2026-10-15T07:02:57.532816+00:00",
+    "draft_sha256": "839dfa0631cf42aaec4c22ccc7a908db16c868825180c09ba65a93f04a69a3ed",
+    "source_commit": "aa6a4cdea8da1529fa0f70de529b782ed80c0a46",
+    "pipeline_image": "itcs355u6688124.azurecr.io/itcs355-lab5@sha256:95e543c2a16d4325aa65e75b1a20624e8c09dec67ef2975d5a9acd20e8b70463",
+    "submission_working_directory": "/home/nirvana/ml-od",
+    "fixture_sha256": "8e88fc4d5939d3a1427479485d0c87105b4bae8cd17d9d98c7a402fd8a1c1abf",
+    "original_raw_sha256": "422cccb9136e814061b83e4f041cff21ba7372c6f7fb0feb2c321555c6a6341f",
+    "expected_failure": "validate: load_pct outside plausible range [0.0, 100.0]",
+    "current_ip_matches_approved_draft": true,
+    "ip_value_omitted": true,
+    "model_versions_before": [
+      "1",
+      "2",
+      "3"
+    ],
+    "baseline_revision": "lab5-staging--0000002",
+    "baseline_model_version": "3",
+    "baseline_traffic_weight": 100,
+    "baseline_serving_image": "itcs355u6688124.azurecr.io/itcs355-lab4@sha256:654ed915ca7c12f59b619979f3795c705b82eb2a9ee23620b520e185095c6bb8",
+    "baseline_compute_current": 0,
+    "outcome": "accepted",
+    "accepted_at_utc": "2026-10-15T07:03:26.728742+00:00",
+    "status": "NotStarted",
+    "studio_url": "https://ml.azure.com/runs/lab5-invalid-data-aa6a4cd-20261015-01?wsid=/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourcegroups/itcs355-u6688124/workspaces/mlw-itcs355-u6688124&tid=9bc585f9-a8b8-431c-9013-efa7b2b40cdf"
+  },
+  "draft": {
+    "changed_from_normal_run": [
+      "name",
+      "inputs.raw_data.path"
+    ],
+    "sha256": "839dfa0631cf42aaec4c22ccc7a908db16c868825180c09ba65a93f04a69a3ed",
+    "gate_minimum": 0.8,
+    "six_steps_and_handoffs_unchanged": true,
+    "timeout_per_step_seconds": 600
+  },
+  "fixture": {
+    "rows": 6000,
+    "changed_cells": 1,
+    "reading_id": 0,
+    "column": "load_pct",
+    "before": 95.792,
+    "after": 250.0,
+    "sha256": "8e88fc4d5939d3a1427479485d0c87105b4bae8cd17d9d98c7a402fd8a1c1abf",
+    "original_sha256": "422cccb9136e814061b83e4f041cff21ba7372c6f7fb0feb2c321555c6a6341f",
+    "original_unchanged": true,
+    "dvc_metadata_sha256": "f624901d8d2767418a05c9021b4c62ed48795cc7f7766e0112163c6596e65268",
+    "note": "Temporary corrupted test copy, not a new DVC dataset version."
+  },
+  "offline_check_before_submission": {
+    "execution": "Existing CLI main entry point, in process, under offline guards",
+    "ingest": {
+      "exit_code": 0,
+      "stdout": "{\"stage\": \"ingest\", \"source_file\": \"sensors-invalid-load.csv\", \"sha256\": \"8e88fc4d5939d3a1427479485d0c87105b4bae8cd17d9d98c7a402fd8a1c1abf\", \"bytes\": 321436}\n",
+      "stderr": ""
+    },
+    "validate": {
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "VALIDATE FAIL: load_pct outside plausible range [0.0, 100.0]\n"
+    },
+    "ingest_bytes_match_fixture": true,
+    "validated_output_created": false,
+    "cli_entry_point_calls_this_check": 2
+  },
+  "preflight": {
+    "started_at_utc": "2026-10-15T07:01:34.193863+00:00",
+    "scope": "Read-only draft, IP, compute/App, image and job-name checks.",
+    "checks": {
+      "local_draft": {
+        "passed": true,
+        "draft_sha256": "839dfa0631cf42aaec4c22ccc7a908db16c868825180c09ba65a93f04a69a3ed",
+        "job": "lab5-invalid-data-aa6a4cd-20261015-01",
+        "source_commit": "aa6a4cdea8da1529fa0f70de529b782ed80c0a46",
+        "six_step_limits_seconds": 600,
+        "inputs_unchanged": true,
+        "private_modes_unchanged": true
+      },
+      "current_ip": {
+        "passed": true,
+        "matches_config_and_draft": true,
+        "prefix_length": 32
+      },
+      "compute": {
+        "passed": true,
+        "name": "cpu-lab5",
+        "provisioning_state": "Succeeded",
+        "min_instances": 0,
+        "max_instances": 1,
+        "current_nodes": 0,
+        "target_nodes": 0,
+        "allocation_state": "Steady",
+        "identities": {
+          "training": "attached; client ID matches draft",
+          "release": "attached; client ID matches draft"
+        }
+      },
+      "app": {
+        "passed": true,
+        "name": "lab5-staging",
+        "state": "Succeeded",
+        "revision": "lab5-staging--0000002",
+        "running_state": "ScaledToZero",
+        "health": "Healthy",
+        "replicas": 0,
+        "traffic_weight": 100,
+        "model_version": "3",
+        "serving_image_matches": true,
+        "https_only": true,
+        "approved_ip_matches": true,
+        "replica_bounds": [
+          0,
+          1
+        ],
+        "shared_environment_ready": true
+      },
+      "model_versions": {
+        "passed": true,
+        "versions": [
+          "1",
+          "2",
+          "3"
+        ]
+      },
+      "pipeline_image": {
+        "passed": true,
+        "image": "itcs355u6688124.azurecr.io/itcs355-lab5@sha256:95e543c2a16d4325aa65e75b1a20624e8c09dec67ef2975d5a9acd20e8b70463",
+        "digest_matches": true,
+        "platform": "linux/amd64",
+        "read_enabled": true
+      },
+      "serving_image": {
+        "passed": true,
+        "image": "itcs355u6688124.azurecr.io/itcs355-lab4@sha256:654ed915ca7c12f59b619979f3795c705b82eb2a9ee23620b520e185095c6bb8",
+        "digest_matches": true,
+        "platform": "linux/amd64",
+        "read_enabled": true
+      },
+      "existing_pipeline_environment": {
+        "passed": true,
+        "name": "CliV2AnonymousEnvironment",
+        "version": "4d420d5324bb262c6921ff9f9f11aad79bbbceb935a8fdcd514ec2ca3ef25229",
+        "image_matches_draft": true
+      },
+      "planned_job_name": {
+        "passed": true,
+        "name": "lab5-invalid-data-aa6a4cd-20261015-01",
+        "exists": false
+      }
+    },
+    "blockers": [],
+    "azure_configuration_writes": 0,
+    "pipeline_submissions": 0,
+    "app_http_requests": 0,
+    "ip_value_omitted": true,
+    "completed_at_utc": "2026-10-15T07:02:12.010919+00:00",
+    "preflight_passed": true,
+    "repository_and_configuration_unchanged": true,
+    "limitations": [
+      "Snapshot only: quota/capacity, actual identity access and pipeline execution are not proven by metadata reads.",
+      "The invalid-data run must fail validation after ingest; train, evaluate, register and deploy must not execute. This preflight does not submit it.",
+      "No new smoke test or load test; the App endpoint was not requested."
+    ]
+  },
+  "managed_validation_error": {
+    "file": "validate-logs/artifacts/user_logs/std_log.txt",
+    "sha256": "8ab3d2ac1afbbc8c9eeb3b9f427f831999557b44404ae4628ff6630e88889fd7",
+    "validation_lines": [
+      "VALIDATE FAIL: load_pct outside plausible range [0.0, 100.0]"
+    ],
+    "exit_code": 1,
+    "exit_code_source": "Azure Studio validate job Status messages"
+  },
+  "small_outputs": {
+    "ingest": [
+      {
+        "blob_name": "azureml/8695d59c-d0c9-424a-99f8-318e9af91ee8/raw_data/ingest.json",
+        "sha256": "f8fcbee045fd2a25dc6d8cc4e0b03d006485d55815ca602c90a6cfe11407559f",
+        "data": {
+          "stage": "ingest",
+          "source_file": "sensors-invalid-load.csv",
+          "sha256": "8e88fc4d5939d3a1427479485d0c87105b4bae8cd17d9d98c7a402fd8a1c1abf",
+          "bytes": 321436
+        }
+      }
+    ],
+    "validate": []
+  },
+  "validation_json_created": false,
+  "downstream_steps": {
+    "train": "no child job created",
+    "evaluate": "no child job created",
+    "register": "no child job created",
+    "deploy_staging": "no child job created"
+  },
+  "readback_after": {
+    "checked_at_utc": "2026-10-15T07:11:10.006108+00:00",
+    "job_name": "lab5-invalid-data-aa6a4cd-20261015-01",
+    "pipeline_status": "Failed",
+    "steps": [
+      {
+        "name": "8695d59c-d0c9-424a-99f8-318e9af91ee8",
+        "step": "ingest",
+        "status": "Completed"
+      },
+      {
+        "name": "c38f4cad-54d1-41d4-a770-10a2ff1a7259",
+        "step": "validate",
+        "status": "Failed"
+      }
+    ],
+    "downstream_child_jobs_created": false,
+    "model_versions_before": [
+      "1",
+      "2",
+      "3"
+    ],
+    "model_versions_after": [
+      "1",
+      "2",
+      "3"
+    ],
+    "app": {
+      "name": "lab5-staging",
+      "state": "Succeeded",
+      "revision": "lab5-staging--0000002",
+      "model_version": "3",
+      "health": "Healthy",
+      "running_state": "ScaledToZero",
+      "replicas": 0,
+      "traffic_weight": 100
+    },
+    "checks": {
+      "model_versions_unchanged": true,
+      "revision_unchanged": true,
+      "model_version_unchanged": true,
+      "traffic_unchanged": true,
+      "serving_image_unchanged": true,
+      "healthy_active_revision": true,
+      "https_only": true,
+      "allowlist_unchanged": true,
+      "scale_zero_to_one": true
+    },
+    "compute": {
+      "allocationState": "Steady",
+      "currentNodeCount": 1,
+      "targetNodeCount": 1
+    },
+    "app_http_requests": 0,
+    "azure_configuration_writes": 0
+  },
+  "final_compute_observation": {
+    "observed_at_utc": "2026-10-15T07:15:59.500584+00:00",
+    "job_name": "lab5-invalid-data-aa6a4cd-20261015-01",
+    "status": "Failed",
+    "steps": [
+      {
+        "name": "8695d59c-d0c9-424a-99f8-318e9af91ee8",
+        "step": "ingest",
+        "status": "Completed"
+      },
+      {
+        "name": "c38f4cad-54d1-41d4-a770-10a2ff1a7259",
+        "step": "validate",
+        "status": "Failed"
+      }
+    ],
+    "compute": {
+      "allocationState": "Steady",
+      "currentNodeCount": 0,
+      "targetNodeCount": 0
+    }
+  },
+  "screenshots": [
+    {
+      "path": "screenshots/lab5-invalid-data-aa6a4cd-2026-10-15.jpg",
+      "sha256": "41fc6b3447a3f33514dea8f36f96c8ee31cd71c1d5e48a59027b90ab13b16d63"
+    },
+    {
+      "path": "screenshots/lab5-invalid-data-error-2026-10-15.jpg",
+      "sha256": "ad4bb66f2fd74fdbb0d87208490eb2c34908aa6a8ea66ed76b780b37943f11ac"
+    }
+  ],
+  "limits": [
+    "One managed submission; no retry, training, build, role change, commit or Git push.",
+    "The App endpoint was not requested; staging configuration was read back without changes.",
+    "Only one out-of-range fixture was tested in this managed run, not every invalid-data case.",
+    "Compute returned to zero nodes; storage and shared resources remain, so this is not a zero-cost claim."
+  ]
+}

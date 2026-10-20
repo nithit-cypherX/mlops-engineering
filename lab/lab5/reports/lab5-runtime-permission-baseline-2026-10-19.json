@@ -1,0 +1,94 @@
+{
+  "check": "lab5_runtime_permission_baseline",
+  "direct_blob": {
+    "artifact": "MLmodel",
+    "authentication": "ManagedIdentityCredential; OAuth, no SAS",
+    "bytes": 1669,
+    "runtime_principal_matches": true,
+    "sha256": "027a165b8be2cdea80d7c2147d3a4de4df94b50547b6e41e1dd98d6afa14f460",
+    "status": "passed"
+  },
+  "elapsed_seconds": 11.8,
+  "fresh_process": true,
+  "identity": "id-itcs355-u6688124-lab5-runtime",
+  "mlflow": {
+    "downloaded_files": 6,
+    "empty_download_directory": true,
+    "manifest_sha256_matches_blob": true,
+    "model_class": "RandomForestClassifier",
+    "runtime_principal_matches": true,
+    "selected_credential": "ManagedIdentityCredential",
+    "status": "passed",
+    "uri": "models:/itcs355-u6688124-lab5/4"
+  },
+  "model_name": "itcs355-u6688124-lab5",
+  "model_version": "4",
+  "packages": {
+    "azure-identity": "1.25.3",
+    "azure-storage-blob": "12.27.1",
+    "azureml-mlflow": "1.62.0.post6",
+    "mlflow": "2.22.5"
+  },
+  "revision": "lab5-staging--0000003",
+  "started_at_utc": "2026-10-19T12:53:45.635956+00:00",
+  "status": "passed",
+  "temporary_download_removed": true,
+  "app": "lab5-staging",
+  "serving_image": "itcs355u6688124.azurecr.io/itcs355-lab4@sha256:654ed915ca7c12f59b619979f3795c705b82eb2a9ee23620b520e185095c6bb8",
+  "method": [
+    "Executed one fresh Python process through the console of the existing api container.",
+    "Read the existing version 4 MLmodel blob using an explicit ManagedIdentityCredential and OAuth; no SAS or account key was supplied.",
+    "Loaded models:/itcs355-u6688124-lab5/4 with mlflow.sklearn.load_model into a newly created empty temporary directory.",
+    "Checked the credential selected by the MLflow Azure authentication chain and matched the returned token's principal claim to the runtime identity without printing the token.",
+    "Compared the downloaded MLmodel manifest SHA-256 with the direct Blob result and removed the temporary download directory."
+  ],
+  "preflight_obstacle": {
+    "initial_health_http_status": 403,
+    "current_ipv4_matched_allowlist_before": false,
+    "replicas_before": 0,
+    "approved_change": "Updated only the existing lab5-staging Allow rule to the current public IPv4 /32.",
+    "ip_value_omitted": true,
+    "readback": {
+      "single_allow_rule": true,
+      "prefix_length": 32,
+      "only_ingress_ip_changed": true,
+      "template_unchanged": true,
+      "identity_unchanged": true,
+      "revision_unchanged": true
+    },
+    "initial_cold_start_health_request": "Timed out while the replica was starting; later replica read-back showed ready=true, Running, restartCount=0."
+  },
+  "post_check": {
+    "checked_at_utc": "2026-10-19T12:54:36.718792+00:00",
+    "ready": {
+      "http_status": 200,
+      "status": "ready",
+      "model_version": "4"
+    },
+    "revision": "lab5-staging--0000003",
+    "revision_health": "Healthy",
+    "replicas": 1,
+    "scale": {
+      "min_replicas": 0,
+      "max_replicas": 1
+    },
+    "runtime_blob_reader_assignment_present": true,
+    "runtime_blob_reader_assignment_unchanged": true,
+    "console_closed": true
+  },
+  "scope": {
+    "permissions_added_or_removed": false,
+    "ci_or_pipeline_run": false,
+    "model_training": false,
+    "image_build": false,
+    "new_revision": false,
+    "github_settings_changed": false,
+    "local_cloud_env_changed": false,
+    "commit_or_push": false
+  },
+  "limitations": [
+    "Positive baseline only. No permission was removed, so this does not establish whether direct Blob Reader access is necessary for the MLflow path.",
+    "This is a model-loading check, not a new accuracy, performance or prediction test.",
+    "Only the App allowlist was updated. GitHub CI and local cloud.env were not synchronized with the current IP in this step."
+  ]
+}

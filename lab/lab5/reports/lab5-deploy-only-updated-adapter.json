@@ -1,0 +1,104 @@
+{
+  "date": "2026-10-15",
+  "scope": "Update the current operator IPv4 /32 in ignored cloud.env and the private draft, then submit one deploy-only job. No train/build, role changes, Git commit or push.",
+  "job": {
+    "name": "lab5-deploy-only-4dfb85d-20261015-01",
+    "submission_attempts": 1,
+    "submitted_at_utc": "2026-10-15T03:55:37.528069+00:00",
+    "accepted_at_utc": "2026-10-15T03:55:49.880989+00:00",
+    "status": "Failed",
+    "failure_observed_at_utc": "2026-10-15T04:10:02.143050+00:00",
+    "compute": "cpu-lab5",
+    "instance_count": 1,
+    "timeout_seconds": 600,
+    "studio_duration_seconds": 662.760,
+    "duration_note": "Studio displayed 11m 2.760s. This is not a billed-time calculation or a change to the configured 600-second timeout.",
+    "release_identity": "id-itcs355-u6688124-lab5-release",
+    "release_identity_client_id": "c1ee259d-4522-4a94-bce9-6eeac16adfcd",
+    "source_commit": "4dfb85dd9ac43f7502f173cf7a6f7db0fd9e4b65",
+    "pipeline_image": "itcs355u6688124.azurecr.io/itcs355-lab5@sha256:f57a562fc602d0e2ed97db7d2770afb1c0dd5ba0ad91ca50346cb5c1e23f9be2",
+    "environment_reference": "CliV2AnonymousEnvironment:affdfc9a2fc3fbeec8180656cfb5c4d820b13017f68a2b9cd4d5e222a54dd853",
+    "environment_image_matches_tested_digest": true,
+    "draft_sha256": "7bb4e019c92536aa8794b1cb4c609ea86a31affab2e0be04a392932be3bf0ea3",
+    "studio_url": "https://ml.azure.com/runs/lab5-deploy-only-4dfb85d-20261015-01?wsid=/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourcegroups/itcs355-u6688124/workspaces/mlw-itcs355-u6688124"
+  },
+  "inputs": {
+    "registration_path": "azureml://datastores/lab5_artifacts/paths/azureml/lab5-register-only-4bec26f-20261014-02/registered/",
+    "registration_sha256": "737874896b1a1cb44242faed1a600a8d062a62ca01124de8d5a89391aebff860",
+    "registration_hash_verified_before_submission": true,
+    "model": "itcs355-u6688124-lab5:2",
+    "serving_image": "itcs355u6688124.azurecr.io/itcs355-lab4@sha256:654ed915ca7c12f59b619979f3795c705b82eb2a9ee23620b520e185095c6bb8",
+    "model_versions_after_attempt": ["1", "2"]
+  },
+  "ip_update": {
+    "files": ["ignored cloud.env", "private deploy-only YAML outside Git"],
+    "only_setting_changed": "SERVING_ALLOWED_IP",
+    "prefix_length": 32,
+    "current_public_ipv4_verified_before_submission": true,
+    "app_allowlist_matches_updated_config": true,
+    "values_omitted": true
+  },
+  "failure": {
+    "source": "Azure ML Studio status messages; screenshot saved below",
+    "codes": ["ReceivedTerminationSignal", "MaxWallClockTimeExpired"],
+    "message": "Job was terminated since it's execution time exceeded the max_run_duration_seconds.",
+    "system_log_corroboration": "The lifecycler log at 2026-10-15T04:08:47Z recorded ReceivedTerminationSignal and an OS termination signal.",
+    "deployment_output_exists": false,
+    "output_checked": "azureml://datastores/lab5_artifacts/paths/azureml/lab5-deploy-only-4dfb85d-20261015-01/deployment/deployment.json",
+    "user_log_timeout_message": false
+  },
+  "diagnosis": {
+    "observed": "The App update succeeded and the IP matched. The active revision stayed Provisioned, ScaledToZero, Healthy, with zero replicas and 100% traffic.",
+    "code_behavior": "The adapter accepts ScaledToZero with zero replicas only when healthState is null or the string None. Healthy is accepted only with Running, Processing, or RunningAtMaxScale. The observed combination satisfies neither branch.",
+    "test_gap": "The existing scaled-to-zero test covers healthState=None, not healthState=Healthy.",
+    "inference": "The missing idle-state case prevented the readiness loop from returning before Azure ML terminated the job at its wall-clock limit. Longer waiting alone does not make this observed state pass.",
+    "not_proven": "No HTTP health, readiness, or prediction request was sent in this attempt. Control-plane Healthy does not establish current HTTP readiness when replicas are zero.",
+    "proposed_next_step_not_executed": "Review a narrow adapter change and regression test for ScaledToZero plus Healthy with zero replicas, retaining ownership, image, model, traffic, identity and ingress checks. Do not increase the timeout or redeploy without approval."
+  },
+  "final_readback": {
+    "at_utc": "2026-10-15T04:14:55.201080+00:00",
+    "app_state": "Succeeded",
+    "latest_revision": "lab5-staging--model2-readfix-1014",
+    "latest_ready_revision": "lab5-staging--model2-readfix-1014",
+    "revision": {
+      "active": true,
+      "provisioningState": "Provisioned",
+      "runningState": "ScaledToZero",
+      "healthState": "Healthy",
+      "replicas": 0,
+      "trafficWeight": 100
+    },
+    "https_only": true,
+    "serving_image_unchanged": true,
+    "ip_matches_updated_config": true,
+    "compute": {
+      "allocationState": "Steady",
+      "currentNodeCount": 0,
+      "targetNodeCount": 0
+    }
+  },
+  "lineage_caveat": {
+    "auto_captured_repository": "https://github.com/pasdptt/public_teaching_mlaiops.git",
+    "auto_captured_commit": "2e29faeb1fdaa6360947808e32b0e3c1444113f2",
+    "explanation": "The SDK captured Git metadata from the instructor checkout because the operator launched the submission there. Those fields are not the pipeline image source. The source_commit tag and verified image digest identify the tested 4dfb85d image. No local implementation code was uploaded.",
+    "next_submission": "Use the student repository as the submission working directory and check the generated lineage metadata before submission. No existing cloud metadata was changed in this attempt."
+  },
+  "screenshots": [
+    {
+      "path": "screenshots/lab5-deploy-only-4dfb85d-failed-2026-10-15.jpg",
+      "sha256": "ae9d4fdde950db5e870454755a3ddc15c950810035f1417892167c394f13d117"
+    },
+    {
+      "path": "screenshots/lab5-deploy-only-timeout-error-2026-10-15.jpg",
+      "sha256": "3dfaf35950c29bcbcf1201e1d46bf1094f3645c82768bf87ff239165be2adbec"
+    },
+    {
+      "path": "screenshots/lab5-deploy-only-scaled-zero-2026-10-15.jpg",
+      "sha256": "fbba1837be25041c78b3fa713e07a5672b6e09fff32e65d2f1e858ecd40f1c8c"
+    }
+  ],
+  "screenshot_privacy": "Actual Azure pages, captured without the account header. No IP values or credentials included.",
+  "not_done": ["Training", "Model registration", "Image build/push", "Role changes", "Retry", "Revision restart", "New revision or App/Environment creation", "HTTP smoke tests", "Git commit/push"],
+  "remaining": "Task 1 is still in progress. Managed deploy-only success, end-to-end pipeline success, and managed negative-input/negative-gate checks remain unverified.",
+  "verification": "No implementation changed and no offline tests were rerun. The 452 offline tests previously passed for this exact image, but did not cover the observed ScaledToZero plus Healthy state."
+}

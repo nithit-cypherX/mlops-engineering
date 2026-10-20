@@ -75,14 +75,15 @@ jobs:
       - name: Install the existing lock and check configuration
         run: |
           python -m pip install --require-hashes -r requirements.txt
-          python -c 'from src.config import load_staging; from cloudlayer.azure_staging import validate_settings; from pathlib import Path; validate_settings(load_staging(Path("cloud.env.example")))'
+          python -c 'from cloudlayer.azure_config import load_staging; from cloudlayer.azure_staging import validate_settings; from pathlib import Path; validate_settings(load_staging(Path("cloud.env.example")))'
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           test -z "$(git status --porcelain --untracked-files=no)"
 
       - name: Offline tests and lint
         run: |
-          python -m ruff check --no-cache --config ../lab4/ruff.toml src cloudlayer scripts tests
-          python -m pytest -q -p no:cacheprovider tests
+          python -m ruff check --no-cache --config ../lab4/ruff.toml src cloudlayer scripts tests conftest.py
+          python scripts/portability_audit.py
+          python -m pytest -q -p no:cacheprovider tests cloudlayer/tests
 
       - name: Restore the existing hash-checked dataset
         run: python ../lab4/scripts/pull_data.py
@@ -99,9 +100,9 @@ jobs:
           docker run --rm --network none "$image" python -m pip check
           docker run --rm --network none \
             -e PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 \
-            -v "$PWD/tests:/app/tests:ro" \
+            -v "$PWD/cloudlayer/tests:/app/cloudlayer/tests:ro" \
             -v "$PWD/cloud.env.example:/app/cloud.env.example:ro" \
-            "$image" python -m pytest -q -p no:cacheprovider /app/tests/test_staging.py
+            "$image" python -m pytest -q -p no:cacheprovider /app/cloudlayer/tests/test_staging.py
           printf 'image=%s\n' "$image" >> "$GITHUB_OUTPUT"
 
       - name: Log in as the Lab 5 CI identity
@@ -140,7 +141,7 @@ jobs:
           from cloudlayer.azure_registry import WORKSPACE
           from cloudlayer.azure_storage import validate_datastore
           from cloudlayer.lab5_scope import GROUP, SUBSCRIPTION
-          from src.config import load_staging
+          from cloudlayer.azure_config import load_staging
 
           def make_job():
               job = pipelines.compile_azure(

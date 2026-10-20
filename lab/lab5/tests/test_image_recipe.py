@@ -85,7 +85,8 @@ def test_dockerignore_declares_secret_and_generated_file_exclusions():
     patterns = set((ROOT / ".dockerignore").read_text().splitlines())
     assert {".git", ".venv", "cloud.env", ".env", ".env.*", "cloud.env.*",
             ".azure/", ".aws/", ".ssh/", "data/", "reports/", "mlruns/", "mlartifacts/",
-            "**/__pycache__/", "**/*.pyc", "**/.env*", "**/cloud.env*"} <= patterns
+            "**/__pycache__/", "**/*.pyc", "**/.env*", "**/cloud.env*",
+            "tests/", "cloudlayer/tests/"} <= patterns
 
 
 @pytest.mark.parametrize("revision,accepted", [

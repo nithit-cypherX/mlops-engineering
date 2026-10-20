@@ -1,0 +1,98 @@
+{
+  "checked_on": "2026-10-14",
+  "scope": "One approved release AcrPull assignment, one approved current-IP update, and one deploy-only retry. No new training, registration, build, or Git publication.",
+  "source_commit": "4bec26f1a3e52886da8a74e3a1f34d1bff9e8277",
+  "role_change": {
+    "checked_at_utc": "2026-10-14T13:15:15.079140+00:00",
+    "identity": "id-itcs355-u6688124-lab5-release",
+    "role": "AcrPull",
+    "scope": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.ContainerRegistry/registries/itcs355u6688124",
+    "assignment_id_suffix": "183e3a0c-e798-58ba-bfa2-e446337f7717",
+    "writes": 1,
+    "readback_matched": true,
+    "scope_limit": "Registry-wide image pull, not repository-specific. No image push permission.",
+    "acr_admin_enabled": false
+  },
+  "job": {
+    "name": "lab5-deploy-only-4bec26f-20261014-02",
+    "submission_attempts": 1,
+    "accepted_at_utc": "2026-10-14T13:17:56Z",
+    "status": "Failed",
+    "failed_observed_at_utc": "2026-10-14T13:32:44.238579+00:00",
+    "compute": "cpu-lab5",
+    "identity": "id-itcs355-u6688124-lab5-release",
+    "pipeline_image": "itcs355u6688124.azurecr.io/itcs355-lab5@sha256:564040abcebe0fa9d0ff1702d1d5ec52e367657bc72ef78f762fcc72327e3e49",
+    "serving_image": "itcs355u6688124.azurecr.io/itcs355-lab4@sha256:654ed915ca7c12f59b619979f3795c705b82eb2a9ee23620b520e185095c6bb8",
+    "registered_input": "azureml://datastores/lab5_artifacts/paths/azureml/lab5-register-only-4bec26f-20261014-02/registered/",
+    "deployment_output": "azureml://datastores/lab5_artifacts/paths/azureml/lab5-deploy-only-4bec26f-20261014-02/deployment/",
+    "model": "itcs355-u6688124-lab5:2",
+    "registration_sha256": "737874896b1a1cb44242faed1a600a8d062a62ca01124de8d5a89391aebff860",
+    "timeout_seconds": 600,
+    "studio_duration_seconds": 656.91,
+    "duration_note": "Studio duration, not a billing calculation."
+  },
+  "local_ip_update": {
+    "field": "SERVING_ALLOWED_IP",
+    "file": "cloud.env",
+    "git_ignored_and_untracked": true,
+    "other_file_contents_unchanged": true,
+    "matched_current_public_ipv4_at_preflight": true,
+    "prefix_length": 32,
+    "ip_value_omitted": true
+  },
+  "observations": [
+    {"at_utc": "2026-10-14T13:23:22.7604351Z", "source": "ContainerAppSystemLogs_CL", "result": "Serving image pulled successfully; log reports 12.11 seconds."},
+    {"at_utc": "2026-10-14T13:23:28.6913652Z", "source": "ContainerAppConsoleLogs_CL", "result": "Started server process [1]."},
+    {"at_utc": "2026-10-14T13:23:34.635422Z", "source": "ContainerAppConsoleLogs_CL", "result": "Model version 2 load failed with PERMISSION_DENIED, HTTP 403, for Microsoft.MachineLearningServices/workspaces/metadata/artifacts/read."},
+    {"at_utc": "2026-10-14T13:27:59.2742606Z", "source": "ContainerAppSystemLogs_CL", "result": "Startup probe received 503; container terminated with reason ProbeFailure."}
+  ],
+  "failure": {
+    "job_error": "ReceivedTerminationSignal / MaxWallClockTimeExpired",
+    "revision": "lab5-staging--0000001",
+    "runtime_identity": "id-itcs355-u6688124-lab5-runtime",
+    "error_principal_matches_runtime_identity": true,
+    "missing_action": "Microsoft.MachineLearningServices/workspaces/metadata/artifacts/read",
+    "existing_runtime_workspace_role": "ITCS355 Lab5 Model Reader u6688124",
+    "existing_role_actions": [
+      "Microsoft.MachineLearningServices/workspaces/read",
+      "Microsoft.MachineLearningServices/workspaces/models/read",
+      "Microsoft.MachineLearningServices/workspaces/models/versions/read"
+    ],
+    "deployment_output_files": [],
+    "deployment_report_written": false,
+    "external_http_checks": "Not run; recorded /ready 503 responses are Azure probes.",
+    "diagnostic_limit": "The first scope-based CLI token request timed out. A later resource-based Log Analytics token request succeeded and returned the existing revision logs. The downloaded Azure ML user log was empty; Studio and system logs establish the job timeout."
+  },
+  "final_readback": {
+    "checked_at_utc": "2026-10-14T13:36:45.942426+00:00",
+    "app": "lab5-staging",
+    "provisioning_state": "Succeeded",
+    "running_status": "Running",
+    "latest_revision": "lab5-staging--0000001",
+    "latest_ready_revision": "lab5-staging--sw3yomt",
+    "runtime_attached": true,
+    "ingress_external": true,
+    "https_only": true,
+    "single_approved_ip_allow": true,
+    "revisions": [
+      {"name": "lab5-staging--sw3yomt", "running_state": "ScaledToZero", "replicas": 0, "traffic_weight": 0},
+      {"name": "lab5-staging--0000001", "running_state": "ActivationFailed", "replicas": 0, "traffic_weight": 100}
+    ],
+    "compute": {"current": 0, "target": 0, "state": "Steady"},
+    "model_versions": ["2", "1"],
+    "acr_admin_enabled": false,
+    "cost_limit": "Shared resources remain; zero compute nodes and App replicas do not mean zero cloud costs."
+  },
+  "interpretation": {
+    "progress": "The retry passed pipeline image preparation and the App pulled its serving image. This does not independently identify which principal pulled the pipeline image in the earlier failed attempt.",
+    "confirmed_runtime_blocker": "Runtime lacks the artifact-metadata read action reported by MLflow. The model did not load, readiness probes returned 503, and the job reached its time limit.",
+    "next_step_not_applied": "Review adding only the missing read action to the existing runtime model-reader role at the existing workspace scope. A new retry requires approval; increasing the timeout alone does not fix this permission denial.",
+    "verification_limit": "Runtime model loading, HTTP prediction, the end-to-end pipeline, and managed negative-path checks remain unverified. Task 1 is not complete."
+  },
+  "screenshots": [
+    {"path": "screenshots/lab5-release-acrpull-2026-10-14.jpg", "sha256": "786cd7e04ddfea934e174e583b9f276d696cdc310b68c760e851ccf4e35fefb8"},
+    {"path": "screenshots/lab5-deploy-only-runtime-failed-2026-10-14.jpg", "sha256": "2710387a0714ff1a698fd22ce005833c5ff22b706712e2dbd2c742fdea35ece2"}
+  ],
+  "changes_not_made": ["Runtime role change", "Further job retry", "ACR admin enablement", "New training", "New model registration", "Image build", "Implementation change", "Commit", "Push"],
+  "tests": "Offline tests were not rerun because no implementation changed."
+}

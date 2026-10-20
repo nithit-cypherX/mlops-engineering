@@ -1,0 +1,167 @@
+{
+  "job_name": "lab5-normal-4bec26f-20261013-01",
+  "studio_url": "https://ml.azure.com/runs/lab5-normal-4bec26f-20261013-01?wsid=/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourcegroups/itcs355-u6688124/workspaces/mlw-itcs355-u6688124&tid=9bc585f9-a8b8-431c-9013-efa7b2b40cdf",
+  "submitted_at_utc": "2026-10-13T12:52:33.802456+00:00",
+  "accepted_at_utc": "2026-10-13T12:53:00.996754+00:00",
+  "checked_at_utc": "2026-10-13T13:10:10.851784+00:00",
+  "status": "Failed",
+  "source_commit": "4bec26f1a3e52886da8a74e3a1f34d1bff9e8277",
+  "pipeline_image": "itcs355u6688124.azurecr.io/itcs355-lab5@sha256:564040abcebe0fa9d0ff1702d1d5ec52e367657bc72ef78f762fcc72327e3e49",
+  "steps": [
+    {
+      "step": "ingest",
+      "name": "0ce0359f-25fe-4cf8-9293-be8b79f50d8c",
+      "status": "Completed"
+    },
+    {
+      "step": "validate",
+      "name": "26b8f923-7da7-4b9a-8d31-c898f58b77e1",
+      "status": "Completed"
+    },
+    {
+      "step": "train",
+      "name": "2a2b8509-3cd9-43a8-ae8d-80c687e1c98a",
+      "status": "Completed"
+    },
+    {
+      "step": "evaluate",
+      "name": "ad571dc8-c6cf-4263-b204-32b87d647dea",
+      "status": "Completed"
+    },
+    {
+      "step": "register",
+      "name": "973eb5e6-c774-45ce-a25d-50cfa8f3353e",
+      "status": "Failed"
+    },
+    {
+      "step": "deploy_staging",
+      "status": "Not started",
+      "reason": "Registration failed; no deployment child job was created"
+    }
+  ],
+  "reports": {
+    "metrics": {
+      "seed": 20260101,
+      "python_hash_seed": 20260101,
+      "params": {
+        "bootstrap": true,
+        "ccp_alpha": 0,
+        "class_weight": null,
+        "criterion": "gini",
+        "max_depth": 12,
+        "max_features": "sqrt",
+        "max_leaf_nodes": null,
+        "max_samples": null,
+        "min_impurity_decrease": 0,
+        "min_samples_leaf": 10,
+        "min_samples_split": 2,
+        "min_weight_fraction_leaf": 0,
+        "monotonic_cst": null,
+        "n_estimators": 100,
+        "n_jobs": -1,
+        "oob_score": false,
+        "random_state": 20260101,
+        "verbose": 0,
+        "warm_start": false
+      },
+      "features": [
+        "temp_c",
+        "vibration_mm_s",
+        "pressure_kpa",
+        "hours_since_service",
+        "load_pct",
+        "ambient_humidity"
+      ],
+      "data_fingerprint": "422cccb9136e814061b83e4f041cff21ba7372c6f7fb0feb2c321555c6a6341f",
+      "dvc_hash": "1c886b512c8a5c9bf723da1cd119fc80.dir",
+      "git_commit": "4bec26f1a3e52886da8a74e3a1f34d1bff9e8277",
+      "git_commit_source": "supplied",
+      "split_strategy": "group_by_machine_id",
+      "split_rows": {
+        "train": 3600,
+        "val": 1200,
+        "test": 1200
+      },
+      "package_versions": {
+        "scikit-learn": "1.8.0",
+        "numpy": "2.4.4",
+        "pandas": "2.3.3",
+        "cloudpickle": "3.1.2",
+        "mlflow": "2.22.5"
+      },
+      "val_roc_auc": 0.8444994217173845,
+      "val_pr_auc": 0.4044125077384774,
+      "test_roc_auc": 0.8466731943553135,
+      "test_pr_auc": 0.4598251404871057,
+      "model_files_sha256": {
+        "MLmodel": "766131a3062bdbafcd62d83f5caba3763a32b4d53e3646a3a0a54ffbdfef79b0",
+        "conda.yaml": "2a52a8363a850d7c89f9e67ddce59006422d1eb64c19a9f9337fb787ef9899db",
+        "model.pkl": "ebe4f91523f5b872a5290effb8484b59398756fecd97f8fe069e293e5d4def61",
+        "python_env.yaml": "78684e6b92addee523d4c6d4a10fed277333552a84c0c86ae85ffc06f230c46c",
+        "requirements.txt": "0a70832c98b7d903be2f7de381543e77f27137aa2f224291a01f0b482efb91b6"
+      }
+    },
+    "gate": {
+      "stage": "evaluate",
+      "status": "pass",
+      "metric": "val_roc_auc",
+      "minimum": 0.8,
+      "score": 0.8444994217173845,
+      "training_record_sha256": "c0ed5f25529cefb0ff1cc57706976776841079f13483904d2f13bfa8adc76bdd"
+    },
+    "ingest": {
+      "stage": "ingest",
+      "source_file": "sensors.csv",
+      "sha256": "422cccb9136e814061b83e4f041cff21ba7372c6f7fb0feb2c321555c6a6341f",
+      "bytes": 321437
+    },
+    "validation": {
+      "stage": "validate",
+      "status": "pass",
+      "sha256": "422cccb9136e814061b83e4f041cff21ba7372c6f7fb0feb2c321555c6a6341f",
+      "bytes": 321437,
+      "rows": 6000
+    }
+  },
+  "gate_hash_matches_training_record": true,
+  "registration_failure": {
+    "evidence": "Azure Activity Log",
+    "event_timestamp_utc": "2026-10-13T13:01:06.7315427Z",
+    "operation": "Microsoft.MachineLearningServices/workspaces/models/versions/write",
+    "status": "Failed",
+    "substatus": "Unauthorized",
+    "identity": "id-itcs355-u6688124-lab5-training",
+    "missing_action": "Microsoft.MachineLearningServices/workspaces/models/write",
+    "requested_version": "1",
+    "registered_model_versions_at_readback": [],
+    "model_files_uploaded": true,
+    "model_registered": false,
+    "retry_performed": false
+  },
+  "final_compute_state": {
+    "allocationState": "Steady",
+    "currentNodeCount": 0,
+    "targetNodeCount": 0,
+    "nodeStateCounts": {
+      "preparingNodeCount": 0,
+      "runningNodeCount": 0,
+      "idleNodeCount": 0,
+      "unusableNodeCount": 0,
+      "leavingNodeCount": 0,
+      "preemptedNodeCount": 0
+    }
+  },
+  "final_staging_state": {
+    "state": "Succeeded",
+    "latest_revision": "lab5-staging--sw3yomt",
+    "ingress_enabled": false,
+    "placeholder_image_unchanged": true
+  },
+  "limitations": [
+    "No registration or staging deployment succeeded.",
+    "The negative-input and negative-gate managed runs have not been performed.",
+    "Billing was not collected; zero compute nodes is not proof of zero cost.",
+    "No role changes, implementation changes, Git commit or Git push were performed."
+  ],
+  "screenshot": "screenshots/lab5-first-pipeline-register-failed-2026-10-13.jpg"
+}

@@ -1,0 +1,71 @@
+{
+  "checked_at_utc": "2026-10-16T08:54:45Z",
+  "source_commit": "cc84eec2be562049a73685d862e03bc1b8e98449",
+  "ci_run": {
+    "number": 2,
+    "id": 38876116346,
+    "attempt": 1,
+    "branch": "main",
+    "url": "https://github.com/nithit-cypherX/mlops-engineering/actions/runs/38876116346",
+    "job_id": 116891472383,
+    "conclusion": "failure",
+    "job_duration_seconds": 323,
+    "dispatches_in_this_attempt": 1
+  },
+  "completed_steps": [
+    "offline tests and lint",
+    "hash-checked dataset restore",
+    "linux/amd64 image build and offline image checks",
+    "OIDC login",
+    "ACR image push"
+  ],
+  "failed_step": "Submit once and wait for the managed result",
+  "error": {
+    "type": "ClientAuthenticationError",
+    "code": "UserError",
+    "operation": "Microsoft.MachineLearningServices/workspaces/modules/write",
+    "phase": "component registration before parent job creation",
+    "previous_compute_name_error": false
+  },
+  "image": {
+    "tag": "itcs355u6688124.azurecr.io/itcs355-lab5:cc84eec2be562049a73685d862e03bc1b8e98449-ci-38876116346-1",
+    "digest": "sha256:31f599fff721c9551e35a622f8c1ccab9f73d36581af05410853d6c1392472fb"
+  },
+  "post_run_checks": {
+    "managed_job": {
+      "name": "lab5-ci-38876116346-1",
+      "lookup": "JobNotFound"
+    },
+    "compute": {
+      "current": 0,
+      "name": "cpu-lab5",
+      "state": "Succeeded",
+      "target": 0
+    },
+    "staging": {
+      "name": "lab5-staging",
+      "provisioning_state": "Succeeded",
+      "latest_revision": "lab5-staging--0000002",
+      "ready_revision": "lab5-staging--0000002",
+      "latest_revision_traffic_weight": 100
+    },
+    "registered_model_versions": [
+      "3",
+      "2",
+      "1"
+    ],
+    "lab5_ci_enabled": "false"
+  },
+  "boundaries": {
+    "no_retry": true,
+    "no_role_changes": true,
+    "no_fix_applied_after_failure": true,
+    "no_managed_training_or_deployment_from_this_run": true,
+    "preparatory_aml_assets_not_audited": true,
+    "no_commit_or_git_push": true
+  },
+  "screenshots": [
+    "screenshots/lab5-ci-second-run-permission-failed-2026-10-16.jpg",
+    "screenshots/lab5-ci-disabled-after-second-run-2026-10-16.jpg"
+  ]
+}

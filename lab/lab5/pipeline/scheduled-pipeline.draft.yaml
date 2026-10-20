@@ -1,0 +1,181 @@
+# LOCAL REVIEW DRAFT, copied from Completed job lab5-ci-39226985486-1.
+# Reuse exact component versions; their shared environment pins the image to
+# itcs355u6688124.azurecr.io/itcs355-lab5@sha256:8fb066fcf9842230510d03c0b06f5eba1b6acd00c0804a2697b96b873c3e4e34
+# No historical job ID/name/status or fixed output paths are copied.
+# The IP placeholder is NOT a submission guard: fill/check a private copy first.
+type: pipeline
+display_name: lab5-scheduled-retraining
+experiment_name: lab5-scheduled-retraining
+tags:
+  course: itcs355
+  student: itcs355-u6688124
+  lab: '5'
+inputs:
+  raw_data:
+    type: uri_file
+    mode: download
+    path: azureml://datastores/lab5_inputs/paths/LocalUpload/d867f5b0b5985ab022b7dd92ec798cba7eb9d7883cb65d8cdaba545a8126f670/sensors.csv
+  dvc_metadata:
+    type: uri_file
+    mode: download
+    path: azureml://datastores/lab5_inputs/paths/LocalUpload/dde3a609bdacb4fbc7008ec18b3a19a3881eaedd45431707196655018c505b0f/raw.dvc
+  source_commit: 5c1483ed9000a18c7722cafecba9aa07d07d5048
+  gate_minimum: 0.80
+outputs:
+  training:
+    type: uri_folder
+    mode: upload
+  gate:
+    type: uri_folder
+    mode: upload
+  registered_model:
+    type: uri_folder
+    mode: upload
+  deployment:
+    type: uri_folder
+    mode: upload
+settings:
+  continue_on_step_failure: false
+  default_datastore: azureml:lab5_artifacts
+  force_rerun: true
+jobs:
+  ingest:
+    type: command
+    component: azureml:azureml_anonymous:6ded1cfa-4477-46b0-86d1-89ee22edfa1c
+    compute: cpu-lab5
+    identity:
+      type: managed_identity
+      client_id: 7e44580e-f307-411e-b25b-7dc7723710b4
+    resources:
+      instance_count: 1
+    limits:
+      timeout: 600
+    environment_variables:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONHASHSEED: '20260101'
+    inputs:
+      raw:
+        path: ${{parent.inputs.raw_data}}
+    outputs:
+      raw_data:
+        type: uri_folder
+        mode: upload
+  validate:
+    type: command
+    component: azureml:azureml_anonymous:4578a3e1-eef1-4e41-9d1e-ef961fa1d15e
+    compute: cpu-lab5
+    identity:
+      type: managed_identity
+      client_id: 7e44580e-f307-411e-b25b-7dc7723710b4
+    resources:
+      instance_count: 1
+    limits:
+      timeout: 600
+    environment_variables:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONHASHSEED: '20260101'
+    inputs:
+      raw:
+        path: ${{parent.jobs.ingest.outputs.raw_data}}
+    outputs:
+      validated:
+        type: uri_folder
+        mode: upload
+  train:
+    type: command
+    component: azureml:azureml_anonymous:b60ac6a8-8867-49b1-871d-c13785707594
+    compute: cpu-lab5
+    identity:
+      type: managed_identity
+      client_id: 7e44580e-f307-411e-b25b-7dc7723710b4
+    resources:
+      instance_count: 1
+    limits:
+      timeout: 600
+    environment_variables:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONHASHSEED: '20260101'
+    inputs:
+      validated:
+        path: ${{parent.jobs.validate.outputs.validated}}
+      dvc_metadata:
+        path: ${{parent.inputs.dvc_metadata}}
+      source_commit:
+        path: ${{parent.inputs.source_commit}}
+    outputs:
+      bundle: ${{parent.outputs.training}}
+  evaluate:
+    type: command
+    component: azureml:azureml_anonymous:7234ff3e-2f6c-49df-bcab-02c56532c343
+    compute: cpu-lab5
+    identity:
+      type: managed_identity
+      client_id: 7e44580e-f307-411e-b25b-7dc7723710b4
+    resources:
+      instance_count: 1
+    limits:
+      timeout: 600
+    environment_variables:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONHASHSEED: '20260101'
+    inputs:
+      training:
+        path: ${{parent.jobs.train.outputs.bundle}}
+      minimum:
+        path: ${{parent.inputs.gate_minimum}}
+    outputs:
+      decision: ${{parent.outputs.gate}}
+  register:
+    type: command
+    component: azureml:azureml_anonymous:413b0dc8-8f6f-40f7-972b-f0e6e682245f
+    compute: cpu-lab5
+    identity:
+      type: managed_identity
+      client_id: 7e44580e-f307-411e-b25b-7dc7723710b4
+    resources:
+      instance_count: 1
+    limits:
+      timeout: 600
+    environment_variables:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONHASHSEED: '20260101'
+      CLOUD_PROVIDER: azure
+      AZURE_CLIENT_ID: 7e44580e-f307-411e-b25b-7dc7723710b4
+    inputs:
+      training:
+        path: ${{parent.jobs.train.outputs.bundle}}
+      gate:
+        path: ${{parent.jobs.evaluate.outputs.decision}}
+    outputs:
+      registered: ${{parent.outputs.registered_model}}
+  deploy_staging:
+    type: command
+    component: azureml:azureml_anonymous:3fb178fe-972c-4ed2-a009-7705e29400e6
+    compute: cpu-lab5
+    identity:
+      type: managed_identity
+      client_id: c1ee259d-4522-4a94-bce9-6eeac16adfcd
+    resources:
+      instance_count: 1
+    limits:
+      timeout: 600
+    environment_variables:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONHASHSEED: '20260101'
+      CLOUD_PROVIDER: azure
+      AZURE_CLIENT_ID: c1ee259d-4522-4a94-bce9-6eeac16adfcd
+      PROJECT_ID: itcs355-u6688124
+      REGION: malaysiawest
+      AZURE_SUBSCRIPTION_ID: d9385e82-8bee-4612-8a76-967c241112c8
+      ENDPOINT_NAME: lab5-staging
+      AZURE_CONTAINERAPPS_ENVIRONMENT: feedbackpulse-env
+      AZURE_MANAGED_IDENTITY_ID: /subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-itcs355-u6688124-lab5-runtime
+      SERVING_INSTANCE: 0.5cpu-1Gi
+      SERVING_IMAGE: itcs355u6688124.azurecr.io/itcs355-lab4@sha256:654ed915ca7c12f59b619979f3795c705b82eb2a9ee23620b520e185095c6bb8
+      SERVING_ALLOWED_IP: REPLACE_WITH_APPROVED_PUBLIC_IPV4_32
+      MLFLOW_TRACKING_URI: azureml://malaysiawest.api.azureml.ms/mlflow/v1.0/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.MachineLearningServices/workspaces/mlw-itcs355-u6688124
+    inputs:
+      registered:
+        path: ${{parent.jobs.register.outputs.registered}}
+    outputs:
+      deployment: ${{parent.outputs.deployment}}

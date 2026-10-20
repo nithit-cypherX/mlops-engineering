@@ -1,0 +1,294 @@
+{
+  "job_name": "lab5-normal-aa6a4cd-20261015-01",
+  "submission_attempts": 1,
+  "submitted_at_utc": "2026-10-15T05:47:05.414405+00:00",
+  "draft_sha256": "914a0a58eafc5200d6f9613186d93064b23001a683f00e3571747a8a200ef730",
+  "source_commit": "aa6a4cdea8da1529fa0f70de529b782ed80c0a46",
+  "pipeline_image": "itcs355u6688124.azurecr.io/itcs355-lab5@sha256:95e543c2a16d4325aa65e75b1a20624e8c09dec67ef2975d5a9acd20e8b70463",
+  "submission_working_directory": "/home/nirvana/ml-od",
+  "current_ip_matches_approved_draft": true,
+  "ip_value_omitted": true,
+  "model_versions_before": [
+    "1",
+    "2"
+  ],
+  "baseline_revision": "lab5-staging--model2-readfix-1014",
+  "baseline_serving_image": "itcs355u6688124.azurecr.io/itcs355-lab4@sha256:654ed915ca7c12f59b619979f3795c705b82eb2a9ee23620b520e185095c6bb8",
+  "baseline_compute_current": 0,
+  "outcome": "Completed",
+  "accepted_at_utc": "2026-10-15T05:47:21.759016+00:00",
+  "studio_url": "https://ml.azure.com/runs/lab5-normal-aa6a4cd-20261015-01?wsid=/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourcegroups/itcs355-u6688124/workspaces/mlw-itcs355-u6688124&tid=9bc585f9-a8b8-431c-9013-efa7b2b40cdf",
+  "acceptance_status": "NotStarted",
+  "observed_at_utc": "2026-10-15T05:59:33.406760+00:00",
+  "status": "Completed",
+  "steps": [
+    {
+      "name": "7b65cd0d-4471-432d-ab05-09fe9f99019c",
+      "step": "ingest",
+      "status": "Completed"
+    },
+    {
+      "name": "02cb27f8-474b-43a0-8977-947b7ae3f23f",
+      "step": "validate",
+      "status": "Completed"
+    },
+    {
+      "name": "a145d922-4e9e-4571-b167-0a5a66663ba9",
+      "step": "train",
+      "status": "Completed"
+    },
+    {
+      "name": "bb2f7815-dc19-4564-9b46-5dfab3684e58",
+      "step": "evaluate",
+      "status": "Completed"
+    },
+    {
+      "name": "94d20ed7-e434-46f6-98f0-eae7312a06c2",
+      "step": "register",
+      "status": "Completed"
+    },
+    {
+      "name": "0df87165-aa21-49c9-aea4-3f1eda3b7789",
+      "step": "deploy_staging",
+      "status": "Completed"
+    }
+  ],
+  "compute": {
+    "allocationState": "Steady",
+    "currentNodeCount": 1,
+    "targetNodeCount": 1
+  },
+  "artifacts": {
+    "ingest": [
+      {
+        "blob_name": "azureml/7b65cd0d-4471-432d-ab05-09fe9f99019c/raw_data/ingest.json",
+        "sha256": "d78249b8a49a1e1208ad04ed04e41c8f7cd2744340c2a27f89c09ffac5c1fc41",
+        "data": {
+          "stage": "ingest",
+          "source_file": "sensors.csv",
+          "sha256": "422cccb9136e814061b83e4f041cff21ba7372c6f7fb0feb2c321555c6a6341f",
+          "bytes": 321437
+        }
+      }
+    ],
+    "validate": [
+      {
+        "blob_name": "azureml/02cb27f8-474b-43a0-8977-947b7ae3f23f/validated/validation.json",
+        "sha256": "804be47b9b368f90547e3ac9f3c2cebb59f20192a3d00764efea7a82d79b1362",
+        "data": {
+          "stage": "validate",
+          "status": "pass",
+          "sha256": "422cccb9136e814061b83e4f041cff21ba7372c6f7fb0feb2c321555c6a6341f",
+          "bytes": 321437,
+          "rows": 6000
+        }
+      }
+    ],
+    "train": [
+      {
+        "blob_name": "azureml/a145d922-4e9e-4571-b167-0a5a66663ba9/bundle/metrics.json",
+        "sha256": "825cabbe704d024d5fa66189392f12638eefbb50ebb35f109d1cb49773481ffb",
+        "data": {
+          "seed": 20260101,
+          "python_hash_seed": 20260101,
+          "params": {
+            "bootstrap": true,
+            "ccp_alpha": 0.0,
+            "class_weight": null,
+            "criterion": "gini",
+            "max_depth": 12,
+            "max_features": "sqrt",
+            "max_leaf_nodes": null,
+            "max_samples": null,
+            "min_impurity_decrease": 0.0,
+            "min_samples_leaf": 10,
+            "min_samples_split": 2,
+            "min_weight_fraction_leaf": 0.0,
+            "monotonic_cst": null,
+            "n_estimators": 100,
+            "n_jobs": -1,
+            "oob_score": false,
+            "random_state": 20260101,
+            "verbose": 0,
+            "warm_start": false
+          },
+          "features": [
+            "temp_c",
+            "vibration_mm_s",
+            "pressure_kpa",
+            "hours_since_service",
+            "load_pct",
+            "ambient_humidity"
+          ],
+          "data_fingerprint": "422cccb9136e814061b83e4f041cff21ba7372c6f7fb0feb2c321555c6a6341f",
+          "dvc_hash": "1c886b512c8a5c9bf723da1cd119fc80.dir",
+          "git_commit": "aa6a4cdea8da1529fa0f70de529b782ed80c0a46",
+          "git_commit_source": "supplied",
+          "split_strategy": "group_by_machine_id",
+          "split_rows": {
+            "train": 3600,
+            "val": 1200,
+            "test": 1200
+          },
+          "package_versions": {
+            "scikit-learn": "1.8.0",
+            "numpy": "2.4.4",
+            "pandas": "2.3.3",
+            "cloudpickle": "3.1.2",
+            "mlflow": "2.22.5"
+          },
+          "val_roc_auc": 0.8444994217173845,
+          "val_pr_auc": 0.4044125077384774,
+          "test_roc_auc": 0.8466731943553135,
+          "test_pr_auc": 0.4598251404871057,
+          "model_files_sha256": {
+            "MLmodel": "2d3d6651d03441892684d46bca9272b2f3200c3578006ee6b7efa7d8c090d95e",
+            "conda.yaml": "2a52a8363a850d7c89f9e67ddce59006422d1eb64c19a9f9337fb787ef9899db",
+            "model.pkl": "ebe4f91523f5b872a5290effb8484b59398756fecd97f8fe069e293e5d4def61",
+            "python_env.yaml": "78684e6b92addee523d4c6d4a10fed277333552a84c0c86ae85ffc06f230c46c",
+            "requirements.txt": "0a70832c98b7d903be2f7de381543e77f27137aa2f224291a01f0b482efb91b6"
+          }
+        }
+      }
+    ],
+    "evaluate": [
+      {
+        "blob_name": "azureml/bb2f7815-dc19-4564-9b46-5dfab3684e58/decision/gate.json",
+        "sha256": "f874dc99ea061c7335a083b037d1c07885b23d0abd2e24b6764fd985ce29af24",
+        "data": {
+          "stage": "evaluate",
+          "status": "pass",
+          "metric": "val_roc_auc",
+          "minimum": 0.8,
+          "score": 0.8444994217173845,
+          "training_record_sha256": "825cabbe704d024d5fa66189392f12638eefbb50ebb35f109d1cb49773481ffb"
+        }
+      }
+    ],
+    "register": [
+      {
+        "blob_name": "azureml/94d20ed7-e434-46f6-98f0-eae7312a06c2/registered/registration.json",
+        "sha256": "3e0f3ab3d6db6669db9f45de54f5fde9e3d10f5dfb2daf7b293ec66a16afd7cb",
+        "data": {
+          "name": "itcs355-u6688124-lab5",
+          "version": "3",
+          "id": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.MachineLearningServices/workspaces/mlw-itcs355-u6688124/models/itcs355-u6688124-lab5/versions/3",
+          "model_uri": "azureml:itcs355-u6688124-lab5:3"
+        }
+      }
+    ],
+    "deploy_staging": [
+      {
+        "blob_name": "azureml/0df87165-aa21-49c9-aea4-3f1eda3b7789/deployment/deployment.json",
+        "sha256": "6746118aa36095b8c62a84b03e728297ceebe4e5c0524ea1158ba3c4882f9b78",
+        "data": {
+          "status": "control_plane_verified",
+          "app_id": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.App/containerApps/lab5-staging",
+          "endpoint": "https://lab5-staging.happybay-6ab85ce1.malaysiawest.azurecontainerapps.io",
+          "revision": "lab5-staging--0000002",
+          "serving_image": "itcs355u6688124.azurecr.io/itcs355-lab4@sha256:654ed915ca7c12f59b619979f3795c705b82eb2a9ee23620b520e185095c6bb8",
+          "model": {
+            "name": "itcs355-u6688124-lab5",
+            "version": "3",
+            "id": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.MachineLearningServices/workspaces/mlw-itcs355-u6688124/models/itcs355-u6688124-lab5/versions/3",
+            "model_uri": "azureml:itcs355-u6688124-lab5:3"
+          },
+          "revision_state": "healthy",
+          "http_smoke_tested": false
+        }
+      }
+    ]
+  },
+  "git_metadata": {
+    "mlflow.source.git.repoURL": "https://github.com/nithit-cypherX/mlops-engineering.git",
+    "mlflow.source.git.branch": "main",
+    "mlflow.source.git.commit": "aa6a4cdea8da1529fa0f70de529b782ed80c0a46",
+    "azureml.git.dirty": "True"
+  },
+  "student_repository_git_metadata_matches": true,
+  "app": {
+    "state": "Succeeded",
+    "latest_revision": "lab5-staging--0000002",
+    "latest_ready_revision": "lab5-staging--0000002",
+    "ip_matches_config": true,
+    "https_only": true,
+    "serving_image_matches": true,
+    "model_name": "itcs355-u6688124-lab5",
+    "model_version": "3"
+  },
+  "revision": {
+    "active": true,
+    "provisioningState": "Provisioned",
+    "runningState": "RunningAtMaxScale",
+    "healthState": "Healthy",
+    "replicas": 1,
+    "trafficWeight": 100
+  },
+  "model_versions_after": [
+    "1",
+    "2",
+    "3"
+  ],
+  "checks": {
+    "data_hash_matches_all_steps": true,
+    "validation_rows_6000": true,
+    "source_commit_matches": true,
+    "gate_hash_matches_actual_metrics": true,
+    "gate_passes_080": true,
+    "registry_readback_matches": true,
+    "registry_lineage_matches": true,
+    "deployment_uses_this_run_registration": true,
+    "deployment_verified": true,
+    "app_model_matches_registration": true,
+    "serving_image_matches": true,
+    "ip_restriction_preserved": true
+  },
+  "registry_tags": {
+    "course": "itcs355",
+    "student": "itcs355-u6688124",
+    "lab": "5",
+    "gate_metric": "val_roc_auc",
+    "gate_minimum": "0.8",
+    "seed": "20260101",
+    "training_record_sha256": "825cabbe704d024d5fa66189392f12638eefbb50ebb35f109d1cb49773481ffb",
+    "model_sha256": "ebe4f91523f5b872a5290effb8484b59398756fecd97f8fe069e293e5d4def61",
+    "git_commit": "aa6a4cdea8da1529fa0f70de529b782ed80c0a46",
+    "data_fingerprint": "422cccb9136e814061b83e4f041cff21ba7372c6f7fb0feb2c321555c6a6341f",
+    "dvc_hash": "1c886b512c8a5c9bf723da1cd119fc80.dir",
+    "val_roc_auc": "0.8444994217173845",
+    "val_pr_auc": "0.4044125077384774",
+    "test_roc_auc": "0.8466731943553135",
+    "test_pr_auc": "0.4598251404871057"
+  },
+  "verification_passed": true,
+  "http_smoke_tested_this_attempt": false,
+  "limitations": [
+    "No HTTP smoke test was sent to the newly deployed model in this attempt.",
+    "Managed negative-data and negative-gate paths were not exercised in this run.",
+    "Git SHA in training is supplied lineage; the tested image was built from a committed Git archive. Submission metadata can mark the checkout dirty because README/evidence remains uncommitted.",
+    "Job elapsed time is not billed compute time; shared Azure resources can still incur costs."
+  ],
+  "scope": "One approved full pipeline submission. No retry, new build, permission changes, Git commit or push.",
+  "collected_at_utc": "2026-10-15T05:59:37.377622+00:00",
+  "post_run_compute_observation": {
+    "observed_at_utc": "2026-10-15T06:03:21.383881+00:00",
+    "allocationState": "Steady",
+    "currentNodeCount": 0,
+    "targetNodeCount": 0
+  },
+  "screenshot": {
+    "path": "reports/screenshots/lab5-full-pipeline-aa6a4cd-completed-2026-10-15.jpg",
+    "sha256": "6c67eddb12bc28517f50b601ca1b718d79d73aed0cec9ae5cf1facf7c6314739",
+    "note": "Actual Azure Studio Child jobs screenshot; cropped to omit profile and Created by column."
+  },
+  "step_durations_displayed_in_azure_studio_seconds": {
+    "ingest": 122,
+    "validate": 17,
+    "train": 33,
+    "evaluate": 16,
+    "register": 31,
+    "deploy_staging": 81
+  },
+  "duration_note": "Displayed per-step durations are not pipeline wall time or billed VM time.",
+  "app_observation_note": "App and revision were read back at collected_at_utc; the later compute observation did not probe or change the App."
+}

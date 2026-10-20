@@ -1,0 +1,108 @@
+{
+  "job_name": "lab5-normal-4bec26f-20261013-02",
+  "studio_url": "https://ml.azure.com/runs/lab5-normal-4bec26f-20261013-02?wsid=/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourcegroups/itcs355-u6688124/workspaces/mlw-itcs355-u6688124&tid=9bc585f9-a8b8-431c-9013-efa7b2b40cdf",
+  "submitted_at_utc": "2026-10-13T13:29:51.754015+00:00",
+  "accepted_at_utc": "2026-10-13T13:30:11.932675+00:00",
+  "terminal_observed_at_utc": "2026-10-13T13:38:34.359000+00:00",
+  "source_commit": "4bec26f1a3e52886da8a74e3a1f34d1bff9e8277",
+  "pipeline_image": "itcs355u6688124.azurecr.io/itcs355-lab5@sha256:564040abcebe0fa9d0ff1702d1d5ec52e367657bc72ef78f762fcc72327e3e49",
+  "retry_basis": "One approved retry after adding only workspaces/models/write to the existing training registrar role.",
+  "status": "Failed",
+  "steps": [
+    {
+      "step": "ingest",
+      "name": "9ce85413-2039-4960-8866-135441423116",
+      "status": "Completed"
+    },
+    {
+      "step": "validate",
+      "name": "53640fc3-97dd-4c2a-955e-e108fb0cf7a9",
+      "status": "Completed"
+    },
+    {
+      "step": "train",
+      "name": "828e0fd2-ff18-4628-a86f-33d85c4c2f88",
+      "status": "Completed"
+    },
+    {
+      "step": "evaluate",
+      "name": "68dc4572-3210-4ebd-9c0e-2c8d648e5cc4",
+      "status": "Completed"
+    },
+    {
+      "step": "register",
+      "name": "ba3c045f-8f27-4715-a5fc-d72474e14f6b",
+      "status": "Failed"
+    },
+    {
+      "step": "deploy_staging",
+      "status": "Not started",
+      "reason": "Registration failed; no deployment child job was created"
+    }
+  ],
+  "data": {
+    "rows": 6000,
+    "bytes": 321437,
+    "sha256": "422cccb9136e814061b83e4f041cff21ba7372c6f7fb0feb2c321555c6a6341f",
+    "dvc_hash": "1c886b512c8a5c9bf723da1cd119fc80.dir"
+  },
+  "metrics": {
+    "val_roc_auc": 0.8444994217173845,
+    "test_roc_auc": 0.8466731943553135,
+    "val_pr_auc": 0.4044125077384774,
+    "test_pr_auc": 0.4598251404871057
+  },
+  "gate": {
+    "stage": "evaluate",
+    "status": "pass",
+    "metric": "val_roc_auc",
+    "minimum": 0.8,
+    "score": 0.8444994217173845,
+    "training_record_sha256": "8b9318d8925da5ec6ff46b42e481bb8345d43008e2f965e15d7a8a76ac8adde1"
+  },
+  "checks": {
+    "approved_ip_unchanged": true,
+    "source_and_inputs_unchanged": true,
+    "six_action_registrar_role_present_before_run": true,
+    "gate_hash_matches_actual_metrics": true,
+    "scores_equal_to_first_run": true,
+    "model_pkl_hash_equals_first_run": true
+  },
+  "model_pkl_sha256": "ebe4f91523f5b872a5290effb8484b59398756fecd97f8fe069e293e5d4def61",
+  "registration_failure": {
+    "evidence": "Azure Activity Log and registration user log",
+    "event_timestamp_utc": "2026-10-13T13:37:54.0537707Z",
+    "operation": "Microsoft.MachineLearningServices/workspaces/models/versions/write",
+    "status": "Failed",
+    "substatus": "Unauthorized",
+    "identity": "id-itcs355-u6688124-lab5-training",
+    "missing_action": "Microsoft.MachineLearningServices/workspaces/metadata/artifacts/write",
+    "message": "Identity(object id: 333b372d-9622-4cac-a8ef-d33e0539ef3d) does not have permissions for Microsoft.MachineLearningServices/workspaces/metadata/artifacts/write actions. Please refer to https://aka.ms/azureml-auth-troubleshooting to fix the permissions issue.",
+    "requested_version": "1",
+    "registered_model_versions_at_readback": [],
+    "registry_checked_at_utc": "2026-10-13T13:41:49.388935+00:00",
+    "model_files_uploaded": true,
+    "model_registered": false
+  },
+  "final_compute_state": {
+    "checked_at_utc": "2026-10-13T13:44:12.846906+00:00",
+    "allocationState": "Steady",
+    "currentNodeCount": 0,
+    "targetNodeCount": 0
+  },
+  "final_staging_state": {
+    "checked_at_utc": "2026-10-13T13:41:49.388935+00:00",
+    "state": "Succeeded",
+    "latest_revision": "lab5-staging--sw3yomt",
+    "ingress_enabled": false,
+    "placeholder_image_unchanged": true
+  },
+  "limitations": [
+    "No further permission changes or third pipeline run were made.",
+    "Registration and staging model loading are still unverified.",
+    "Negative-input and negative-gate managed runs have not been performed.",
+    "Zero compute nodes does not mean zero total cost; billing has not been collected and the App/shared resources remain.",
+    "No implementation changes, build, Git commit or Git push were made."
+  ],
+  "screenshot": "screenshots/lab5-pipeline-retry-register-failed-2026-10-13.jpg"
+}

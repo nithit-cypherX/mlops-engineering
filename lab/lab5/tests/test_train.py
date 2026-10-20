@@ -3,62 +3,17 @@ from __future__ import annotations
 
 import hashlib
 import json
-import socket
 import subprocess
-from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock
 
-import mlflow.sklearn
 import numpy as np
 import pandas as pd
 import pytest
 import yaml
 
 from src import data, seeds, train
-from src.data_steps import ingest, validate
-from cloudlayer import azure_registry as registry
-from scripts import evaluation_gate as gate
-
-
-@pytest.fixture
-def frame():
-    rows = 80
-    return pd.DataFrame({
-        "reading_id": np.arange(rows),
-        "machine_id": np.repeat(np.arange(20), 4),
-        "temp_c": np.tile([20.0, 50.0, 30.0, 60.0], 20),
-        "vibration_mm_s": np.tile([1.0, 4.0, 2.0, 5.0], 20),
-        "pressure_kpa": np.full(rows, 100.0),
-        "hours_since_service": np.arange(rows, dtype=float),
-        "load_pct": np.tile([30.0, 80.0, 40.0, 90.0], 20),
-        "ambient_humidity": np.full(rows, 50.0),
-        "failed_within_7d": np.tile([0, 1, 0, 1], 20),
-    })
-
-
-@pytest.fixture
-def local_job(frame, tmp_path, monkeypatch):
-    monkeypatch.setattr(socket.socket, "connect", Mock(side_effect=AssertionError("No network")))
-    monkeypatch.setenv("MLFLOW_TRACKING_URI", "https://tracking.invalid")
-    monkeypatch.setattr(seeds, "_INITIAL_HASH_SEED", str(seeds.DEFAULT_SEED))
-    monkeypatch.setattr(train, "git_commit", lambda supplied=None: supplied or "c" * 40 + "-dirty")
-    for target, name in (
-        (mlflow, "start_run"), (mlflow, "register_model"), (mlflow.sklearn, "log_model"),
-    ):
-        monkeypatch.setattr(target, name, Mock(side_effect=AssertionError("Local export only")))
-    source = tmp_path / "source.csv"
-    frame.to_csv(source, index=False)
-    checked = tmp_path / "validated"
-    raw = tmp_path / "ingested"
-    ingest(source, raw)
-    validate(raw / "sensors.csv", checked)
-    metadata = tmp_path / "raw.dvc"
-    metadata.write_text("outs:\n- path: raw\n  hash: md5\n  md5: " + "a" * 32 + ".dir\n")
-    return SimpleNamespace(
-        source=source, checked=checked, dvc=metadata, output=tmp_path / "training",
-        frame=frame, report=checked / "validation.json",
-    )
+from src.data_steps import validate
 
 
 def run_small(job):
@@ -97,88 +52,6 @@ def test_group_split_is_disjoint_complete_and_deterministic(frame):
 def test_split_rejects_too_few_machines(frame):
     with pytest.raises(ValueError, match="empty"):
         data.split(frame[frame[data.GROUP] == 0], seed=20260101)
-
-
-def test_default_parameters_export_reloadable_model_and_real_metrics(local_job, monkeypatch):
-    job = local_job
-    original = job.source.read_bytes()
-    save = Mock(wraps=mlflow.sklearn.save_model)
-    monkeypatch.setattr(mlflow.sklearn, "save_model", save)
-    result = train.run_training(job.checked, job.dvc, job.output)
-    params = result["params"]
-    assert (params["n_estimators"], params["max_depth"], params["min_samples_leaf"]) == (100, 12, 10)
-    assert params["random_state"] == result["seed"] == result["python_hash_seed"] == 20260101
-    assert result["git_commit"] == "c" * 40 + "-dirty"
-    assert result["git_commit_source"] == "local_git"
-    assert result["dvc_hash"] == "a" * 32 + ".dir"
-    assert result["data_fingerprint"] == hashlib.sha256(original).hexdigest()
-    assert result["split_strategy"] == "group_by_machine_id"
-    assert result["split_rows"] == {"train": 48, "val": 16, "test": 16}
-    assert json.loads((job.output / "metrics.json").read_text()) == result
-    model = mlflow.sklearn.load_model(str(job.output / "model"))
-    trained = save.call_args.args[0]
-    np.testing.assert_allclose(
-        model.predict_proba(job.frame[data.FEATURES]),
-        trained.predict_proba(job.frame[data.FEATURES]), rtol=0, atol=1e-12,
-    )
-    _, val_df, test_df = data.split(job.frame, seed=result["seed"])
-    for name, part in (("val", val_df), ("test", test_df)):
-        proba = model.predict_proba(part[data.FEATURES])[:, 1]
-        assert result[f"{name}_roc_auc"] == pytest.approx(
-            train.roc_auc_score(part[data.TARGET], proba), abs=1e-12,
-        )
-        assert result[f"{name}_pr_auc"] == pytest.approx(
-            train.average_precision_score(part[data.TARGET], proba), abs=1e-12,
-        )
-    saved_metadata = yaml.safe_load((job.output / "model" / "MLmodel").read_text())["metadata"]
-    assert saved_metadata["git_commit"] == result["git_commit"]
-    assert saved_metadata["data_fingerprint"] == result["data_fingerprint"]
-    assert saved_metadata == {
-        key: value for key, value in result.items() if key != "model_files_sha256"
-    }
-    assert result["model_files_sha256"] == {
-        path.name: hashlib.sha256(path.read_bytes()).hexdigest()
-        for path in (job.output / "model").iterdir()
-    }
-    assert save.call_args.kwargs["pip_requirements"] == [
-        f"{name}=={value}" for name, value in result["package_versions"].items()
-    ]
-    assert job.source.read_bytes() == original
-    assert (job.checked / "sensors.csv").read_bytes() == original
-    # Connect this real, tiny training export to a mock registry without another fit.
-    client = SimpleNamespace(
-        subscription_id=registry.SUBSCRIPTION, resource_group_name=registry.GROUP,
-        workspace_name=registry.WORKSPACE, models=Mock(spec=["create_or_update", "get"]),
-        datastores=Mock(spec=["get"]),
-    )
-    from azure.ai.ml import load_datastore
-
-    client.datastores.get.return_value = load_datastore(
-        Path(__file__).resolve().parents[1] / "pipeline" / "datastore-artifacts.yaml",
-    )
-    client.models.create_or_update.return_value = SimpleNamespace(
-        name=registry.MODEL_NAME, version="1",
-    )
-    client.models.get.side_effect = lambda **_: SimpleNamespace(
-        name=registry.MODEL_NAME, version="1", type="mlflow_model",
-        id=f"{registry.MODEL_ROOT}/versions/1",
-        tags=client.models.create_or_update.call_args.args[0].tags.copy(),
-    )
-    gate_dir = job.output.parent / "gate"
-    assert gate.main([
-        "--metrics", str(job.output / "metrics.json"), "--output-dir", str(gate_dir),
-    ]) == 0
-    registered_dir = job.output.parent / "registered"
-    assert registry.main([
-        "--training-dir", str(job.output), "--gate-report", str(gate_dir / "gate.json"),
-        "--output-dir", str(registered_dir),
-    ], client=client) == 0
-    registered = json.loads((registered_dir / "registration.json").read_text())
-    assert registered["model_uri"] == f"azureml:{registry.MODEL_NAME}:1"
-    client.models.create_or_update.assert_called_once()
-    assert client.models.create_or_update.call_args.args[0].tags["val_roc_auc"] == str(
-        result["val_roc_auc"],
-    )
 
 
 @pytest.mark.parametrize("filename", ["validation.json", "sensors.csv"])

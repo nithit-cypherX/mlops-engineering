@@ -1,0 +1,116 @@
+{
+  "started_at_utc": "2026-10-15T06:07:29.691090+00:00",
+  "status": "passed",
+  "endpoint": "https://lab5-staging.happybay-6ab85ce1.malaysiawest.azurecontainerapps.io",
+  "revision": "lab5-staging--0000002",
+  "model": "itcs355-u6688124-lab5:3",
+  "deployment_job": "lab5-normal-aa6a4cd-20261015-01",
+  "http_checks": [
+    {
+      "at_utc": "2026-10-15T06:07:33.696113+00:00",
+      "method": "GET",
+      "path": "/health",
+      "status_code": 200,
+      "model_version_header": "3",
+      "request_id_matched": true,
+      "body": {
+        "status": "alive",
+        "model_version": "3"
+      },
+      "contract_passed": true
+    },
+    {
+      "at_utc": "2026-10-15T06:08:26.630387+00:00",
+      "method": "GET",
+      "path": "/ready",
+      "status_code": 200,
+      "model_version_header": "3",
+      "request_id_matched": true,
+      "body": {
+        "status": "ready",
+        "model_version": "3"
+      },
+      "contract_passed": true
+    },
+    {
+      "at_utc": "2026-10-15T06:08:26.777253+00:00",
+      "method": "POST",
+      "path": "/predict",
+      "input": {
+        "temp_c": 78.4,
+        "vibration_mm_s": 3.1,
+        "pressure_kpa": 315.2,
+        "hours_since_service": 4200,
+        "load_pct": 68,
+        "ambient_humidity": 55
+      },
+      "status_code": 200,
+      "model_version_header": "3",
+      "request_id_matched": true,
+      "body": {
+        "probability": 0.00737357519563027,
+        "model_version": "3"
+      },
+      "contract_passed": true
+    }
+  ],
+  "configuration_writes": 0,
+  "predict_requests": 1,
+  "current_ip_matches_approved_config": true,
+  "ip_value_omitted": true,
+  "before": {
+    "at_utc": "2026-10-15T06:07:33.695903+00:00",
+    "app_state": "Succeeded",
+    "image_matches": true,
+    "model_matches": true,
+    "https_only": true,
+    "approved_ip_matches": true,
+    "scale_min": 0,
+    "scale_max": 1,
+    "revision": {
+      "active": true,
+      "provisioningState": "Provisioned",
+      "runningState": "ScaledToZero",
+      "healthState": "Healthy",
+      "replicas": 0,
+      "trafficWeight": 100
+    },
+    "compute": {
+      "allocationState": "Steady",
+      "currentNodeCount": 0,
+      "targetNodeCount": 0
+    }
+  },
+  "serving_image": "itcs355u6688124.azurecr.io/itcs355-lab4@sha256:654ed915ca7c12f59b619979f3795c705b82eb2a9ee23620b520e185095c6bb8",
+  "prediction_matches_prior_sample_within_1e-12": true,
+  "after": {
+    "at_utc": "2026-10-15T06:08:29.615905+00:00",
+    "app_state": "Succeeded",
+    "image_matches": true,
+    "model_matches": true,
+    "https_only": true,
+    "approved_ip_matches": true,
+    "scale_min": 0,
+    "scale_max": 1,
+    "revision": {
+      "active": true,
+      "provisioningState": "Provisioned",
+      "runningState": "RunningAtMaxScale",
+      "healthState": "Healthy",
+      "replicas": 1,
+      "trafficWeight": 100
+    },
+    "compute": {
+      "allocationState": "Steady",
+      "currentNodeCount": 0,
+      "targetNodeCount": 0
+    }
+  },
+  "completed_at_utc": "2026-10-15T06:08:29.615937+00:00",
+  "limitations": [
+    "One synthetic sample, not an accuracy or latency benchmark.",
+    "Separate HTTP check; managed deployment.json remains http_smoke_tested:false.",
+    "Follow-up to a completed full pipeline; no negative-path managed run.",
+    "HTTP requests may wake a replica and incur normal runtime costs."
+  ]
+}

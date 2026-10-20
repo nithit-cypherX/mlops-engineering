@@ -1,0 +1,206 @@
+{
+  "checked_on": "2026-10-14",
+  "scope": "One explicitly approved new revision using the same serving image and registered model, plus live smoke checks and evidence. No train/build, permission changes, new Azure ML jobs, commit or push.",
+  "source_commit": "4bec26f1a3e52886da8a74e3a1f34d1bff9e8277",
+  "method": {
+    "actor": "Logged-in operator; not an Azure ML pipeline job.",
+    "http_method": "PATCH",
+    "api_version": "2025-07-01",
+    "app": "lab5-staging",
+    "changed_field": "properties.template.revisionSuffix",
+    "old_value": "",
+    "new_value": "model2-readfix-1014",
+    "writes": 1,
+    "submitted_at_utc": "2026-10-14T14:10:39.191199+00:00",
+    "accepted_at_utc": "2026-10-14T14:10:39.768237+00:00",
+    "http_status": 202,
+    "request_id": "9dc7e235-9bc1-4c8d-9350-6033da3c1471",
+    "request_body": {
+      "location": "Malaysia West",
+      "properties": {
+        "template": {
+          "revisionSuffix": "model2-readfix-1014"
+        }
+      }
+    },
+    "revision": "lab5-staging--model2-readfix-1014",
+    "references": [
+      "https://learn.microsoft.com/en-us/rest/api/resource-manager/containerapps/container-apps/update?view=rest-resource-manager-containerapps-2025-07-01",
+      "https://learn.microsoft.com/en-us/azure/container-apps/revisions#revision-scope-changes"
+    ]
+  },
+  "unchanged": {
+    "serving_image": "itcs355u6688124.azurecr.io/itcs355-lab4@sha256:654ed915ca7c12f59b619979f3795c705b82eb2a9ee23620b520e185095c6bb8",
+    "model": "itcs355-u6688124-lab5:2",
+    "runtime_identity": "id-itcs355-u6688124-lab5-runtime",
+    "baseline_template_sha256": "70199e7f62460bf7e04fbb9083fca8e60eee2cf186a5cc89992c97747a739c34",
+    "baseline_configuration_sha256": "24954affe6be83b4d82293d4e118dc17633d10f9f061c583697df8a9daa29ba3",
+    "baseline_identity_sha256": "a1b2acf25541b1b537669fe03e1656315627c12d75bf05509e312987c313ed48",
+    "template_same_except_suffix": true,
+    "configuration_same": true,
+    "identity_same": true,
+    "cpu": 0.5,
+    "memory": "1Gi",
+    "min_replicas": 0,
+    "max_replicas": 1,
+    "https_only": true,
+    "single_current_ipv4_allow": true,
+    "ip_prefix_length": 32,
+    "ip_value_omitted": true,
+    "local_cloud_env_edited": false,
+    "roles_changed": false,
+    "model_versions": [
+      "2",
+      "1"
+    ]
+  },
+  "startup": {
+    "observed_log_at_utc": "2026-10-14T14:11:19.1752313Z",
+    "application_log_timestamp_utc": "2026-10-14T14:11:17.564Z",
+    "source": "ContainerAppConsoleLogs_CL",
+    "revision": "lab5-staging--model2-readfix-1014",
+    "message": "model loaded",
+    "model_version": "2",
+    "readiness_transition": "Initial /ready 503 while loading, followed by /ready 200."
+  },
+  "healthy_readback": {
+    "at_utc": "2026-10-14T14:13:24.668258+00:00",
+    "app_state": "Succeeded",
+    "latest_revision": "lab5-staging--model2-readfix-1014",
+    "latest_ready_revision": "lab5-staging--model2-readfix-1014",
+    "template_same_except_suffix": true,
+    "configuration_unchanged": true,
+    "identity_unchanged": true,
+    "new_revision": {
+      "createdTime": "2026-10-14T14:10:46+00:00",
+      "provisioningState": "Provisioned",
+      "runningState": "RunningAtMaxScale",
+      "healthState": "Healthy",
+      "replicas": 1,
+      "trafficWeight": 100,
+      "active": true
+    },
+    "compute_current": 0
+  },
+  "http_checks": [
+    {
+      "at_utc": "2026-10-14T14:12:52.034435+00:00",
+      "path": "/health",
+      "status_code": 200,
+      "body": {
+        "status": "alive",
+        "model_version": "2"
+      },
+      "model_version_header": "2",
+      "contract_passed": true
+    },
+    {
+      "at_utc": "2026-10-14T14:12:52.123462+00:00",
+      "path": "/ready",
+      "status_code": 200,
+      "body": {
+        "status": "ready",
+        "model_version": "2"
+      },
+      "model_version_header": "2",
+      "contract_passed": true
+    },
+    {
+      "at_utc": "2026-10-14T14:12:52.200513+00:00",
+      "path": "/predict",
+      "status_code": 200,
+      "input": {
+        "temp_c": 78.4,
+        "vibration_mm_s": 3.1,
+        "pressure_kpa": 315.2,
+        "hours_since_service": 4200,
+        "load_pct": 68,
+        "ambient_humidity": 55
+      },
+      "body": {
+        "probability": 0.00737357519563027,
+        "model_version": "2"
+      },
+      "model_version_header": "2",
+      "request_id": "lab5-revision-recovery-800208d7-4aeb-4d22-8169-5c8afdb20ae9",
+      "request_id_matched": true,
+      "contract_passed": true
+    }
+  ],
+  "final_readback": {
+    "at_utc": "2026-10-14T14:15:10.553289+00:00",
+    "app_state": "Succeeded",
+    "latest_revision": "lab5-staging--model2-readfix-1014",
+    "latest_ready_revision": "lab5-staging--model2-readfix-1014",
+    "revisions": [
+      {
+        "name": "lab5-staging--sw3yomt",
+        "active": false,
+        "runningState": "Stopped",
+        "healthState": "Healthy",
+        "replicas": 0,
+        "trafficWeight": 0
+      },
+      {
+        "name": "lab5-staging--0000001",
+        "active": false,
+        "runningState": "Stopped",
+        "healthState": "Healthy",
+        "replicas": 0,
+        "trafficWeight": 0
+      },
+      {
+        "name": "lab5-staging--model2-readfix-1014",
+        "active": true,
+        "runningState": "RunningAtMaxScale",
+        "healthState": "Healthy",
+        "replicas": 1,
+        "trafficWeight": 100
+      }
+    ],
+    "compute": {
+      "currentNodeCount": 0,
+      "targetNodeCount": 0,
+      "allocationState": "Steady"
+    },
+    "model_versions": [
+      "2",
+      "1"
+    ],
+    "runtime_role_actions": [
+      "Microsoft.MachineLearningServices/workspaces/read",
+      "Microsoft.MachineLearningServices/workspaces/models/read",
+      "Microsoft.MachineLearningServices/workspaces/models/versions/read",
+      "Microsoft.MachineLearningServices/workspaces/metadata/artifacts/read"
+    ],
+    "role_workspace_scope_unchanged": true,
+    "acr_admin_enabled": false
+  },
+  "interpretation": {
+    "proven": "The new revision loaded the existing model and passed liveness, readiness and one synthetic prediction request through the App endpoint.",
+    "limitation": "This direct operator recovery is not a successful managed pipeline run. Prior failed jobs remain failed, and no pipeline deployment.json was produced by this step.",
+    "benchmark_limit": "The prediction checks serving compatibility, not new accuracy, latency, throughput, or cost claims.",
+    "remaining": "End-to-end managed pipeline success and managed negative-input/negative-gate checks still need verification.",
+    "cost": "Azure ML compute stayed at zero. The App had one healthy replica at 14:15 UTC with automatic scaling configured 0–1. Shared resources remain."
+  },
+  "screenshots": [
+    {
+      "path": "screenshots/lab5-new-revision-ready-2026-10-14.jpg",
+      "sha256": "185500775b10f09eb41d2f8aab408680418be6bdf27ec77588c5daff5378323c",
+      "privacy": "Cropped account header; actual Portal capture, not a generated illustration."
+    }
+  ],
+  "changes_not_made": [
+    "Training",
+    "Model registration",
+    "Image build or push",
+    "Role/permission change",
+    "Azure ML job submission",
+    "App/Environment creation or deletion",
+    "Revision restart",
+    "Implementation change",
+    "Commit",
+    "Git push"
+  ],
+  "tests": "No offline tests rerun because implementation did not change. Three live HTTP contract checks passed; source/configuration comparisons and evidence-file checks performed."
+}

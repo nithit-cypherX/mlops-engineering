@@ -1,0 +1,66 @@
+{
+  "job_name": "lab5-deploy-only-aa6a4cd-20261015-01",
+  "status": "Completed",
+  "submission_attempts": 1,
+  "submitted_at_utc": "2026-10-15T05:05:34.995680+00:00",
+  "accepted_at_utc": "2026-10-15T05:05:40.379284+00:00",
+  "first_observed_completed_at_utc": "2026-10-15T05:11:54.609770+00:00",
+  "studio_reported_duration_seconds": 134.25,
+  "duration_note": "Azure Studio displayed 2m 14.25s for job and compute duration. This is not total elapsed time from submission or a billing measurement.",
+  "source_commit": "aa6a4cdea8da1529fa0f70de529b782ed80c0a46",
+  "pipeline_image": "itcs355u6688124.azurecr.io/itcs355-lab5@sha256:95e543c2a16d4325aa65e75b1a20624e8c09dec67ef2975d5a9acd20e8b70463",
+  "environment": "CliV2AnonymousEnvironment:4d420d5324bb262c6921ff9f9f11aad79bbbceb935a8fdcd514ec2ca3ef25229",
+  "environment_image_matches_tested_digest": true,
+  "instance_count": 1,
+  "timeout_seconds": 600,
+  "release_identity": "id-itcs355-u6688124-lab5-release",
+  "registration_input": "azureml://datastores/lab5_artifacts/paths/azureml/lab5-register-only-4bec26f-20261014-02/registered/",
+  "registration_sha256": "737874896b1a1cb44242faed1a600a8d062a62ca01124de8d5a89391aebff860",
+  "deployment_output_path": "azureml://datastores/lab5_artifacts/paths/azureml/lab5-deploy-only-aa6a4cd-20261015-01/deployment/deployment.json",
+  "deployment_output_sha256": "58c7c4287d9e6473b5318ee1e336254678ef3548af5b17e70b8b3a83e4687e7e",
+  "deployment_output": {
+    "status": "control_plane_verified",
+    "app_id": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.App/containerApps/lab5-staging",
+    "endpoint": "https://lab5-staging.happybay-6ab85ce1.malaysiawest.azurecontainerapps.io",
+    "revision": "lab5-staging--model2-readfix-1014",
+    "serving_image": "itcs355u6688124.azurecr.io/itcs355-lab4@sha256:654ed915ca7c12f59b619979f3795c705b82eb2a9ee23620b520e185095c6bb8",
+    "model": {
+      "name": "itcs355-u6688124-lab5",
+      "version": "2",
+      "id": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.MachineLearningServices/workspaces/mlw-itcs355-u6688124/models/itcs355-u6688124-lab5/versions/2",
+      "model_uri": "azureml:itcs355-u6688124-lab5:2"
+    },
+    "revision_state": "scaled_to_zero",
+    "http_smoke_tested": false
+  },
+  "read_back": {
+    "observed_at_utc": "2026-10-15T05:17:29.609185+00:00",
+    "app_provisioning_state": "Succeeded",
+    "revision_active": true,
+    "revision_provisioning_state": "Provisioned",
+    "revision_running_state": "ScaledToZero",
+    "revision_health_state": "Healthy",
+    "replicas": 0,
+    "traffic_weight": 100,
+    "https_only": true,
+    "allowed_ip_matches_config": true,
+    "ip_value_omitted": true,
+    "compute": {"allocationState": "Steady", "currentNodeCount": 0, "targetNodeCount": 0}
+  },
+  "git_metadata": {
+    "repository": "https://github.com/nithit-cypherX/mlops-engineering.git",
+    "branch": "main",
+    "commit": "aa6a4cdea8da1529fa0f70de529b782ed80c0a46",
+    "dirty": true,
+    "note": "README/evidence remained uncommitted in the submission checkout. The image was built from the committed Git archive; no local implementation code was uploaded."
+  },
+  "model_versions_after_run": ["1", "2"],
+  "scope": "One deploy-only job. No new training, build, model registration, role/IP change, revision restart, automatic retry, commit, or Git push.",
+  "limitations": [
+    "This is not a successful end-to-end managed pipeline run.",
+    "No new HTTP smoke tests or managed negative-input/negative-gate checks ran.",
+    "Earlier failed jobs remain failed."
+  ],
+  "screenshot": "screenshots/lab5-deploy-only-aa6a4cd-completed-2026-10-15.jpg",
+  "screenshot_sha256": "eec4e85b4b1b8cc7b2c8938019cbbb96a63e2ee54282da1311920d23a1bded7c"
+}

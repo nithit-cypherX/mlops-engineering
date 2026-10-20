@@ -24,3 +24,4 @@ cloud.env.*
 **/.env*
 **/cloud.env*
 tests/
+cloudlayer/tests/

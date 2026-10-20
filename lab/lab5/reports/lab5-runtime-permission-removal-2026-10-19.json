@@ -1,0 +1,149 @@
+{
+  "check": "lab5_task2_runtime_permission_removal",
+  "date": "2026-10-19",
+  "baseline_report": "lab5-runtime-permission-baseline-2026-10-19.json",
+  "target": {
+    "identity": "id-itcs355-u6688124-lab5-runtime",
+    "role": "Storage Blob Data Reader",
+    "scope": "lab5-artifacts Blob container only",
+    "assignment_id": "6f116c41-390c-5f24-be5a-7e5f552d6290"
+  },
+  "reason_for_selection": "The serving code loads a versioned model through Azure ML/MLflow. Direct Blob OAuth access might not be needed for this path while Model Reader, including metadata/artifacts/read, remains assigned.",
+  "before": {
+    "direct_blob": "passed in baseline",
+    "mlflow": "passed in baseline",
+    "ready_before_removal": {
+      "http_status": 200,
+      "status": "ready",
+      "model_version": "4"
+    },
+    "original_assignment_properties_saved": true
+  },
+  "removal": {
+    "event": "runtime_blob_reader_removed",
+    "utc": "2026-10-19T13:03:40.754109+00:00",
+    "assignment_id": "6f116c41-390c-5f24-be5a-7e5f552d6290",
+    "exact_assignment_absent": true,
+    "other_runtime_assignments_present": true,
+    "other_runtime_assignment_count": 2
+  },
+  "experiment": {
+    "check": "lab5_runtime_blob_reader_removal",
+    "direct_blob": {
+      "attempts": [
+        {
+          "bytes": 1669,
+          "elapsed_seconds": 4.87,
+          "status": "still_allowed"
+        },
+        {
+          "elapsed_seconds": 35.38,
+          "error_code": "AuthorizationPermissionMismatch",
+          "error_type": "HttpResponseError",
+          "http_status": 403,
+          "status": "denied"
+        }
+      ],
+      "authentication": "ManagedIdentityCredential; OAuth, no SAS",
+      "runtime_principal_matches": true,
+      "status": "expected_denial"
+    },
+    "elapsed_seconds": 38.06,
+    "fresh_process": true,
+    "identity": "id-itcs355-u6688124-lab5-runtime",
+    "mlflow": {
+      "downloaded_files": 6,
+      "empty_download_directory": true,
+      "manifest_matches_baseline": true,
+      "manifest_sha256": "027a165b8be2cdea80d7c2147d3a4de4df94b50547b6e41e1dd98d6afa14f460",
+      "model_class": "RandomForestClassifier",
+      "runtime_principal_matches": true,
+      "selected_credential": "ManagedIdentityCredential",
+      "status": "passed",
+      "uri": "models:/itcs355-u6688124-lab5/4"
+    },
+    "model_name": "itcs355-u6688124-lab5",
+    "model_version": "4",
+    "revision": "lab5-staging--0000003",
+    "started_at_utc": "2026-10-19T13:04:03.431301+00:00",
+    "status": "completed",
+    "temporary_download_removed": true
+  },
+  "restoration": {
+    "event": "runtime_blob_reader_restored",
+    "utc": "2026-10-19T13:05:41.862412+00:00",
+    "same_assignment_id": true,
+    "original_properties_match": true,
+    "same_principal_role_scope": true
+  },
+  "blob_recovery": {
+    "check": "blob_read_after_restore",
+    "started_at_utc": "2026-10-19T13:06:35.991968+00:00",
+    "identity": "id-itcs355-u6688124-lab5-runtime",
+    "attempts": [
+      {
+        "status": "passed",
+        "elapsed_seconds": 0.26
+      }
+    ],
+    "status": "passed",
+    "runtime_principal_matches": true,
+    "bytes": 1669,
+    "sha256": "027a165b8be2cdea80d7c2147d3a4de4df94b50547b6e41e1dd98d6afa14f460",
+    "manifest_matches_baseline": true,
+    "elapsed_seconds": 0.26
+  },
+  "post_check": {
+    "check": "post_experiment_app",
+    "checked_at_utc": "2026-10-19T13:07:57.556868+00:00",
+    "ready": {
+      "http_status": 200,
+      "status": "ready",
+      "model_version": "4"
+    },
+    "revision": "lab5-staging--0000003",
+    "health": "Healthy",
+    "image_unchanged": true,
+    "runtime_identity_selected": true,
+    "model_name": "itcs355-u6688124-lab5",
+    "model_version": "4",
+    "min_replicas": 0,
+    "max_replicas": 1,
+    "allow_rule_count": 1,
+    "allow_rule_is_single_ip": true
+  },
+  "recovery_guard": {
+    "maximum_removed_seconds": 720,
+    "manual_restore_observed": true,
+    "original_properties_verified": true,
+    "automatic_restore_needed": false,
+    "guard_process_exit_code": 0
+  },
+  "method": {
+    "execution": "Fresh Python process in the existing api container; no new revision or pipeline job.",
+    "direct_blob": "Explicit ManagedIdentityCredential for runtime; OAuth, without SAS or account keys.",
+    "propagation_control": "Repeated the same direct Blob read until 403 AuthorizationPermissionMismatch was observed, then ran the MLflow check.",
+    "mlflow": "Fresh download into an empty temporary directory. Verified the selected credential and runtime principal; compared the manifest SHA-256 with the baseline.",
+    "temporary_model_download_removed": true,
+    "console_closed": true
+  },
+  "conclusion": "Removing the single assignment broke direct OAuth Blob reads, but the tested Azure ML/MLflow path still loaded the same version 4 model using runtime identity. Restoring the exact original assignment made direct Blob reads pass again.",
+  "scope": {
+    "only_one_assignment_temporarily_removed": true,
+    "original_permission_restored": true,
+    "other_runtime_grants_preserved": true,
+    "role_definitions_changed": false,
+    "ci_or_pipeline_run": false,
+    "train_or_build": false,
+    "new_revision": false,
+    "app_configuration_changed_this_experiment": false,
+    "github_settings_changed": false,
+    "commit_or_push": false
+  },
+  "limitations": [
+    "The first direct Blob read after removal still succeeded. The decisive result was the later 403, not the initial cached-authorization period.",
+    "This proves the observed behavior for the current serving image, model version 4 and MLflow loading path; it does not show that every Blob-reading workload can lose this permission.",
+    "No App cold-start test with the assignment absent was performed. The fresh model load ran in a separate process inside the existing replica.",
+    "The original assignment was restored as approved; no permanent permission reduction was made."
+  ]
+}

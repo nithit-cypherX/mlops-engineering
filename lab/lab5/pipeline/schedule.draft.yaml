@@ -1,0 +1,25 @@
+# LOCAL REVIEW DRAFT. Do not submit this file as-is.
+# Creation enables an Azure ML schedule; this file does not create anything.
+# Review the dates and replace the IP placeholder in a private copy first.
+$schema: https://azuremlschemas.azureedge.net/latest/schedule.schema.json
+name: lab5-weekly-retraining
+display_name: Lab 5 weekly retraining
+description: Bounded weekly schedule draft using the successful CI 10 pipeline.
+tags:
+  course: itcs355
+  student: itcs355-u6688124
+  lab: '5'
+trigger:
+  type: recurrence
+  frequency: week
+  interval: 1
+  time_zone: SE Asia Standard Time
+  schedule:
+    week_days: [monday]
+    hours: [13]
+    minutes: [0]
+  # Proposed review window: one Monday occurrence, not indefinite retraining.
+  # Adjust this window only when the live scheduling test is approved.
+  start_time: '2026-10-26T12:55:00'
+  end_time: '2026-10-26T14:00:00'
+create_job: ./scheduled-pipeline.draft.yaml

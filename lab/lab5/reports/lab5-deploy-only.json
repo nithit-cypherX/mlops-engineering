@@ -1,0 +1,133 @@
+{
+  "checked_on": "2026-10-14",
+  "scope": "One deploy-only Azure ML command job using registered Lab 5 model version 2. No training, registration, build, new roles, or Git publication.",
+  "source_commit": "4bec26f1a3e52886da8a74e3a1f34d1bff9e8277",
+  "job": {
+    "name": "lab5-deploy-only-4bec26f-20261014-01",
+    "submission_attempts": 1,
+    "submission_started_at_utc": "2026-10-14T07:05:12.543307+00:00",
+    "submission_accepted_at_utc": "2026-10-14T07:05:17.241988+00:00",
+    "failed_first_observed_at_utc": "2026-10-14T07:09:10.647537+00:00",
+    "status": "Failed",
+    "compute": "cpu-lab5",
+    "identity": "id-itcs355-u6688124-lab5-release",
+    "pipeline_image": "itcs355u6688124.azurecr.io/itcs355-lab5@sha256:564040abcebe0fa9d0ff1702d1d5ec52e367657bc72ef78f762fcc72327e3e49",
+    "planned_serving_image": "itcs355u6688124.azurecr.io/itcs355-lab4@sha256:654ed915ca7c12f59b619979f3795c705b82eb2a9ee23620b520e185095c6bb8",
+    "environment": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.MachineLearningServices/workspaces/mlw-itcs355-u6688124/environments/CliV2AnonymousEnvironment/versions/f3d1a889960157fffcb8545ba3a1f5adf0d44a69401aff02228d145385037555",
+    "command": "python -m scripts.pipeline_step deploy_staging --registration '${{inputs.registered}}/registration.json' --output-dir '${{outputs.deployment}}'",
+    "registered_input": "azureml://datastores/lab5_artifacts/paths/azureml/lab5-register-only-4bec26f-20261014-02/registered/",
+    "deployment_output": "azureml://datastores/lab5_artifacts/paths/azureml/lab5-deploy-only-4bec26f-20261014-01/deployment/",
+    "studio_duration_seconds": 50.65,
+    "duration_note": "Studio duration, not total time including cold start and not a billing calculation."
+  },
+  "input": {
+    "source_registration_job": "lab5-register-only-4bec26f-20261014-02",
+    "registration": {
+      "name": "itcs355-u6688124-lab5",
+      "version": "2",
+      "id": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.MachineLearningServices/workspaces/mlw-itcs355-u6688124/models/itcs355-u6688124-lab5/versions/2",
+      "model_uri": "azureml:itcs355-u6688124-lab5:2"
+    },
+    "registration_sha256": "737874896b1a1cb44242faed1a600a8d062a62ca01124de8d5a89391aebff860",
+    "current_ip_matched_local_configuration_at_preflight": true,
+    "preflight_at_utc": "2026-10-14T07:04:27.000123+00:00",
+    "ip_value_omitted": true
+  },
+  "failure": {
+    "stage": "Pipeline container image pull, before the deployment command could start.",
+    "portal_error": "UserError: Failed to pull Docker image.",
+    "portal_warning": "AggregatedUnauthorizedAccessError",
+    "portal_explanation": "The compute may be unable to authenticate with the registry. The message mentions AcrPull but does not identify the principal used for the failed pull.",
+    "diagnostic_logs": "Downloaded default logs contained hosttools and lifecycler system logs, not user-command logs. Raw logs were kept outside the repository.",
+    "deployment_output_files": [],
+    "deployment_report_written": false,
+    "http_checks": {
+      "health": "not run",
+      "ready": "not run",
+      "predict": "not run"
+    },
+    "http_checks_reason": "The model deployment never started; staging still has its placeholder image with ingress disabled."
+  },
+  "observed_identity_configuration": {
+    "checked_at_utc": "2026-10-14T07:14:27.684548+00:00",
+    "job_identity": {
+      "identityType": "Managed",
+      "clientId": "c1ee259d-4522-4a94-bce9-6eeac16adfcd",
+      "objectId": null,
+      "resourceId": null
+    },
+    "declared_azure_client_id_matches_release": true,
+    "compute_identity_names": [
+      "id-itcs355-u6688124-lab5-training",
+      "id-itcs355-u6688124-lab5-release"
+    ],
+    "compute_identity_related_property_names": [],
+    "acr": {
+      "admin_enabled": false,
+      "public_network_access": "Enabled",
+      "role_assignment_mode": null
+    },
+    "acr_role_assignments_for_training_and_release": [
+      {
+        "identity": "id-itcs355-u6688124-lab5-training",
+        "scope": "/subscriptions/d9385e82-8bee-4612-8a76-967c241112c8/resourceGroups/itcs355-u6688124/providers/Microsoft.ContainerRegistry/registries/itcs355u6688124",
+        "role_id": "7f951dda-4ed3-4680-a7ca-43fe172d538d"
+      }
+    ],
+    "compute": {
+      "current": 0,
+      "target": 0,
+      "state": "Steady"
+    }
+  },
+  "interpretation": {
+    "likely_gap": "Release is selected in the job and has no ACR role; training has AcrPull and previously completed a job with the same pipeline image.",
+    "not_proven": "The available error does not identify the image-pull principal. Missing release AcrPull is a hypothesis, not a confirmed root cause.",
+    "earlier_assumption": "The plan assumed that training, listed first on the shared compute, would handle image preparation for the release job. This failure means that assumption is not verified.",
+    "proposed_next_step_not_applied": "Review an AcrPull grant for the Lab 5 release identity only at the existing ACR scope, then one approved retry. Do not enable the ACR admin user or add unrelated roles.",
+    "reference": "https://learn.microsoft.com/en-us/azure/machine-learning/how-to-identity-based-service-authentication?view=azureml-api-2",
+    "reference_limit": "Microsoft documents the default compute identity for registry access; it does not identify the principal used by this failed job."
+  },
+  "final_readback": {
+    "checked_at_utc": "2026-10-14T07:12:35.712799+00:00",
+    "app": "lab5-staging",
+    "revision": "lab5-staging--sw3yomt",
+    "image": "mcr.microsoft.com/k8se/quickstart@sha256:3a4d93c34c6753f24765ab17a36f1754aee9b02082b7d9553d17697b9e8252c4",
+    "ingress_enabled": false,
+    "runtime_attached": false,
+    "existing_placeholder_replicas": 1,
+    "model_versions": [
+      "2",
+      "1"
+    ],
+    "app_revision_unchanged": true,
+    "compute_checked_at_utc": "2026-10-14T07:14:27.684548+00:00",
+    "compute": {
+      "current": 0,
+      "target": 0,
+      "state": "Steady"
+    },
+    "cost_limit": "Zero compute nodes does not mean zero storage, App, or shared-resource costs."
+  },
+  "verification_limits": [
+    "No deployment, runtime model loading, or HTTP smoke check was verified.",
+    "This was not a full end-to-end pipeline run; Task 1 remains in progress.",
+    "No implementation changed, so offline tests were not rerun for this evidence update."
+  ],
+  "screenshot": {
+    "path": "screenshots/lab5-deploy-only-image-pull-failed-2026-10-14.jpg",
+    "sha256": "0051bba510267e154c6e511ee818a6049fe50000edbe0d15ff2ef9301d9af318",
+    "note": "Azure ML Studio overview, cropped to omit the account header. Full error text was inspected in the status panel."
+  },
+  "changes_not_made": [
+    "Role changes",
+    "ACR admin enablement",
+    "Manual App update",
+    "Job retry",
+    "Training",
+    "Model registration",
+    "Build",
+    "Commit",
+    "Push"
+  ]
+}

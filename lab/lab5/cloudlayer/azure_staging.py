@@ -17,7 +17,7 @@ import requests
 
 from cloudlayer import lab5_scope as scope
 from cloudlayer.azure_registry import MODEL_NAME, MODEL_ROOT, WORKSPACE
-from src.config import ENV_FILE, StagingConfig, load_staging
+from cloudlayer.azure_config import ENV_FILE, StagingConfig, load_staging
 
 APP_API = "2025-07-01"
 ACR_SERVER = "itcs355u6688124.azurecr.io"
